@@ -1,0 +1,4 @@
+# Info box above the areas list (tab "bereiche").
+type: info
+theme: info
+text: noren.panel.areas.info

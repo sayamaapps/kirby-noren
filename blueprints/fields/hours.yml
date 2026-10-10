@@ -1,0 +1,71 @@
+# Structure field `zeiten`: one row per area and weekday, two blocks per row.
+# Field names are a compatibility contract (SPEC.md §6). Option values stay
+# the German weekday names; only the shown texts are translated.
+# Ported from kirby-starter site/blueprints/pages/betrieb.yml, tab "zeiten".
+label: noren.panel.hours.label
+type: structure
+columns:
+  bereich: true
+  tag: true
+  von1: true
+  bis1: true
+fields:
+  bereich:
+    label: noren.panel.hours.area.label
+    type: select
+    options:
+      type: query
+      query: page.bereiche.toStructure
+      text: "{{ structureItem.name }}"
+      value: "{{ structureItem.schluessel }}"
+    help: noren.panel.hours.area.help
+  tag:
+    label: noren.panel.hours.day.label
+    type: select
+    required: true
+    options:
+      - value: Montag
+        text:
+          '*': noren.day.1
+      - value: Dienstag
+        text:
+          '*': noren.day.2
+      - value: Mittwoch
+        text:
+          '*': noren.day.3
+      - value: Donnerstag
+        text:
+          '*': noren.day.4
+      - value: Freitag
+        text:
+          '*': noren.day.5
+      - value: Samstag
+        text:
+          '*': noren.day.6
+      - value: Sonntag
+        text:
+          '*': noren.day.7
+  von1:
+    label: noren.panel.hours.from1.label
+    type: time
+    width: 1/4
+    display: HH:mm
+  bis1:
+    label: noren.panel.hours.to1.label
+    type: time
+    width: 1/4
+    display: HH:mm
+  von2:
+    label: noren.panel.hours.from2.label
+    type: time
+    width: 1/4
+    display: HH:mm
+  bis2:
+    label: noren.panel.hours.to2.label
+    type: time
+    width: 1/4
+    display: HH:mm
+  hinweis:
+    label: noren.panel.hours.note.label
+    type: text
+    help: noren.panel.hours.note.help

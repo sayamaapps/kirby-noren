@@ -1,0 +1,9 @@
+# Tab "Bereiche": info box and the areas structure. Sites reuse it with
+# `extends: noren/tabs/areas` (SPEC.md §7).
+label: noren.panel.tab.areas
+icon: grid
+fields:
+  bereicheHinweis:
+    extends: noren/fields/areas-info
+  bereiche:
+    extends: noren/fields/areas

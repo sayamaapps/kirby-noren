@@ -1,0 +1,42 @@
+{
+    "name": "sayamaapps/kirby-noren",
+    "description": "Opening hours for Kirby CMS: weekly plan with several blocks per day, areas and locations, closures and special hours, German public holidays for all 16 states, an \"open now\" status and schema.org data. No styling.",
+    "type": "kirby-plugin",
+    "license": "MIT",
+    "keywords": ["kirby", "kirby-plugin", "kirby-5", "opening-hours", "holidays", "schema-org", "local-business"],
+    "homepage": "https://github.com/simsimmal/kirby-noren",
+    "authors": [
+        {
+            "name": "Simon Räder",
+            "homepage": "https://sayamaapps.de"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/simsimmal/kirby-noren/issues",
+        "source": "https://github.com/simsimmal/kirby-noren"
+    },
+    "require": {
+        "php": "^8.2",
+        "ext-mbstring": "*",
+        "getkirby/composer-installer": "^1.2"
+    },
+    "require-dev": {
+        "getkirby/cms": "^5.0"
+    },
+    "scripts": {
+        "test": "sh tests/run.sh"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "getkirby/composer-installer": true
+        },
+        "platform": {
+            "php": "8.2.0"
+        }
+    },
+    "extra": {
+        "installer-name": "noren",
+        "kirby-cms-path": false
+    }
+}

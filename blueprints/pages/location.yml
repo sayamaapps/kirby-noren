@@ -1,0 +1,10 @@
+# Page blueprint of a location: the two tabs "Bereiche" and "Zeiten".
+# A site uses it with `extends: noren/pages/location` in its own page
+# blueprint, and may add its own tabs next to them (SPEC.md §7).
+title: noren.panel.page.title
+icon: clock
+tabs:
+  bereiche:
+    extends: noren/tabs/areas
+  zeiten:
+    extends: noren/tabs/hours

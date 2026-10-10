@@ -1,0 +1,32 @@
+<?php
+
+namespace Noren;
+
+/**
+ * The one place where Noren writes to the PHP error log (Kirby-free).
+ *
+ * Every message is written once per process: a status and a table render
+ * read the configuration many times, and a broken option must not fill the
+ * log with copies (SPEC.md §4). Tests call forget() to see a message again.
+ */
+final class Log
+{
+    /** @var array<string, true> */
+    private static array $seen = [];
+
+    /** Writes $message to the error log unless it was written before in this process. */
+    public static function error(string $message): void
+    {
+        if (isset(self::$seen[$message])) {
+            return;
+        }
+        self::$seen[$message] = true;
+        error_log($message);
+    }
+
+    /** Forgets the messages already written (tests only). */
+    public static function forget(): void
+    {
+        self::$seen = [];
+    }
+}

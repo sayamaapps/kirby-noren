@@ -1,0 +1,4 @@
+# Info box above the closures list (tab "zeiten").
+type: info
+theme: negative
+text: noren.panel.closures.info

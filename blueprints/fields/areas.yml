@@ -1,0 +1,23 @@
+# Structure field `bereiche`: the parts of the business that have their own
+# opening hours. Field names are a compatibility contract (SPEC.md §6).
+# Ported from kirby-starter site/blueprints/pages/betrieb.yml, tab "bereiche".
+label: noren.panel.areas.label
+type: structure
+columns:
+  schluessel: true
+  name: true
+fields:
+  schluessel:
+    label: noren.panel.area.key.label
+    type: text
+    required: true
+    help: noren.panel.area.key.help
+  name:
+    label: noren.panel.area.name.label
+    type: text
+    required: true
+    help: noren.panel.area.name.help
+  kurzname:
+    label: noren.panel.area.short.label
+    type: text
+    help: noren.panel.area.short.help

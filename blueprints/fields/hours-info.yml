@@ -1,0 +1,4 @@
+# Info box above the weekly hours table (tab "zeiten").
+type: info
+theme: notice
+text: noren.panel.hours.info

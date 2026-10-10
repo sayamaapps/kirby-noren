@@ -1,0 +1,51 @@
+# Structure field `schliessungen`: closures and special days, inclusive date
+# range. Field names are a compatibility contract (SPEC.md §6).
+# Ported from kirby-starter site/blueprints/pages/betrieb.yml, tab "zeiten".
+label: noren.panel.closures.label
+type: structure
+columns:
+  anlass: true
+  von: true
+  bis: true
+  hinweis: true
+fields:
+  anlass:
+    label: noren.panel.closure.occasion.label
+    type: text
+    placeholder: noren.panel.closure.occasion.placeholder
+    help: noren.panel.closure.occasion.help
+  von:
+    label: noren.panel.closure.from.label
+    type: date
+    required: true
+    width: 1/2
+  bis:
+    label: noren.panel.closure.to.label
+    type: date
+    required: true
+    width: 1/2
+    help: noren.panel.closure.to.help
+  bereich:
+    label: noren.panel.closure.area.label
+    type: select
+    options:
+      type: query
+      query: page.bereiche.toStructure
+      text: "{{ structureItem.name }}"
+      value: "{{ structureItem.schluessel }}"
+    help: noren.panel.closure.area.help
+  hinweis:
+    label: noren.panel.closure.note.label
+    type: text
+    help: noren.panel.closure.note.help
+  oeffnet:
+    label: noren.panel.closure.opens.label
+    type: time
+    width: 1/2
+    display: HH:mm
+    help: noren.panel.closure.opens.help
+  schliesst:
+    label: noren.panel.closure.closes.label
+    type: time
+    width: 1/2
+    display: HH:mm
