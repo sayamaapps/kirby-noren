@@ -645,7 +645,7 @@ Noren does not handle phone numbers, addresses or the `betriebsangabe` field. Ke
 
 ### Behaviour changes
 
-The switch is not byte-identical in all cases. Seven changes, each listed in the [CHANGELOG](CHANGELOG.md#100--unreleased):
+The switch is not byte-identical in all cases. Seven changes, each listed in the [CHANGELOG](CHANGELOG.md#100--2026-10-11):
 
 1. **Overnight blocks** are read. Before, a row whose end lay before its start was ignored. A Friday 18:00 to 2:00 is now open on Saturday until 2:00. A row ending at 00:00 is read as until midnight in every case, also with `overnightUntil` set to `false`.
 2. **A business without areas gets a status line.** The starter's `bereicheMitZeiten()` returned nothing when no areas were defined, so the status band stayed empty.
