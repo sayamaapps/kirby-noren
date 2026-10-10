@@ -11,7 +11,7 @@ All notable changes to this project are documented here. Versions follow
   **[privacy text]**. Every site using the plugin must then review its privacy
   policy.
 
-## [1.0.0] — unreleased
+## [1.0.0] — 2026-10-11
 
 First release as a Composer package. Before 1.0.0 the hours logic lived as a
 copy in each site: `site/plugins/betrieb` (kirby-starter, with the snippets
