@@ -42,9 +42,12 @@ Manual installation (download into `site/plugins/noren/`) also works.
    ```php
    return [
        'noren.active'   => true,
+       'noren.language' => 'de',   // German texts, see the note below
        'noren.holidays' => 'BY',   // Bavarian public holidays; optional
    ];
    ```
+
+   > **Language:** Noren's texts are English unless it learns otherwise. It follows `noren.language`, then the current language of a multi-language site, then Kirby's `locale` option. **A German single-language site without a `locale` must set `'noren.language' => 'de'`**, or its status line reads "Open now" instead of "Jetzt geöffnet".
 
 2. Give the location pages a blueprint, for example `site/blueprints/pages/betrieb.yml`:
 
