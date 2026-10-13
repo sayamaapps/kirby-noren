@@ -5,7 +5,7 @@
  *  2. starter shape: areas laden / cafe / werkstatt, legacy nm_ row, closures
  *     per area, two call orders without memoisation, units;
  *  3. no areas: one unit with id = page id;
- *  4. praxisbeispiel shape: several locations, vm_/nm_ rows, closures in `urlaub`,
+ *  4. medical-practice shape: several locations, vm_/nm_ rows, closures in `urlaub`,
  *     the template list form;
  *  5. noren.locations as closure (listed only) and as list of ids;
  *  6. page methods (zeitenschluessel, no reference, location page);
@@ -176,12 +176,12 @@ withSite(function (string $tmp): void {
     holds(is_array($kirby->site()->norenStatus()), 'no areas: a status line exists (the starter returned nothing here)');
 });
 
-/* --- 4. praxisbeispiel shape: several locations ------------------------------- */
+/* --- 4. medical-practice shape: several locations ------------------------------- */
 
 withSite(function (string $tmp): void {
-    noren_page($tmp, '1_au', 'standort', [
+    noren_page($tmp, '1_beispiel', 'standort', [
         'title' => 'Praxis Beispiel',
-        'kurzname' => 'Au',
+        'kurzname' => 'Beispiel',
         'zeiten' => [['tag' => 'Montag', 'vm_von' => '08:00', 'vm_bis' => '12:00', 'nm_von' => '14:00', 'nm_bis' => '18:00']],
         'urlaub' => [['von' => '2026-08-03', 'bis' => '2026-08-14']],
     ]);
@@ -201,25 +201,25 @@ withSite(function (string $tmp): void {
         'noren.fields' => ['closures' => 'urlaub'],
         'locale' => 'de_DE',
     ]);
-    expect(['au', 'beispiel-nord'], array_map(static fn ($p) => $p->id(), $kirby->site()->norenLocations()), 'praxisbeispiel: two locations in order, template standort');
+    expect(['beispiel', 'beispiel-nord'], array_map(static fn ($p) => $p->id(), $kirby->site()->norenLocations()), 'practice: two locations in order, template standort');
     $units = $kirby->site()->norenUnits();
-    expect(['au', 'beispiel-nord'], array_map(static fn (array $u) => $u['id'], $units), 'praxisbeispiel: units without areas, ids = page ids');
-    expect(['Au', 'Beispiel Nord'], array_map(static fn (array $u) => $u['label'], $units), 'praxisbeispiel: unit labels from kurzname');
+    expect(['beispiel', 'beispiel-nord'], array_map(static fn (array $u) => $u['id'], $units), 'practice: units without areas, ids = page ids');
+    expect(['Beispiel', 'Beispiel Nord'], array_map(static fn (array $u) => $u['label'], $units), 'practice: unit labels from kurzname');
 
-    $au = $kirby->page('au');
-    expect([[480, 720], [840, 1080]], $au->norenSchedule()->blocks(0), 'praxisbeispiel: vm_/nm_ rows read as two blocks');
-    expect(1, count($au->norenSchedule()->closures()), 'praxisbeispiel: the urlaub closure is read');
-    $inside = $au->norenSchedule()->status(at('2026-08-10 10:00'));
-    expect('closure', $inside['state'], 'praxisbeispiel: urlaub closure applies during its days');
+    $beispiel = $kirby->page('beispiel');
+    expect([[480, 720], [840, 1080]], $beispiel->norenSchedule()->blocks(0), 'practice: vm_/nm_ rows read as two blocks');
+    expect(1, count($beispiel->norenSchedule()->closures()), 'practice: the urlaub closure is read');
+    $inside = $beispiel->norenSchedule()->status(at('2026-08-10 10:00'));
+    expect('closure', $inside['state'], 'practice: urlaub closure applies during its days');
 
     $list = noren_kirby($tmp, [
         'noren.active' => true,
         'noren.template' => ['betrieb', 'standort'],
     ]);
     expect(
-        ['au', 'beispiel-nord', 'kontakt'],
+        ['beispiel', 'beispiel-nord', 'kontakt'],
         array_map(static fn ($p) => $p->id(), $list->site()->norenLocations()),
-        'praxisbeispiel: template list form gives all three locations in order'
+        'practice: template list form gives all three locations in order'
     );
 });
 

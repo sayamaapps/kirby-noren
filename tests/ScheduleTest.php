@@ -11,7 +11,7 @@
  *
  * Ports every check of kirby-starter's OeffnungszeitenTest.php (same sample
  * business, same dates, same German strings) plus the extra check of
- * mustergasthaus's OeffnungszeitenTest.php ("Ohne Feiertagsprüfung wäre derselbe
+ * the shop site's OeffnungszeitenTest.php ("Ohne Feiertagsprüfung wäre derselbe
  * Samstag offen"), renamed per SPEC §8. Regression guards kept: no memoisation
  * across areas, appended rows, DST, running closure, 14-day lead boundary.
  *
@@ -75,7 +75,7 @@ $sonderFeld = field([
 ]);
 $sonder = Schedule::fromFields($musterFeld, $sonderFeld, null, 'Betriebsferien', $checkerBY);
 
-// Holiday-less copy of the same plan (mustergasthaus: "without the holiday check").
+// Holiday-less copy of the same plan (shop: "without the holiday check").
 $musterOhneFeiertage = Schedule::fromFields($musterFeld, null, null, 'Betriebsferien');
 $muster = Schedule::fromFields($musterFeld, null, null, 'Betriebsferien', $checkerBY);
 
@@ -283,7 +283,7 @@ expect(
 );
 expect(null, $muster->holidayOn(at('2026-12-24')), 'Heiligabend ist kein gesetzlicher Feiertag');
 
-// Without the holiday option: the same Saturday stays open (mustergasthaus extra check).
+// Without the holiday option: the same Saturday stays open (shop extra check).
 expect(true, $musterOhneFeiertage->status(at('2026-10-03 10:00'))['open'], 'Ohne Option: Samstag 3.10.2026 bleibt offen');
 expect('Jetzt geöffnet', $musterOhneFeiertage->status(at('2026-10-03 10:00'))['text'], 'Ohne Option: kein „Heute Feiertag“');
 expect(null, $musterOhneFeiertage->holidayOn(at('2026-10-03')), 'Ohne Option: holidayOn() liefert nie einen Namen');

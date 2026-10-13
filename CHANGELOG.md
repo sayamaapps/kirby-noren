@@ -16,8 +16,8 @@ All notable changes to this project are documented here. Versions follow
 First release as a Composer package. Before 1.0.0 the hours logic lived as a
 copy in each site: `site/plugins/betrieb` (kirby-starter, with the snippets
 `zeiten-tabelle`, `statusband` and the hours part of `strukturdaten`), and
-variants in praxisbeispiel (`Praxis\Sprechzeiten`), gasthaus-muster
-(`Karte::zeitgruppen()`) and radladen (`zeiten-kurz`). The changes below are
+variants in a practice site (`Praxis\Sprechzeiten`), a restaurant site
+(`Karte::zeitgruppen()`) and a bike-shop site (`zeiten-kurz`). The changes below are
 measured against kirby-starter's `betrieb` copy.
 
 ### Changed — renamed to English (breaking)
@@ -52,8 +52,8 @@ from the copy updates its calls and snippets once, using the table below.
 | `$page->oeffnungszeiten()`, `$page->hatZeiten()` | `$page->norenSchedule()`, `$page->norenHasHours()` |
 | snippet `zeiten-tabelle` (`$bereich`, `$plan`) | `noren/table` (`$area`, `$schedule`) |
 | snippet `statusband` (`$nur`, `$mehrLink`) | `noren/status` (`$only`, `$link`) |
-| radladen `zeiten-kurz` (`$plan`) | `noren/compact` (`$schedule`, `$mode`, `$title`) |
-| gasthaus `Karte::zeitgruppen($plan)` → `tage`, `zeiten` | `Grouping::consecutive($schedule)` → `label`, `hours` |
+| bike shop `zeiten-kurz` (`$plan`) | `noren/compact` (`$schedule`, `$mode`, `$title`) |
+| restaurant `Karte::zeitgruppen($plan)` → `tage`, `zeiten` | `Grouping::consecutive($schedule)` → `label`, `hours` |
 | `strukturdaten.php` week and special closures | `$site->norenSchema()` |
 | CSS `zeiten-raster`, `zeile`, `zeile-tag`, `zeile-zeit`, `zeile-zu`, `zeile-hinweis`, `zeile--feiertage`, `zeiten-zusatz`, `schliessung`, `data-heute="ja"` | `noren-table`, `noren-row`, `noren-day`, `noren-hours`, `noren-closed`, `noren-note`, `noren-row--holidays`, `noren-extra`, `noren-closure`, `data-today="true"` |
 | CSS `band-status`, `band-bereich`, `data-offen="ja"` | `noren-status-line`, `noren-status-label`, `data-open="true"` |

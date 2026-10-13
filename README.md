@@ -125,13 +125,13 @@ return [
 
 ## Content field contract
 
-The German field names are a compatibility contract: existing content from kirby-starter, Gasthaus Muster and praxisbeispiel works unchanged. The page-level names can be changed with `noren.fields`; the row-level names cannot.
+The German field names are a compatibility contract: existing content from earlier sites works unchanged. The page-level names can be changed with `noren.fields`; the row-level names cannot.
 
 | Level | Field | Option key | Default name | Content |
 |---|---|---|---|---|
 | page | areas | `fields.areas` | `bereiche` | structure: `schluessel` (key, required), `name`, `kurzname` |
 | page | hours | `fields.hours` | `zeiten` | structure, rows below |
-| page | closures | `fields.closures` | `schliessungen` | structure, rows below (praxisbeispiel: `urlaub`) |
+| page | closures | `fields.closures` | `schliessungen` | structure, rows below (practice: `urlaub`) |
 | page | area reference | `fields.areaRef` | `zeitenschluessel` | text on a non-location page naming an area |
 | page | short name | `fields.short` | `kurzname` | text on a location page (the status label) |
 | hours row | `bereich` | | | area key; empty = no areas |
@@ -161,7 +161,7 @@ Two patterns cover the common cases.
 
 ### One location, several areas
 
-One page holds all hours. The areas are listed in the `bereiche` structure, and each hours row names its area. This is the Gasthaus Muster shape: a shop and a café on one page, the café closed on Mondays.
+One page holds all hours. The areas are listed in the `bereiche` structure, and each hours row names its area. This is the shop-and-café shape: a shop and a café on one page, the café closed on Mondays.
 
 The Panel writes the structure as YAML, which looks like this:
 
@@ -180,7 +180,7 @@ Closures can name an area in their `bereich` field. A closure with an empty area
 
 ### Several locations, one plan each
 
-Each location is its own page with its own hours. A praxisbeispiel-style setup uses the template `standort` for every site:
+Each location is its own page with its own hours. A medical-practice setup uses the template `standort` for every site:
 
 ```php
 // site/config/config.php
@@ -686,8 +686,8 @@ The switch is not byte-identical in all cases. Seven changes, each listed in the
 | `$page->oeffnungszeiten()`, `$page->hatZeiten()` | `$page->norenSchedule()`, `$page->norenHasHours()` |
 | snippet `zeiten-tabelle` (`$bereich`, `$plan`) | `noren/table` (`$area`, `$schedule`) |
 | snippet `statusband` (`$nur`, `$mehrLink`) | `noren/status` (`$only`, `$link`) |
-| radladen `zeiten-kurz` (`$plan`) | `noren/compact` (`$schedule`, `$mode`, `$title`) |
-| gasthaus `Karte::zeitgruppen($plan)` → `tage`, `zeiten` | `Grouping::consecutive($schedule)` → `label`, `hours` |
+| bike shop `zeiten-kurz` (`$plan`) | `noren/compact` (`$schedule`, `$mode`, `$title`) |
+| restaurant `Karte::zeitgruppen($plan)` → `tage`, `zeiten` | `Grouping::consecutive($schedule)` → `label`, `hours` |
 | `strukturdaten.php` week and special closures | `$site->norenSchema()` |
 | CSS `zeiten-raster`, `zeile`, `zeile-tag`, `zeile-zeit`, `zeile-zu`, `zeile-hinweis`, `zeile--feiertage`, `zeiten-zusatz`, `schliessung`, `data-heute="ja"` | `noren-table`, `noren-row`, `noren-day`, `noren-hours`, `noren-closed`, `noren-note`, `noren-row--holidays`, `noren-extra`, `noren-closure`, `data-today="true"` |
 | CSS `band-status`, `band-bereich`, `data-offen="ja"` | `noren-status-line`, `noren-status-label`, `data-open="true"` |

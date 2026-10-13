@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Grouping (SPEC.md §3.4, §9.3): consecutive (gasthaus rule), byHours
- * (radladen rule), labels, times. Kirby-free.
+ * Grouping (SPEC.md §3.4, §9.3): consecutive (restaurant rule), byHours
+ * (bike-shop rule), labels, times. Kirby-free.
  */
 
 require_once __DIR__ . '/helpers.php';
@@ -39,7 +39,7 @@ $en = static fn () => I18n::setLanguage('en');
 /* --------------------------------------------------------------- consecutive */
 $de();
 
-// gasthaus-muster: Di–Mi 11–16, Do–Sa 11–22
+// restaurant: Di–Mi 11–16, Do–Sa 11–22
 $s = plan([
     ['tag' => 'Dienstag', 'von1' => '11:00', 'bis1' => '16:00'],
     ['tag' => 'Mittwoch', 'von1' => '11:00', 'bis1' => '16:00'],

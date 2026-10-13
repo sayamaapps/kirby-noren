@@ -603,7 +603,7 @@ final class Schedule
         $detail = $next !== null ? $this->opens($today, $next) : '';
         $tomorrowHoliday = null;
 
-        // Evening before a holiday (praxisbeispiel, opt-in): name the reason,
+        // Evening before a holiday (medical practice, opt-in): name the reason,
         // otherwise "öffnet am Montag" on Friday evening before 3 October
         // makes people wonder why not tomorrow. Only when tomorrow would be
         // open by the weekly plan and no closure or special hours apply.

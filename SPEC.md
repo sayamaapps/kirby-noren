@@ -11,8 +11,8 @@ this repository.
 
 It replaces `site/plugins/betrieb` of kirby-starter (`Betrieb\Oeffnungszeiten`,
 `Betrieb\Feiertage`, the snippets `zeiten-tabelle`, `statusband`, the hours part
-of `strukturdaten`) and the variants in praxisbeispiel (`Praxis\Sprechzeiten`),
-gasthaus-muster (`Karte::zeitgruppen()`) and radladen (`zeiten-kurz`).
+of `strukturdaten`) and the variants in practice (`Praxis\Sprechzeiten`),
+a restaurant (`Karte::zeitgruppen()`) and a bike shop (`zeiten-kurz`).
 `Telefon.php`, address fields and `betriebsangabe` are **out of scope**.
 
 This document is the contract. Section numbers are referenced from code
@@ -56,10 +56,10 @@ comments and task prompts.
 | Original plugin | `../kirby-starter/site/plugins/betrieb/{index.php,src/Oeffnungszeiten.php,src/Feiertage.php}` |
 | Original snippets | `../kirby-starter/site/snippets/{zeiten-tabelle.php,statusband.php,strukturdaten.php}` |
 | Original blueprint, config | `../kirby-starter/site/blueprints/pages/betrieb.yml`, `site/config/betrieb.example.php` |
-| Original tests | `../kirby-starter/tests/{OeffnungszeitenTest.php,FeiertageTest.php}`, `../mustergasthaus/tests/OeffnungszeitenTest.php` (one extra check "Ohne Feiertagsprüfung wäre derselbe Samstag offen") |
-| Several locations, eve-of-holiday notice | `../praxisbeispiel/site/plugins/praxis/{index.php,src/Sprechzeiten.php}`, `praxisbeispiel/site/blueprints/pages/standort.yml` |
-| Consecutive grouping | `../gasthaus-muster/site/plugins/gasthaus/src/Karte.php` (`zeitgruppen()`), `gasthaus-muster/tests/GasthausKarteTest.php` |
-| Non-consecutive grouping | `../radladen/site/snippets/zeiten-kurz.php` |
+| Original tests | `../kirby-starter/tests/{OeffnungszeitenTest.php,FeiertageTest.php}`, `../muster-laden/tests/OeffnungszeitenTest.php` (one extra check "Ohne Feiertagsprüfung wäre derselbe Samstag offen") |
+| Several locations, eve-of-holiday notice | `../praxis-beispiel/site/plugins/praxis/{index.php,src/Sprechzeiten.php}`, `praxis-beispiel/site/blueprints/pages/standort.yml` |
+| Consecutive grouping | `../gasthaus-muster/site/plugins/gasthaus/src/Karte.php` (`zeitgruppen()`), `gasthaus-muster/tests/KarteTest.php` |
+| Non-consecutive grouping | `../radladen-muster/site/snippets/zeiten-kurz.php` |
 | Family conventions | `../kirby-koe` (README, CHANGELOG, PRIVACY, DATENSCHUTZ, tests), `../kirby-kizami` |
 
 ---
@@ -396,12 +396,12 @@ Kirby-free. Signatures and examples in the stub `src/Grouping.php`. Group:
 ['days' => [1, 2], 'label' => 'Di – Mi', 'blocks' => [[660, 960]], 'hours' => '11:00 – 16:00', 'note' => null]
 ```
 
-- `consecutive(Schedule $s, bool $withNote = false)` — gasthaus rule: only
+- `consecutive(Schedule $s, bool $withNote = false)` — restaurant rule: only
   adjacent days with identical `blocks()` (and identical `note()` when
   `$withNote`); closed days split groups and form none; week order;
   `label = rangeLabel(days)`, `hours = blocksLabel(blocks)`; `note` = the
   shared note when `$withNote`, else null.
-- `byHours(Schedule $s, bool $withNote = true)` — radladen rule: days
+- `byHours(Schedule $s, bool $withNote = true)` — bike-shop rule: days
   with identical blocks (and note) anywhere in the week; sorted by the start
   of the first block, ties keep week order; `label = listLabel(days)`,
   `hours = shortHoursLabel(blocks)`.
@@ -649,7 +649,7 @@ All read as `noren.<name>`, flat or nested; `null` = not set.
 |---|---|---|
 | `active` | `false` | Master switch; only `true` switches on. Off: methods return null/[], snippets print nothing. |
 | `template` | `'betrieb'` | Template name(s) of location pages (string or list). |
-| `locations` | `null` | Closure or list of page ids; overrides `template` (e.g. praxisbeispiel: `fn () => site()->children()->listed()->filterBy('intendedTemplate', 'standort')`). |
+| `locations` | `null` | Closure or list of page ids; overrides `template` (e.g. practice: `fn () => site()->children()->listed()->filterBy('intendedTemplate', 'standort')`). |
 | `fields` | see §6 | Map overriding page field names: `areas`, `hours`, `closures`, `areaRef`, `short`. |
 | `timezone` | `'Europe/Berlin'` | Zone of all date logic; invalid → logged, default. |
 | `holidays` | `false` | `false` / `'BY'` / `['state' => 'BY', 'assumption' => true, 'augsburg' => false, 'corpusChristi' => false, 'sundays' => true, 'extra' => ['MM-DD' or 'Y-m-d' => 'Name']]`. Legacy `['land' => 'bayern', 'mariaeHimmelfahrt' => …, 'friedensfest' => …]` accepted. |
@@ -687,14 +687,14 @@ The complete tables are `translations/en.php` and `translations/de.php`
 ## 6. Content field contract
 
 German field names are a **compatibility contract**: existing content of
-kirby-starter, Gasthaus Muster and praxisbeispiel must work unchanged. The page-level
+existing content from earlier sites must work unchanged. The page-level
 names can be changed with `noren.fields`; the row-level names cannot.
 
 | Level | Field | Option key | Default name | Content |
 |---|---|---|---|---|
 | page | areas | `fields.areas` | `bereiche` | structure: `schluessel` (key, required), `name`, `kurzname` |
 | page | hours | `fields.hours` | `zeiten` | structure, rows below |
-| page | closures | `fields.closures` | `schliessungen` | structure, rows below (praxisbeispiel: `urlaub`) |
+| page | closures | `fields.closures` | `schliessungen` | structure, rows below (practice: `urlaub`) |
 | page | area reference | `fields.areaRef` | `zeitenschluessel` | text on a NON-location page naming an area |
 | page | short name | `fields.short` | `kurzname` | text on a location page (status label) |
 | hours row | `bereich` | — | | area key, empty = no areas |
@@ -804,8 +804,8 @@ Rename table (for README "Upgrading from site/plugins/betrieb"):
 | `$page->oeffnungszeiten()`, `$page->hatZeiten()` | `$page->norenSchedule()`, `$page->norenHasHours()` |
 | snippet `zeiten-tabelle` (`$bereich`, `$plan`) | `noren/table` (`$area`, `$schedule`) |
 | snippet `statusband` (`$nur`, `$mehrLink`) | `noren/status` (`$only`, `$link`) |
-| radladen `zeiten-kurz` (`$plan`) | `noren/compact` (`$schedule`, `$mode`, `$title`) |
-| gasthaus `Karte::zeitgruppen($plan)` → `tage`, `zeiten` | `Grouping::consecutive($schedule)` → `label`, `hours` |
+| bike shop `zeiten-kurz` (`$plan`) | `noren/compact` (`$schedule`, `$mode`, `$title`) |
+| restaurant `Karte::zeitgruppen($plan)` → `tage`, `zeiten` | `Grouping::consecutive($schedule)` → `label`, `hours` |
 | `strukturdaten.php` week/special closures | `$site->norenSchema()` |
 | CSS `zeiten-raster`, `zeile`, `zeile-tag`, `zeile-zeit`, `zeile-zu`, `zeile-hinweis`, `zeile--feiertage`, `zeiten-zusatz`, `schliessung`, `data-heute="ja"` | `noren-table`, `noren-row`, `noren-day`, `noren-hours`, `noren-closed`, `noren-note`, `noren-row--holidays`, `noren-extra`, `noren-closure`, `data-today="true"` |
 | CSS `band-status`, `band-bereich`, `data-offen="ja"` | `noren-status-line`, `noren-status-label`, `data-open="true"` |
@@ -822,7 +822,7 @@ with `I18n::setLanguage('de')`; reset to `'en'` where English is checked.
 
 Port **every** check of `kirby-starter/tests/OeffnungszeitenTest.php` (same
 sample business, same dates, same German expected strings) plus the
-mustergasthaus extra check, renamed per §8:
+shop extra check, renamed per §8:
 `Oeffnungszeiten::ausFeld($feld, null, 'laden')` →
 `Schedule::fromFields(field($rows), null, 'laden')`; constructor arrays with
 `blocks`/`note` and closures `from`/`to`/`note`; holiday checker
@@ -911,7 +911,7 @@ New checks (expected values exact):
 
 ### 9.3 tests/GroupingTest.php (task `presentation`)
 
-- gasthaus cases ported: Di–Mi 11–16, Do–Sa 11–22 → consecutive
+- restaurant cases ported: Di–Mi 11–16, Do–Sa 11–22 → consecutive
   `[['days' => [1, 2], 'label' => 'Di – Mi', 'blocks' => [[660, 960]], 'hours' => '11:00 – 16:00', 'note' => null], ['days' => [3, 4, 5], 'label' => 'Do – Sa', 'blocks' => [[660, 1320]], 'hours' => '11:00 – 22:00', 'note' => null]]`;
   gap case (Di, Do, So two blocks) → labels 'Di', 'Do', 'So', hours
   '10:00 – 14:00 · 17:00 – 21:00'; empty plan → [].
@@ -985,10 +985,10 @@ Real Kirby via helpers, content written with `noren_page()`:
    `norenSchedule('cafe')->blocks(0)` (no memo, both call orders), `norenUnits()`
    ids `['kontakt#laden', 'kontakt#cafe']`, labels `['Laden', 'Hofcafé']`.
 3. No areas → one unit, id 'kontakt', area null.
-4. praxisbeispiel shape: `'noren.template' => 'standort'`, two pages `1_au`,
+4. medical-practice shape: `'noren.template' => 'standort'`, two pages `1_beispiel`,
    `2_beispiel-nord` with `kurzname`, `vm_/nm_` rows and closures in
    `urlaub` (`'noren.fields' => ['closures' => 'urlaub']`) → two locations in
-   order, unit labels 'Au', 'Beispiel Nord'; the urlaub closure applies; list
+   order, unit labels 'Beispiel', 'Beispiel Nord'; the urlaub closure applies; list
    form `['betrieb', 'standort']`.
 5. `noren.locations` as closure (listed only) and as list of ids (unknown id
    skipped).
@@ -1036,7 +1036,7 @@ Modelled on kirby-koe (read its README, CHANGELOG, PRIVACY, DATENSCHUTZ).
   (PHP 8.2–8.4, Kirby 5), install (composer + VCS repository note, manual),
   quick start (config + blueprint `extends` + snippets), **every option of
   §4 with default**, content field contract §6, locations and areas (Beim
-  Muster 1×N, praxisbeispiel N×1, `noren.locations` example), snippets with
+  Muster 1×N, practice N×1, `noren.locations` example), snippets with
   variables and markup classes (§3.8), own markup (site/page methods §3.9 with
   return shapes as PHP array examples), blueprints (§7, incl. the query note),
   public holidays (table per state from §3.2, flags, extra days, the

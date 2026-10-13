@@ -3,7 +3,7 @@
  * SchemaOrg (SPEC.md §3.6, §9.6): time(), openingHours(),
  * specialOpeningHours() and forSchedule() as plain arrays. Kirby-free.
  *
- * The sample business is the Gasthaus Muster plan in Bavaria, from 2026-10-15:
+ * The sample business is the Muster plan in Bavaria, from 2026-10-15:
  * Mon 13:00–18:00, Tue–Fri 8:30–18:00, Sat 8:00–18:00, Sunday closed.
  * The expected holiday list is written by hand from a calendar (Bavaria,
  * default flags: assumption day on, Augsburg off, Corpus Christi on).
