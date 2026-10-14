@@ -705,6 +705,10 @@ composer test                                   # or: sh tests/run.sh
 
 The tests are plain PHP scripts: each `tests/*Test.php` is a standalone script, exit code 0 means pass. Run one with `php tests/ScheduleTest.php`. The Kirby-free tests load the source classes directly; the Kirby tests boot a real Kirby instance from the development dependency. None needs a network connection.
 
+## Maintenance
+
+This module is open source under the MIT license and is maintained for the author's own projects. Issues and pull requests are welcome, but there is no support promise and no release schedule. Report security problems privately through GitHub's private vulnerability reporting (the "Report a vulnerability" button on the Security tab).
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
