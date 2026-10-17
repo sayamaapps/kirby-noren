@@ -11,6 +11,38 @@ All notable changes to this project are documented here. Versions follow
   **[privacy text]**. Every site using the plugin must then review its privacy
   policy.
 
+## [1.1.0] — 2026-10-17
+
+### Fixed
+
+- **Special hours spanning several days** show both dates in the table and
+  compact notes ("6.7. bis 10.7.2026 Sommerwoche: 10:00–14:00 Uhr"). Before,
+  the note named only the first day, so a running week of short hours read
+  like a single past date. New translation key `note.dateRange`.
+- **Continuous opening across days.** The status said "until 48:00" for three
+  full days in a row (and nonsense for a plan open around the clock). It now
+  names the day the run ends: "noch bis Mittwoch um 24:00 Uhr", "noch bis morgen
+  um 18:00 Uhr". A plan whose run still continues after today and the following
+  seven days says "rund um die Uhr geöffnet" and `until` is `null`. The day is
+  named whenever the run ends later than 06:00 of the next day, whatever
+  `overnightUntil` is set to. schema.org gives full days as `00:00`–`23:59`,
+  because `00:00`–`00:00` means closed in Google's LocalBusiness notation
+  (weekly plan and special hours).
+
+### Changed
+
+- `00:00` to `00:00` is read as a full day `[0, 1440]`, in a weekly row and in
+  the `oeffnet`/`schliesst` fields of a closure (special hours all day). Before,
+  it was ignored as equal times, so such a closure row counted as closed. The
+  Panel help says so now.
+
+### Added
+
+- Translation keys `detail.untilTomorrow`, `detail.untilTomorrowOccasion`,
+  `detail.untilWeekday`, `detail.untilWeekdayOccasion`, `detail.untilDate`,
+  `detail.untilDateOccasion`, `detail.alwaysOpen` and
+  `detail.alwaysOpenOccasion`.
+
 ## [1.0.0] — 2026-10-11
 
 First release as a Composer package. Before 1.0.0 the hours logic lived as a

@@ -346,7 +346,7 @@ $status = site()->norenStatus('laden');
 //   'text'     => 'Jetzt geöffnet',      // headline, translated
 //   'detail'   => 'noch bis 18:00 Uhr',  // '' when there is nothing to say
 //   'state'    => 'open',                // 'open' | 'closed' | 'holiday' | 'closure'
-//   'until'    => '18:00',               // end of the running block, else null
+//   'until'    => '18:00',               // end of the running opening as a clock time, null when open around the clock
 //   'next'     => null,                  // next opening 'Y-m-d\TH:i' while closed
 //   'occasion' => null,                  // occasion of the special day or closure in effect
 //   'holiday'  => null,                  // holiday today, or tomorrow with holidayEve
@@ -373,6 +373,7 @@ Table (`norenTable()`), shortened:
 ```
 
 Note types: `holiday`, `special` (a day with hours), `closedDay` (a single closed day), `closure` (a range).
+A `special` entry spanning several days shows both dates in its text ("6.7. bis 10.7.2026 Sommerwoche: 10:00–14:00 Uhr").
 
 Compact (`norenCompact()`):
 
@@ -392,7 +393,8 @@ Schema (`norenSchema()`):
 [
   'openingHoursSpecification' => [
     ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'https://schema.org/Monday', 'opens' => '13:00', 'closes' => '18:00'],
-    // one entry per block, Monday to Sunday; closed days have none
+    // one entry per block, Monday to Sunday; closed days have none;
+    // a full day is 00:00 to 23:59 (00:00 to 00:00 would mean closed)
   ],
   'specialOpeningHoursSpecification' => [
     ['@type' => 'OpeningHoursSpecification', 'validFrom' => '2026-12-24', 'validThrough' => '2026-12-24', 'opens' => '08:30', 'closes' => '12:00'],
@@ -568,10 +570,14 @@ Names come from the translations (`holiday.<id>`), so `I18n` language changes ar
 A block that ends after midnight is entered on its **start day**: Friday 18:00 to 2:00 goes into Friday's row, with the end as `02:00`. The table shows `18:00 – 2:00`, schema.org gives Friday `opens 18:00 closes 02:00`, and the status is open on Saturday until 2:00.
 
 - `overnightUntil` (default `'06:00'`) is the latest end on the next day. An end later than that, such as `18:00` to `08:00`, is most likely a typo and is ignored.
-- `18:00` to `00:00` is a block until midnight. The status shows `until 24:00`, or later if the next day's first block continues the run.
+- `18:00` to `00:00` is a block until midnight. The status shows `until 24:00`, or later if the next day's first block continues the run. When the run ends later than 6:00 of the next day, the status names the day: "noch bis morgen um 18:00 Uhr", "noch bis Mittwoch um 24:00 Uhr".
 - `false` switches overnight blocks off. Such a row (ending after midnight) is then ignored. A row ending at `00:00` still counts as until midnight.
 - The status follows the opening as far as it runs. Friday `18:00–00:00` and Saturday `00:00–02:00` are one run, so on Friday at 23:30 the status says `until 2:00`. The run stops at midnight when the next day does not open at `00:00`, and a next day that is closed or a holiday without special hours stops it as well.
 - The part after midnight is cancelled when the **start day** (Friday) is a full closure, or a holiday without special hours. A closure that begins on Saturday does not cancel Friday's block, because the block belongs to Friday.
+
+### Open around the clock
+
+A full day is entered as `00:00` to `00:00` (or as two blocks that meet at midnight, such as 00:00–12:00 and 12:00–00:00). The table shows `0:00 – 24:00`, schema.org gives `opens 00:00 closes 23:59` (00:00 to 00:00 would mean closed), and the status follows the run across days: "noch bis Mittwoch um 24:00 Uhr". A plan whose run still continues after today and the following seven days (the next closure or holiday is more than eight days away) says "rund um die Uhr geöffnet" and `until` is `null`. The day is named whenever the run ends later than 6:00 of the next day, whatever `overnightUntil` is set to.
 
 ### Special hours beat holidays
 

@@ -176,6 +176,9 @@ expect('10', Grouping::shortTime(600), 'shortTime 600 → 10');
 expect('10:30', Grouping::shortTime(630), 'shortTime 630 → 10:30');
 expect('24', Grouping::shortTime(1440), 'shortTime 1440 → 24');
 expect('2', Grouping::shortTime(1560), 'shortTime 1560 → 2');
+expect('24', Grouping::shortTime(2880), 'shortTime 2880 → 24');
+expect('18', Grouping::shortTime(2520), 'shortTime 2520 → 18');
+expect('0–24 Uhr', Grouping::shortHoursLabel([[0, 1440]]), 'shortHoursLabel: a full day is 0–24 Uhr');
 
 // Overnight block through the content field: Friday 18:00 to 2:00
 $s = plan([['tag' => 'Freitag', 'von1' => '18:00', 'bis1' => '02:00']]);

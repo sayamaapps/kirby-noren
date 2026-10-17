@@ -96,7 +96,9 @@ final class Presenter
             if ($closure['hours'] !== null) {
                 $type = 'special';
                 $text = I18n::t('note.special', [
-                    'date'     => $date,
+                    'date'     => $closure['from'] === $closure['to']
+                        ? $date
+                        : I18n::t('note.dateRange', ['from' => $date, 'to' => I18n::date($closure['to'], true)]),
                     'occasion' => $closure['occasion'] ?? I18n::t('special.label'),
                     'from'     => Schedule::formatTime($closure['hours'][0]),
                     'to'       => Schedule::formatTime($closure['hours'][1]),

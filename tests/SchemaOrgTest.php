@@ -154,6 +154,39 @@ expect(
 );
 expect(11, count($hoffestList), 'Hoffest from 2026-10-01: the Hoffest plus ten Bavarian holidays (Sundays and the holiday with special hours skipped)');
 
+// A full day is 00:00 to 23:59: 00:00 to 00:00 would mean closed in Google's notation.
+$fullDays = new Schedule([0 => ['blocks' => [[0, 1440]]], 1 => ['blocks' => [[1080, 1440]]]], [], null, null, $settings);
+expect(
+    [
+        ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'https://schema.org/Monday', 'opens' => '00:00', 'closes' => '23:59'],
+        ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'https://schema.org/Tuesday', 'opens' => '18:00', 'closes' => '00:00'],
+    ],
+    SchemaOrg::openingHours($fullDays),
+    'full day is 00:00–23:59, a block until midnight stays 18:00–00:00'
+);
+
+$fullSpecial = new Schedule(
+    $musterDays,
+    [
+        ['from' => '2026-10-20', 'to' => '2026-10-20', 'occasion' => 'Hoffest', 'hours' => [0, 1440]],
+        ['from' => '2026-10-21', 'to' => '2026-10-21', 'occasion' => 'Inventur'],
+    ],
+    null,
+    null,
+    $settings
+);
+$fullSpecialList = SchemaOrg::specialOpeningHours($fullSpecial, at('2026-10-15'));
+expect(
+    ['@type' => 'OpeningHoursSpecification', 'validFrom' => '2026-10-20', 'validThrough' => '2026-10-20', 'opens' => '00:00', 'closes' => '23:59'],
+    $fullSpecialList[0] ?? null,
+    'special hours covering a full day are 00:00–23:59'
+);
+expect(
+    ['@type' => 'OpeningHoursSpecification', 'validFrom' => '2026-10-21', 'validThrough' => '2026-10-21', 'opens' => '00:00', 'closes' => '00:00'],
+    $fullSpecialList[1] ?? null,
+    'a closed entry stays 00:00–00:00'
+);
+
 /* --- forSchedule() ------------------------------------------------------- */
 
 $both = SchemaOrg::forSchedule($muster, $from);

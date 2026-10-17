@@ -664,4 +664,110 @@ $monday = new Schedule([0 => ['blocks' => [[480, 720]]]]);
 expect(I18n::t('detail.opensWeekday', ['weekday' => I18n::day(0), 'time' => '8:00']), $monday->status(at('2026-10-06 13:00'))['detail'], 'opening exactly 6 days ahead: weekday wording');
 expect(I18n::t('detail.opensDate', ['date' => I18n::date('2026-10-12'), 'time' => '8:00']), $monday->status(at('2026-10-05 13:00'))['detail'], 'opening exactly 7 days ahead: date wording');
 
+/* --------------------------------------------------------------------------
+ * Full days and runs over several days.
+ * -------------------------------------------------------------------------- */
+
+// 00:00–00:00 is a full day (the Panel's time fields have no 24:00); other equal times stay ignored.
+expect([0, 1440], Schedule::block(0, 0), '00:00–00:00 is a full day');
+expect(null, Schedule::block(600, 600), '10:00–10:00 stays ignored');
+expect([[0, 1440]], Schedule::fromFields(field([['tag' => 'Montag', 'von1' => '00:00', 'bis1' => '00:00']]))->blocks(0), 'a row 00:00–00:00 is read as a full day');
+
+// formatTime shows any later day as its clock time, midnight as 24:00.
+expect('18:00', Schedule::formatTime(2520), 'formatTime 2520 → 18:00');
+expect('24:00', Schedule::formatTime(2880), 'formatTime 2880 → 24:00');
+expect('24:00', Schedule::formatTime(4320), 'formatTime 4320 → 24:00');
+expect('2:00', Schedule::formatTime(1560), 'formatTime 1560 → 2:00');
+
+// Three full days, each entered as two blocks that meet at midnight.
+$fullDay = static fn (string $day): array => ['tag' => $day, 'von1' => '00:00', 'bis1' => '12:00', 'von2' => '12:00', 'bis2' => '00:00'];
+$threeDays = Schedule::fromFields(field([$fullDay('Montag'), $fullDay('Dienstag'), $fullDay('Mittwoch')]));
+expect([[0, 1440]], $threeDays->blocks(0), 'two blocks meeting at midnight merge to a full day');
+$s = $threeDays->status(at('2026-07-06 13:00'));
+expect(true, $s['open'], 'three full days: Monday 13:00 is open');
+expect('noch bis Mittwoch um 24:00 Uhr', $s['detail'], 'three full days: the run ends Wednesday at 24:00');
+expect('24:00', $s['until'], 'three full days: until 24:00');
+expect('noch bis 24:00 Uhr', $threeDays->status(at('2026-07-08 23:00'))['detail'], 'three full days: Wednesday 23:00 is until 24:00 today');
+expect('24:00', $threeDays->status(at('2026-07-08 23:00'))['until'], 'three full days: Wednesday until 24:00');
+expect(false, $threeDays->status(at('2026-07-09 01:00'))['open'], 'three full days: Thursday 01:00 is closed');
+
+// Thursday does not start at 0:00: the run stops at midnight.
+$withThursday = Schedule::fromFields(field([$fullDay('Montag'), $fullDay('Dienstag'), $fullDay('Mittwoch'), ['tag' => 'Donnerstag', 'von1' => '08:00', 'bis1' => '18:00']]));
+expect('noch bis Mittwoch um 24:00 Uhr', $withThursday->status(at('2026-07-06 13:00'))['detail'], 'Thursday 08:00 does not continue the run');
+
+// Monday full day, Tuesday until 18:00: the day is named as "morgen".
+$tomorrow = Schedule::fromFields(field([
+    ['tag' => 'Montag', 'von1' => '00:00', 'bis1' => '00:00'],
+    ['tag' => 'Dienstag', 'von1' => '00:00', 'bis1' => '18:00'],
+]));
+$s = $tomorrow->status(at('2026-07-06 13:00'));
+expect('noch bis morgen um 18:00 Uhr', $s['detail'], 'run ends tomorrow afternoon: "morgen" is named');
+expect('18:00', $s['until'], 'run ends tomorrow afternoon: until 18:00');
+
+// Friday 20:00–03:00 with Saturday 02:00–10:00: the end is in tomorrow's morning, but after 06:00.
+$spillMorning = new Schedule([4 => ['blocks' => [[1200, 1620]]], 5 => ['blocks' => [[120, 600]]]]);
+$s = $spillMorning->status(at('2026-10-09 23:00'));
+expect('noch bis morgen um 10:00 Uhr', $s['detail'], 'Friday 23:00: the run ends tomorrow at 10:00');
+expect('10:00', $s['until'], 'Friday 23:00: until 10:00');
+expect('noch bis 10:00 Uhr', $spillMorning->status(at('2026-10-10 02:30'))['detail'], 'Saturday 02:30: until 10:00 without a day');
+
+// An overnight end up to 06:00 keeps the plain wording.
+$fridayLate = new Schedule([4 => ['blocks' => [[1080, 1560]]]]);
+$s = $fridayLate->status(at('2026-10-09 23:00'));
+expect('noch bis 2:00 Uhr', $s['detail'], 'Friday 18:00–02:00: still "noch bis 2:00 Uhr"');
+expect('2:00', $s['until'], 'Friday 18:00–02:00: until 2:00');
+
+// Around the clock: no end within a week.
+$allWeek = new Schedule(array_fill(0, 7, ['blocks' => [[0, 1440]]]));
+foreach (['2026-07-06 13:00', '2026-07-08 00:00', '2026-07-12 23:59'] as $moment) {
+    $s = $allWeek->status(at($moment));
+    expect(['open' => true, 'detail' => 'rund um die Uhr geöffnet', 'until' => null, 'state' => 'open'], only($s, ['open', 'detail', 'until', 'state']), "24/7 at $moment: open around the clock");
+}
+expect(
+    ['open' => true, 'text' => 'Jetzt geöffnet', 'detail' => 'rund um die Uhr geöffnet', 'state' => 'open', 'until' => null, 'next' => null, 'occasion' => null, 'holiday' => null],
+    $allWeek->status(at('2026-07-06 13:00')),
+    '24/7: full status shape',
+);
+
+// A closure eight days ahead ends the run on the date before it; nine days ahead is out of sight.
+$closedDay8 = new Schedule(array_fill(0, 7, ['blocks' => [[0, 1440]]]), [['from' => '2026-07-14', 'to' => '2026-07-14']]);
+$s = $closedDay8->status(at('2026-07-06 13:00'));
+expect('noch bis 13.7. um 24:00 Uhr', $s['detail'], '24/7 with a closure on day +8: the date is named');
+expect('24:00', $s['until'], '24/7 with a closure on day +8: until 24:00');
+$closedDay9 = new Schedule(array_fill(0, 7, ['blocks' => [[0, 1440]]]), [['from' => '2026-07-15', 'to' => '2026-07-15']]);
+expect('rund um die Uhr geöffnet', $closedDay9->status(at('2026-07-06 13:00'))['detail'], '24/7 with a closure on day +9: only a week is checked');
+
+// 24 hours Monday to Saturday, Sunday closed.
+$sixDays = new Schedule(array_fill(0, 6, ['blocks' => [[0, 1440]]]));
+expect('noch bis Samstag um 24:00 Uhr', $sixDays->status(at('2026-07-06 13:00'))['detail'], '24h Monday–Saturday: the run ends Saturday at 24:00');
+
+// Special hours 00:00–00:00 are a full day too.
+$fullSpecial = Schedule::fromFields(field([['tag' => 'Montag', 'von1' => '10:00', 'bis1' => '12:00']]), field([
+    ['von' => '2026-07-06', 'bis' => '2026-07-06', 'anlass' => 'Hoffest', 'oeffnet' => '00:00', 'schliesst' => '00:00'],
+]));
+expect([0, 1440], $fullSpecial->specialOn(at('2026-07-06 13:00'))['hours'], 'special hours 00:00–00:00 are [0, 1440]');
+expect('noch bis 24:00 Uhr (Hoffest)', $fullSpecial->status(at('2026-07-06 13:00'))['detail'], 'special full day: until 24:00 with the occasion');
+
+// Yesterday's overnight block runs into a multi-day run.
+$spillRun = Schedule::fromFields(field([
+    ['tag' => 'Sonntag', 'von1' => '20:00', 'bis1' => '02:00'],
+    ['tag' => 'Montag', 'von1' => '00:00', 'bis1' => '00:00'],
+    ['tag' => 'Dienstag', 'von1' => '00:00', 'bis1' => '00:00'],
+]));
+expect('noch bis morgen um 24:00 Uhr', $spillRun->status(at('2026-07-06 01:00'))['detail'], 'overnight spill-over joins a multi-day run (Tuesday is tomorrow)');
+$spillRunLong = Schedule::fromFields(field([
+    ['tag' => 'Sonntag', 'von1' => '20:00', 'bis1' => '02:00'],
+    ['tag' => 'Montag', 'von1' => '00:00', 'bis1' => '00:00'],
+    ['tag' => 'Dienstag', 'von1' => '00:00', 'bis1' => '00:00'],
+    ['tag' => 'Mittwoch', 'von1' => '00:00', 'bis1' => '00:00'],
+]));
+expect('noch bis Mittwoch um 24:00 Uhr', $spillRunLong->status(at('2026-07-06 01:00'))['detail'], 'overnight spill-over joins a run that ends on a named weekday');
+
+// English wording.
+I18n::setLanguage('en');
+expect('open until 24:00 on Wednesday', $threeDays->status(at('2026-07-06 13:00'))['detail'], 'en: run until Wednesday');
+expect('open around the clock', $allWeek->status(at('2026-07-06 13:00'))['detail'], 'en: open around the clock');
+expect('open until 18:00 tomorrow', $tomorrow->status(at('2026-07-06 13:00'))['detail'], 'en: run until tomorrow');
+I18n::setLanguage('de');
+
 finish('Noren Schedule');

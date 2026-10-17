@@ -208,6 +208,10 @@ snip_has($html, '<p class="noren-extra" data-holiday>25.12. 1. Weihnachtsfeierta
 snip_has($html, '<p class="noren-extra" data-special>24.12. Heiligabend: 8:30–12:00 Uhr · Hinweis</p>', 'table: special hours with note');
 snip_has($html, '<p class="noren-extra" data-special>31.12. Silvester: geschlossen</p>', 'table: Silvester closed day');
 
+$summerWeek = snip_muster(true, [['von' => '2026-07-06', 'bis' => '2026-07-10', 'anlass' => 'Sommerwoche', 'oeffnet' => '10:00', 'schliesst' => '14:00']]);
+$html = snip_render('table', $on, static fn () => ['schedule' => $summerWeek, 'now' => at('2026-07-08 10:00')]);
+snip_has($html, '<p class="noren-extra" data-special>6.7. bis 10.7.2026 Sommerwoche: 10:00–14:00 Uhr</p>', 'table: multi-day special hours name both dates');
+
 $html = snip_render('table', $on, static fn () => ['schedule' => snip_muster(true), 'now' => at('2027-07-25 10:00')]);
 snip_has($html, '<p class="noren-closure"><strong>Betriebsferien 2.8. bis 15.8.2027</strong><br>Sommerpause</p>', 'table: closure paragraph with note');
 holds(substr_count($html, 'class="noren-closure"') === 1, 'table: one closure paragraph');

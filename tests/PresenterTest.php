@@ -140,6 +140,30 @@ $special = Schedule::fromFields(field(MUSTER_HOURS), field([
 $table = Presenter::table($special, at('2026-12-17 10:00'));
 expect('23.12. Sonderöffnung: 9:00–11:00 Uhr', $table['notes'][0]['text'], 'special without occasion → Sonderöffnung');
 
+// Special hours over several days name both dates
+$week = Schedule::fromFields(field(MUSTER_HOURS), field([
+    ['von' => '2026-07-06', 'bis' => '2026-07-10', 'anlass' => 'Sommerwoche', 'oeffnet' => '10:00', 'schliesst' => '14:00'],
+]), null, null, bavaria(), []);
+$weekNoOccasion = Schedule::fromFields(field(MUSTER_HOURS), field([
+    ['von' => '2026-07-06', 'bis' => '2026-07-10', 'oeffnet' => '10:00', 'schliesst' => '14:00'],
+]), null, null, bavaria(), []);
+foreach (['2026-07-08 10:00' => 'running', '2026-07-01 10:00' => 'ahead'] as $when => $where) {
+    expect([[
+        'type' => 'special', 'from' => '2026-07-06', 'to' => '2026-07-10',
+        'text' => '6.7. bis 10.7.2026 Sommerwoche: 10:00–14:00 Uhr', 'note' => null,
+    ]], Presenter::table($week, at($when))['notes'], "table: multi-day special hours name both dates ($where)");
+    expect(
+        '6.7. bis 10.7.2026 Sommerwoche: 10:00–14:00 Uhr',
+        Presenter::compact($week, at($when))['notes'][0]['text'],
+        "compact: multi-day special hours name both dates ($where)",
+    );
+}
+expect(
+    '6.7. bis 10.7.2026 Sonderöffnung: 10:00–14:00 Uhr',
+    Presenter::table($weekNoOccasion, at('2026-07-08 10:00'))['notes'][0]['text'],
+    'table: multi-day special hours without occasion',
+);
+
 // Two blocks and a note, overnight row
 $rows = [
     ['tag' => 'Dienstag', 'von1' => '08:30', 'bis1' => '12:00', 'von2' => '13:00', 'bis2' => '18:00', 'hinweis' => 'Mittagspause'],
@@ -150,6 +174,8 @@ $table = Presenter::table($shop, at('2026-09-28 10:00'));
 expect(['8:30 – 12:00', '13:00 – 18:00'], $table['days'][1]['hours'], 'two blocks → two entries');
 expect('Mittagspause', $table['days'][1]['note'], 'note of the weekday');
 expect(['18:00 – 2:00'], $table['days'][4]['hours'], 'overnight row shows 2:00');
+$fullDayShop = Schedule::fromFields(field([['tag' => 'Samstag', 'von1' => '00:00', 'bis1' => '00:00']]), null, null, null, null, []);
+expect(['0:00 – 24:00'], Presenter::table($fullDayShop, at('2026-09-28 10:00'))['days'][5]['hours'], 'a full day shows 0:00 – 24:00');
 
 /* ----------------------------------------------------------------- English */
 $en();
@@ -169,6 +195,23 @@ $table = Presenter::table($s, at('2027-07-25 10:00'));
 expect('Closed for holidays 2 Aug to 15 Aug 2027', $table['notes'][0]['text'], 'en: closure range');
 $table = Presenter::table($s, at('2026-09-28 10:00'));
 expect('3 Oct German Unity Day: closed', $table['notes'][0]['text'], 'en: holiday note');
+foreach (['2026-07-08 10:00' => 'running', '2026-07-01 10:00' => 'ahead'] as $when => $where) {
+    expect(
+        '6 Jul to 10 Jul 2026 Sommerwoche: 10:00–14:00',
+        Presenter::table($week, at($when))['notes'][0]['text'],
+        "en: table multi-day special hours name both dates ($where)",
+    );
+    expect(
+        '6 Jul to 10 Jul 2026 Sommerwoche: 10:00–14:00',
+        Presenter::compact($week, at($when))['notes'][0]['text'],
+        "en: compact multi-day special hours name both dates ($where)",
+    );
+}
+expect(
+    '6 Jul to 10 Jul 2026 Special opening hours: 10:00–14:00',
+    Presenter::table($weekNoOccasion, at('2026-07-08 10:00'))['notes'][0]['text'],
+    'en: multi-day special hours without occasion',
+);
 $de();
 
 /* ----------------------------------------------------------------- compact */
