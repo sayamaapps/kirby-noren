@@ -24,8 +24,23 @@ final class SchemaOrg
     }
 
     /**
+     * Opens/closes of one block. A full day ([0, 1440]) is 00:00 to 23:59,
+     * because 00:00 to 00:00 means closed in Google's LocalBusiness notation.
+     *
+     * @return array{opens: string, closes: string}
+     */
+    private static function range(int $from, int $to): array
+    {
+        if ($from === 0 && $to >= Schedule::MINUTES_PER_DAY) {
+            return ['opens' => '00:00', 'closes' => '23:59'];
+        }
+        return ['opens' => self::time($from), 'closes' => self::time($to)];
+    }
+
+    /**
      * One OpeningHoursSpecification per block of the weekly plan, Monday
-     * first. A day without blocks gets no entry (schema.org's "closed").
+     * first. A day without blocks gets no entry (schema.org's "closed"); a
+     * full day is opens "00:00" / closes "23:59".
      *
      * @return list<array{'@type': string, dayOfWeek: string, opens: string, closes: string}>
      */
@@ -37,9 +52,7 @@ final class SchemaOrg
                 $specs[] = [
                     '@type'     => 'OpeningHoursSpecification',
                     'dayOfWeek' => 'https://schema.org/' . $name,
-                    'opens'     => self::time($from),
-                    'closes'    => self::time($to),
-                ];
+                ] + self::range($from, $to);
             }
         }
         return $specs;
@@ -49,7 +62,8 @@ final class SchemaOrg
      * ALL upcoming closures and special days (no lead time — Maps should know
      * early), then the upcoming holidays within $holidayDays, as
      * OpeningHoursSpecification with validFrom/validThrough. Closed days are
-     * opens "00:00" / closes "00:00" (Google's notation for closed all day).
+     * opens "00:00" / closes "00:00" (Google's notation for closed all day); special
+     * hours covering a full day are 00:00 to 23:59.
      *
      * @return list<array{'@type': string, validFrom: string, validThrough: string, opens: string, closes: string}>
      */
@@ -64,9 +78,7 @@ final class SchemaOrg
                 '@type'        => 'OpeningHoursSpecification',
                 'validFrom'    => $closure['from'],
                 'validThrough' => $closure['to'],
-                'opens'        => $hours !== null ? self::time($hours[0]) : '00:00',
-                'closes'       => $hours !== null ? self::time($hours[1]) : '00:00',
-            ];
+            ] + ($hours !== null ? self::range($hours[0], $hours[1]) : ['opens' => '00:00', 'closes' => '00:00']);
         }
 
         foreach ($schedule->upcomingHolidays($from, $holidayDays) as $holiday) {

@@ -169,7 +169,7 @@ final class Schedule {
     static block(?int $from, ?int $to, ?int $overnightUntil = 360): ?array
     static parseTime(string $time): ?int          // "08:00", "08:00:00" → 480; else null
     static dayIndex(string $value): ?int          // "Montag"/"monday"/"1" → 0
-    static formatTime(int $minutes): string       // 510 "8:30", 1440 "24:00", 1560 "2:00"
+    static formatTime(int $minutes): string       // 510 "8:30", 1440 "24:00", 1560 "2:00", 2880 "24:00"
 
     blocks(int $weekday): array                   // weekly plan, sorted
     note(int $weekday): ?string
@@ -228,6 +228,7 @@ $settings = ['timezone' => 'Europe/Berlin', 'holidayEve' => false, 'lookahead' =
 | 18:00 | 02:00 | 360 (default) | `[1080, 1560]` — overnight |
 | 18:00 | 08:00 | 360 | `null` — most likely a typo, ignored |
 | 18:00 | 02:00 | null | `null` — overnight off |
+| 00:00 | 00:00 | any | `[0, 1440]` — a full day |
 | 10:00 | 10:00 | any | `null` |
 
 #### 3.1.3 Status
@@ -241,7 +242,9 @@ schedule's timezone; default now there. Returns
     'text'     => 'Jetzt geöffnet',     // headline, translated
     'detail'   => 'noch bis 18:00 Uhr', // '' when nothing to say
     'state'    => 'open',               // 'open' | 'closed' | 'holiday' | 'closure'
-    'until'    => '18:00',              // formatTime() of the block end while open, else null
+    'until'    => '18:00',              // clock time of the run's end while open ('24:00' for midnight; an end in
+                                        // tomorrow's early morning, up to 06:00, as its clock time), null when open
+                                        // around the clock, null while closed
     'next'     => null,                 // next opening 'Y-m-d\TH:i' while closed, null if open/unknown
     'occasion' => null,                 // occasion of the special day / closure in effect
     'holiday'  => null,                 // holiday today (state holiday) or tomorrow (eve notice)
@@ -280,6 +283,16 @@ Order of evaluation (first match wins):
    ("morgen Feiertag (Tag der Deutschen Einheit) · öffnet am Montag um 13:00
    Uhr"), `holiday` = tomorrow's name. Default off (the starter's tests
    expect the plain detail).
+
+Runs over several days: the end of the running opening is followed across
+midnight as long as the next day starts with a block at 00:00 and is not an
+exception day, up to the next seven days (`runEnd()`). The wording follows the
+day of the end, relative to today: today, or tomorrow up to 06:00 →
+`detail.until`; tomorrow later → `detail.untilTomorrow`; 2–6 days →
+`detail.untilWeekday` (full weekday name); ≥ 7 days → `detail.untilDate`; no
+end within the next seven days → `detail.alwaysOpen` and `until` null. Each has
+an `…Occasion` variant for special days. Midnight is "24:00" ("noch bis
+Mittwoch um 24:00 Uhr", "noch bis morgen um 18:00 Uhr").
 
 Day wording of "öffnet …" (days between today's and the target's midnight):
 1 → `detail.opensTomorrow`; 2–6 → `detail.opensWeekday` (full weekday name);
@@ -415,7 +428,7 @@ Kirby-free. Signatures and examples in the stub `src/Grouping.php`. Group:
 - `shortHoursLabel([[600,1080]])` → de "10–18 Uhr", en "10–18";
   `[[600,750],[840,1080]]` → de "10–12:30 und 14–18 Uhr", en
   "10–12:30 and 14–18" (`compact.and`, `compact.hours`).
-- `shortTime(600)` "10", `630` "10:30", `1440` "24", `1560` "2".
+- `shortTime(600)` "10", `630` "10:30", `1440` "24", `1560` "2", `2880` "24".
 
 ### 3.5 `Noren\Presenter` (owner `presentation`)
 
@@ -498,6 +511,11 @@ SchemaOrg::specialOpeningHours($s, at('2026-10-15')) === [
 SchemaOrg::forSchedule($s, $from) === ['openingHoursSpecification' => […], 'specialOpeningHoursSpecification' => […]];
 SchemaOrg::time(510) === '08:30'; time(1440) === '00:00'; time(1560) === '02:00';
 ```
+
+A full day (`[0, 1440]`, in the weekly plan and in special hours) is opens
+"00:00" closes "23:59", because "00:00" to "00:00" means closed in Google's
+LocalBusiness notation. A block until midnight (`[1080, 1440]`) stays opens
+"18:00" closes "00:00".
 
 `$from` default: today in the schedule's timezone. Overnight Fri 18:00–02:00
 → Friday opens "18:00" closes "02:00".
@@ -848,6 +866,7 @@ New checks (expected values exact):
   Sat 02:00 `open` false, text 'Heute geschlossen', detail 'öffnet am Freitag um 18:00 Uhr';
   Thu 23:00 'öffnet morgen um 18:00 Uhr'.
   '18:00'–'00:00' → `[[1080, 1440]]`, Fri 23:59 'noch bis 24:00 Uhr'.
+  '00:00'–'00:00' → `[[0, 1440]]` (a full day); `block(10:00, 10:00)` stays null.
   '18:00'–'08:00' → no block; with settings `overnightUntil` 600 → `[[1080, 1920]]`;
   with `overnightUntil` null '18:00'–'02:00' → no block.
   Friday full closure 2026-10-09 → Sat 2026-10-10 01:00 not open.
@@ -856,6 +875,15 @@ New checks (expected values exact):
   Special day Thu 2026-12-31 occasion 'Silvesterparty' oeffnet 20:00 schliesst 03:00
   (weekly plan closed on Thursdays) → 2027-01-01 01:30 (Neujahr, BY) open,
   detail 'noch bis 3:00 Uhr (Silvesterparty)'.
+- Full days and runs: three full days Mon–Wed (each two blocks 00:00–12:00 and
+  12:00–00:00) → Mon 13:00 'noch bis Mittwoch um 24:00 Uhr', until '24:00'; Wed
+  23:00 'noch bis 24:00 Uhr'; Mon full day + Tue 00:00–18:00 → 'noch bis morgen um
+  18:00 Uhr'; Fri 20:00–03:00 + Sat 02:00–10:00 → Fri 23:00 'noch bis morgen um
+  10:00 Uhr', Sat 02:30 'noch bis 10:00 Uhr'; 24/7 → 'durchgehend geöffnet',
+  until null; 24/7 with a closure 8 days ahead → 'noch bis 13.7. um 24:00 Uhr', 9
+  days ahead → 'durchgehend geöffnet'; special hours 00:00–00:00 → `[0, 1440]`;
+  yesterday's overnight block joins a multi-day run; `formatTime(2520)` "18:00",
+  `formatTime(2880)` and `formatTime(4320)` "24:00"; English wordings.
 - Eve notice (settings `holidayEve` true, Muster plan, BY): Fri 2026-10-02 19:00 →
   detail 'morgen Feiertag (Tag der Deutschen Einheit) · öffnet am Montag um 13:00 Uhr',
   `holiday` 'Tag der Deutschen Einheit'; Fri 2026-10-02 07:00 → 'öffnet heute um 8:30 Uhr',
@@ -974,6 +1002,8 @@ A site's own `site/snippets/noren/table.php` wins over the package snippet.
   open days only, e.g. '2026-12-25' and '2026-12-26' present, '2026-11-01'
   (Sunday) absent. Write the expected holiday list by hand from a calendar.
 - Hoffest special on 3.10. → that date appears once (special), not as closed.
+- A full day `[0, 1440]` is '00:00'/'23:59' (weekly plan and special hours); a
+  block until midnight stays '18:00'/'00:00'; a closed entry stays '00:00'/'00:00'.
 - `forSchedule()` keys.
 
 ### 9.7 tests/KirbyTest.php (task `kirby`)
@@ -1091,6 +1121,14 @@ Modelled on kirby-koe (read its README, CHANGELOG, PRIVACY, DATENSCHUTZ).
 | `status.allHours` | All opening hours | Alle Öffnungszeiten |
 | `detail.until` | open until {time} | noch bis {time} Uhr |
 | `detail.untilOccasion` | open until {time} ({occasion}) | noch bis {time} Uhr ({occasion}) |
+| `detail.untilTomorrow` | open until {time} tomorrow | noch bis morgen um {time} Uhr |
+| `detail.untilTomorrowOccasion` | open until {time} tomorrow ({occasion}) | noch bis morgen um {time} Uhr ({occasion}) |
+| `detail.untilWeekday` | open until {time} on {weekday} | noch bis {weekday} um {time} Uhr |
+| `detail.untilWeekdayOccasion` | open until {time} on {weekday} ({occasion}) | noch bis {weekday} um {time} Uhr ({occasion}) |
+| `detail.untilDate` | open until {time} on {date} | noch bis {date} um {time} Uhr |
+| `detail.untilDateOccasion` | open until {time} on {date} ({occasion}) | noch bis {date} um {time} Uhr ({occasion}) |
+| `detail.alwaysOpen` | open around the clock | durchgehend geöffnet |
+| `detail.alwaysOpenOccasion` | open around the clock ({occasion}) | durchgehend geöffnet ({occasion}) |
 | `detail.opensToday` | opens today at {time} | öffnet heute um {time} Uhr |
 | `detail.opensTomorrow` | opens tomorrow at {time} | öffnet morgen um {time} Uhr |
 | `detail.opensWeekday` | opens on {weekday} at {time} | öffnet am {weekday} um {time} Uhr |
@@ -1145,7 +1183,7 @@ Modelled on kirby-koe (read its README, CHANGELOG, PRIVACY, DATENSCHUTZ).
 | `panel.area.short.label` | Short name | Kurzname |
 | `panel.area.short.help` | For tight spots such as the status band. Empty = the name is used. | Für enge Stellen wie das Statusband. Leer = Name wird verwendet. |
 | `panel.hours.label` | Opening hours | Öffnungszeiten |
-| `panel.hours.info` | **One row per area and weekday.** A day on which the business is closed gets **no row** — not a row with empty fields.<br><br>Each row has two blocks, for businesses with a lunch break. Open all day? Fill in only the first.<br><br>A block counts only when **both** times are set and the end is after the start. Half-filled rows are ignored — no information is better than wrong information.<br><br>**Past midnight** (Friday 18:00 to 2:00, for example): enter it as Friday’s row with the end in the early morning. The end may reach 6:00 at the latest. | **Eine Zeile je Bereich und Wochentag.** Ein Tag, an dem geschlossen ist, bekommt **keine Zeile** — nicht eine Zeile mit leeren Feldern.<br><br>Es gibt zwei Blöcke je Zeile, für Betriebe mit Mittagspause. Wer durchgehend offen hat, füllt nur den ersten.<br><br>Ein Block zählt nur, wenn **beide** Zeiten gesetzt sind und das Ende nach dem Anfang liegt. Halb ausgefüllte Zeilen werden ignoriert — lieber keine Auskunft als eine falsche.<br><br>**Über Mitternacht** (etwa Freitag 18:00 bis 2:00): als Zeile des Freitags eintragen, mit dem Ende am frühen Morgen. Das Ende darf höchstens bis 6:00 Uhr reichen. |
+| `panel.hours.info` | **One row per area and weekday.** A day on which the business is closed gets **no row** — not a row with empty fields.<br><br>Each row has two blocks, for businesses with a lunch break. Open all day? Fill in only the first. Open around the clock: 00:00 to 00:00.<br><br>A block counts only when **both** times are set and the end is after the start. Half-filled rows are ignored — no information is better than wrong information.<br><br>**Past midnight** (Friday 18:00 to 2:00, for example): enter it as Friday’s row with the end in the early morning. The end may reach 6:00 at the latest. | **Eine Zeile je Bereich und Wochentag.** Ein Tag, an dem geschlossen ist, bekommt **keine Zeile** — nicht eine Zeile mit leeren Feldern.<br><br>Es gibt zwei Blöcke je Zeile, für Betriebe mit Mittagspause. Wer durchgehend offen hat, füllt nur den ersten. Rund um die Uhr geöffnet: 00:00 bis 00:00.<br><br>Ein Block zählt nur, wenn **beide** Zeiten gesetzt sind und das Ende nach dem Anfang liegt. Halb ausgefüllte Zeilen werden ignoriert — lieber keine Auskunft als eine falsche.<br><br>**Über Mitternacht** (etwa Freitag 18:00 bis 2:00): als Zeile des Freitags eintragen, mit dem Ende am frühen Morgen. Das Ende darf höchstens bis 6:00 Uhr reichen. |
 | `panel.hours.area.label` | Area | Bereich |
 | `panel.hours.area.help` | Leave empty if the business has no separate areas. | Leer lassen, wenn der Betrieb keine getrennten Bereiche hat. |
 | `panel.hours.day.label` | Weekday | Wochentag |

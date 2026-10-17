@@ -19,6 +19,25 @@ All notable changes to this project are documented here. Versions follow
   compact notes ("6.7. bis 10.7.2026 Sommerwoche: 10:00–14:00 Uhr"). Before,
   the note named only the first day, so a running week of short hours read
   like a single past date. New translation key `note.dateRange`.
+- **Continuous opening across days.** The status said "until 48:00" for three
+  full days in a row (and nonsense for a plan open around the clock). It now
+  names the day the run ends: "noch bis Mittwoch um 24:00 Uhr", "noch bis morgen
+  um 18:00 Uhr". A plan open all week, without a closure or holiday in the next
+  seven days, says "durchgehend geöffnet" and `until` is `null`. schema.org
+  gives full days as `00:00`–`23:59`, because `00:00`–`00:00` means closed in
+  Google's LocalBusiness notation (weekly plan and special hours).
+
+### Changed
+
+- A row `00:00` to `00:00` is read as a full day `[0, 1440]`. Before, it was
+  ignored as equal times. The Panel help now says so.
+
+### Added
+
+- Translation keys `detail.untilTomorrow`, `detail.untilTomorrowOccasion`,
+  `detail.untilWeekday`, `detail.untilWeekdayOccasion`, `detail.untilDate`,
+  `detail.untilDateOccasion`, `detail.alwaysOpen` and
+  `detail.alwaysOpenOccasion`.
 
 ## [1.0.0] — 2026-10-11
 

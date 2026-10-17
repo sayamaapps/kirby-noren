@@ -174,6 +174,8 @@ $table = Presenter::table($shop, at('2026-09-28 10:00'));
 expect(['8:30 – 12:00', '13:00 – 18:00'], $table['days'][1]['hours'], 'two blocks → two entries');
 expect('Mittagspause', $table['days'][1]['note'], 'note of the weekday');
 expect(['18:00 – 2:00'], $table['days'][4]['hours'], 'overnight row shows 2:00');
+$fullDayShop = Schedule::fromFields(field([['tag' => 'Samstag', 'von1' => '00:00', 'bis1' => '00:00']]), null, null, null, null, []);
+expect(['0:00 – 24:00'], Presenter::table($fullDayShop, at('2026-09-28 10:00'))['days'][5]['hours'], 'a full day shows 0:00 – 24:00');
 
 /* ----------------------------------------------------------------- English */
 $en();
