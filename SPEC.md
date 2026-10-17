@@ -286,11 +286,11 @@ Order of evaluation (first match wins):
 
 Runs over several days: the end of the running opening is followed across
 midnight as long as the next day starts with a block at 00:00 and is not an
-exception day, up to the next seven days (`runEnd()`). The wording follows the
+exception day, through today and the following seven days (`runEnd()`). The wording follows the
 day of the end, relative to today: today, or tomorrow up to 06:00 →
 `detail.until`; tomorrow later → `detail.untilTomorrow`; 2–6 days →
 `detail.untilWeekday` (full weekday name); ≥ 7 days → `detail.untilDate`; no
-end within the next seven days → `detail.alwaysOpen` and `until` null. Each has
+end within today and the following seven days → `detail.alwaysOpen` and `until` null. Each has
 an `…Occasion` variant for special days. Midnight is "24:00" ("noch bis
 Mittwoch um 24:00 Uhr", "noch bis morgen um 18:00 Uhr").
 
@@ -879,9 +879,9 @@ New checks (expected values exact):
   12:00–00:00) → Mon 13:00 'noch bis Mittwoch um 24:00 Uhr', until '24:00'; Wed
   23:00 'noch bis 24:00 Uhr'; Mon full day + Tue 00:00–18:00 → 'noch bis morgen um
   18:00 Uhr'; Fri 20:00–03:00 + Sat 02:00–10:00 → Fri 23:00 'noch bis morgen um
-  10:00 Uhr', Sat 02:30 'noch bis 10:00 Uhr'; 24/7 → 'durchgehend geöffnet',
+  10:00 Uhr', Sat 02:30 'noch bis 10:00 Uhr'; 24/7 → 'rund um die Uhr geöffnet',
   until null; 24/7 with a closure 8 days ahead → 'noch bis 13.7. um 24:00 Uhr', 9
-  days ahead → 'durchgehend geöffnet'; special hours 00:00–00:00 → `[0, 1440]`;
+  days ahead → 'rund um die Uhr geöffnet'; special hours 00:00–00:00 → `[0, 1440]`;
   yesterday's overnight block joins a multi-day run; `formatTime(2520)` "18:00",
   `formatTime(2880)` and `formatTime(4320)` "24:00"; English wordings.
 - Eve notice (settings `holidayEve` true, Muster plan, BY): Fri 2026-10-02 19:00 →
@@ -1127,8 +1127,8 @@ Modelled on kirby-koe (read its README, CHANGELOG, PRIVACY, DATENSCHUTZ).
 | `detail.untilWeekdayOccasion` | open until {time} on {weekday} ({occasion}) | noch bis {weekday} um {time} Uhr ({occasion}) |
 | `detail.untilDate` | open until {time} on {date} | noch bis {date} um {time} Uhr |
 | `detail.untilDateOccasion` | open until {time} on {date} ({occasion}) | noch bis {date} um {time} Uhr ({occasion}) |
-| `detail.alwaysOpen` | open around the clock | durchgehend geöffnet |
-| `detail.alwaysOpenOccasion` | open around the clock ({occasion}) | durchgehend geöffnet ({occasion}) |
+| `detail.alwaysOpen` | open around the clock | rund um die Uhr geöffnet |
+| `detail.alwaysOpenOccasion` | open around the clock ({occasion}) | rund um die Uhr geöffnet ({occasion}) |
 | `detail.opensToday` | opens today at {time} | öffnet heute um {time} Uhr |
 | `detail.opensTomorrow` | opens tomorrow at {time} | öffnet morgen um {time} Uhr |
 | `detail.opensWeekday` | opens on {weekday} at {time} | öffnet am {weekday} um {time} Uhr |
@@ -1183,7 +1183,7 @@ Modelled on kirby-koe (read its README, CHANGELOG, PRIVACY, DATENSCHUTZ).
 | `panel.area.short.label` | Short name | Kurzname |
 | `panel.area.short.help` | For tight spots such as the status band. Empty = the name is used. | Für enge Stellen wie das Statusband. Leer = Name wird verwendet. |
 | `panel.hours.label` | Opening hours | Öffnungszeiten |
-| `panel.hours.info` | **One row per area and weekday.** A day on which the business is closed gets **no row** — not a row with empty fields.<br><br>Each row has two blocks, for businesses with a lunch break. Open all day? Fill in only the first. Open around the clock: 00:00 to 00:00.<br><br>A block counts only when **both** times are set and the end is after the start. Half-filled rows are ignored — no information is better than wrong information.<br><br>**Past midnight** (Friday 18:00 to 2:00, for example): enter it as Friday’s row with the end in the early morning. The end may reach 6:00 at the latest. | **Eine Zeile je Bereich und Wochentag.** Ein Tag, an dem geschlossen ist, bekommt **keine Zeile** — nicht eine Zeile mit leeren Feldern.<br><br>Es gibt zwei Blöcke je Zeile, für Betriebe mit Mittagspause. Wer durchgehend offen hat, füllt nur den ersten. Rund um die Uhr geöffnet: 00:00 bis 00:00.<br><br>Ein Block zählt nur, wenn **beide** Zeiten gesetzt sind und das Ende nach dem Anfang liegt. Halb ausgefüllte Zeilen werden ignoriert — lieber keine Auskunft als eine falsche.<br><br>**Über Mitternacht** (etwa Freitag 18:00 bis 2:00): als Zeile des Freitags eintragen, mit dem Ende am frühen Morgen. Das Ende darf höchstens bis 6:00 Uhr reichen. |
+| `panel.hours.info` | **One row per area and weekday.** A day on which the business is closed gets **no row** — not a row with empty fields.<br><br>Each row has two blocks, for businesses with a lunch break. Open all day? Fill in only the first.<br><br>A block counts only when **both** times are set and the end is after the start — or both are 00:00, which means around the clock. Half-filled rows are ignored — no information is better than wrong information.<br><br>**Past midnight** (Friday 18:00 to 2:00, for example): enter it as Friday’s row with the end in the early morning. The end may reach 6:00 at the latest. | **Eine Zeile je Bereich und Wochentag.** Ein Tag, an dem geschlossen ist, bekommt **keine Zeile** — nicht eine Zeile mit leeren Feldern.<br><br>Es gibt zwei Blöcke je Zeile, für Betriebe mit Mittagspause. Wer durchgehend offen hat, füllt nur den ersten.<br><br>Ein Block zählt nur, wenn **beide** Zeiten gesetzt sind und das Ende nach dem Anfang liegt — oder beide 00:00 sind, das heißt rund um die Uhr. Halb ausgefüllte Zeilen werden ignoriert — lieber keine Auskunft als eine falsche.<br><br>**Über Mitternacht** (etwa Freitag 18:00 bis 2:00): als Zeile des Freitags eintragen, mit dem Ende am frühen Morgen. Das Ende darf höchstens bis 6:00 Uhr reichen. |
 | `panel.hours.area.label` | Area | Bereich |
 | `panel.hours.area.help` | Leave empty if the business has no separate areas. | Leer lassen, wenn der Betrieb keine getrennten Bereiche hat. |
 | `panel.hours.day.label` | Weekday | Wochentag |

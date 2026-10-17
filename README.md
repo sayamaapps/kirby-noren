@@ -577,7 +577,7 @@ A block that ends after midnight is entered on its **start day**: Friday 18:00 t
 
 ### Open around the clock
 
-A full day is entered as `00:00` to `00:00` (or as two blocks that meet at midnight, such as 00:00–12:00 and 12:00–00:00). The table shows `0:00 – 24:00`, schema.org gives `opens 00:00 closes 23:59` (00:00 to 00:00 would mean closed), and the status follows the run across days: "noch bis Mittwoch um 24:00 Uhr". A plan that is open all week without a closure or holiday in the next seven days says "durchgehend geöffnet" and `until` is `null`.
+A full day is entered as `00:00` to `00:00` (or as two blocks that meet at midnight, such as 00:00–12:00 and 12:00–00:00). The table shows `0:00 – 24:00`, schema.org gives `opens 00:00 closes 23:59` (00:00 to 00:00 would mean closed), and the status follows the run across days: "noch bis Mittwoch um 24:00 Uhr". A plan whose run still continues after today and the following seven days (the next closure or holiday is more than eight days away) says "rund um die Uhr geöffnet" and `until` is `null`. The day is named whenever the run ends later than 6:00 of the next day, whatever `overnightUntil` is set to.
 
 ### Special hours beat holidays
 

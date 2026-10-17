@@ -22,15 +22,19 @@ All notable changes to this project are documented here. Versions follow
 - **Continuous opening across days.** The status said "until 48:00" for three
   full days in a row (and nonsense for a plan open around the clock). It now
   names the day the run ends: "noch bis Mittwoch um 24:00 Uhr", "noch bis morgen
-  um 18:00 Uhr". A plan open all week, without a closure or holiday in the next
-  seven days, says "durchgehend geöffnet" and `until` is `null`. schema.org
-  gives full days as `00:00`–`23:59`, because `00:00`–`00:00` means closed in
-  Google's LocalBusiness notation (weekly plan and special hours).
+  um 18:00 Uhr". A plan whose run still continues after today and the following
+  seven days says "rund um die Uhr geöffnet" and `until` is `null`. The day is
+  named whenever the run ends later than 06:00 of the next day, whatever
+  `overnightUntil` is set to. schema.org gives full days as `00:00`–`23:59`,
+  because `00:00`–`00:00` means closed in Google's LocalBusiness notation
+  (weekly plan and special hours).
 
 ### Changed
 
-- A row `00:00` to `00:00` is read as a full day `[0, 1440]`. Before, it was
-  ignored as equal times. The Panel help now says so.
+- `00:00` to `00:00` is read as a full day `[0, 1440]`, in a weekly row and in
+  the `oeffnet`/`schliesst` fields of a closure (special hours all day). Before,
+  it was ignored as equal times, so such a closure row counted as closed. The
+  Panel help says so now.
 
 ### Added
 

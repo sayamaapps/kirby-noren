@@ -721,10 +721,10 @@ expect('2:00', $s['until'], 'Friday 18:00–02:00: until 2:00');
 $allWeek = new Schedule(array_fill(0, 7, ['blocks' => [[0, 1440]]]));
 foreach (['2026-07-06 13:00', '2026-07-08 00:00', '2026-07-12 23:59'] as $moment) {
     $s = $allWeek->status(at($moment));
-    expect(['open' => true, 'detail' => 'durchgehend geöffnet', 'until' => null, 'state' => 'open'], only($s, ['open', 'detail', 'until', 'state']), "24/7 at $moment: open around the clock");
+    expect(['open' => true, 'detail' => 'rund um die Uhr geöffnet', 'until' => null, 'state' => 'open'], only($s, ['open', 'detail', 'until', 'state']), "24/7 at $moment: open around the clock");
 }
 expect(
-    ['open' => true, 'text' => 'Jetzt geöffnet', 'detail' => 'durchgehend geöffnet', 'state' => 'open', 'until' => null, 'next' => null, 'occasion' => null, 'holiday' => null],
+    ['open' => true, 'text' => 'Jetzt geöffnet', 'detail' => 'rund um die Uhr geöffnet', 'state' => 'open', 'until' => null, 'next' => null, 'occasion' => null, 'holiday' => null],
     $allWeek->status(at('2026-07-06 13:00')),
     '24/7: full status shape',
 );
@@ -735,7 +735,7 @@ $s = $closedDay8->status(at('2026-07-06 13:00'));
 expect('noch bis 13.7. um 24:00 Uhr', $s['detail'], '24/7 with a closure on day +8: the date is named');
 expect('24:00', $s['until'], '24/7 with a closure on day +8: until 24:00');
 $closedDay9 = new Schedule(array_fill(0, 7, ['blocks' => [[0, 1440]]]), [['from' => '2026-07-15', 'to' => '2026-07-15']]);
-expect('durchgehend geöffnet', $closedDay9->status(at('2026-07-06 13:00'))['detail'], '24/7 with a closure on day +9: only a week is checked');
+expect('rund um die Uhr geöffnet', $closedDay9->status(at('2026-07-06 13:00'))['detail'], '24/7 with a closure on day +9: only a week is checked');
 
 // 24 hours Monday to Saturday, Sunday closed.
 $sixDays = new Schedule(array_fill(0, 6, ['blocks' => [[0, 1440]]]));
