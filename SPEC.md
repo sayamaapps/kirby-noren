@@ -459,12 +459,14 @@ note per `upcomingClosures($today, $leadDays)` entry:
 | entry | type | text (de) | text (en) |
 |---|---|---|---|
 | with `hours` | `special` | `note.special`: "24.12. Heiligabend: 8:30–12:00 Uhr" (occasion ?? `special.label`) | "24 Dec Heiligabend: 8:30–12:00" |
+| with `hours`, `from !== to` | `special` | `note.special` with the date as `note.dateRange`: "6.7. bis 10.7.2026 Sommerwoche: 10:00–14:00 Uhr" | "6 Jul to 10 Jul 2026 Sommerwoche: 10:00–14:00" |
 | `from === to`, occasion | `closedDay` | `note.closedDayOccasion`: "31.12. Silvester: geschlossen" | "31 Dec Silvester: closed" |
 | `from === to`, no occasion | `closedDay` | `note.closedDay`: "16.2.: geschlossen" | "16 Feb: closed" |
 | range | `closure` | `note.closure`: "Betriebsferien 2.8. bis 15.8.2027" (`label()`, from `format.date`, to `format.dateYear`) | "Closed for holidays 2 Aug to 15 Aug 2027" |
 
 `note` = the entry's note (or null); `from`/`to` = the entry's dates. Date
-of special/closedDay = `from`.
+of special/closedDay = `from`; special with a range = `note.dateRange` of
+`from` (`format.date`) and `to` (`format.dateYear`).
 
 `compact(Schedule $s, ?DateTimeImmutable $now = null, array $options = [])`,
 options `mode` ('grouped' | 'consecutive', default 'grouped'), `leadDays`
@@ -940,6 +942,10 @@ Muster plan (Mo 13–18, Di–Fr 8:30–18, Sa 8–18) with BY:
 - at '2027-02-10': closedDay '16.2.: geschlossen'; at '2027-07-25': closure
   'Betriebsferien 2.8. bis 15.8.2027', with note 'Sommerpause' → `note`.
 - special without occasion → 'Sonderöffnung'; English texts of §3.5.
+- special over several days (6.–10.7.2026, 'Sommerwoche', 10–14) at
+  '2026-07-08' and '2026-07-01': table and compact note text
+  '6.7. bis 10.7.2026 Sommerwoche: 10:00–14:00 Uhr' (without occasion
+  'Sonderöffnung'; en '6 Jul to 10 Jul 2026 Sommerwoche: 10:00–14:00').
 - Overnight row → hours ['18:00 – 2:00']; two blocks → two entries; note.
 - `compact()`: default mode grouped; 'consecutive'; notes limited to 1 and
   to leadDays; `closures` 0 → []; unknown mode → 'grouped'.
@@ -1103,6 +1109,7 @@ Modelled on kirby-koe (read its README, CHANGELOG, PRIVACY, DATENSCHUTZ).
 | `note.closedDay` | {date}: closed | {date}: geschlossen |
 | `note.closedDayOccasion` | {date} {occasion}: closed | {date} {occasion}: geschlossen |
 | `note.closure` | {label} {from} to {to} | {label} {from} bis {to} |
+| `note.dateRange` | {from} to {to} | {from} bis {to} |
 | `compact.hours` | {hours} | {hours} Uhr |
 | `compact.and` |  and  |  und  |
 | `holiday.newYear` | New Year’s Day | Neujahr |

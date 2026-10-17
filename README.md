@@ -373,6 +373,7 @@ Table (`norenTable()`), shortened:
 ```
 
 Note types: `holiday`, `special` (a day with hours), `closedDay` (a single closed day), `closure` (a range).
+A `special` entry spanning several days shows both dates in its text ("6.7. bis 10.7.2026 Sommerwoche: 10:00–14:00 Uhr").
 
 Compact (`norenCompact()`):
 

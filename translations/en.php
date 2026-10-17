@@ -49,6 +49,7 @@ return [
     'note.closedDay' => '{date}: closed',
     'note.closedDayOccasion' => '{date} {occasion}: closed',
     'note.closure' => '{label} {from} to {to}',
+    'note.dateRange' => '{from} to {to}',
 
     // Compact (Grouping::byHours()).
     'compact.hours' => '{hours}',

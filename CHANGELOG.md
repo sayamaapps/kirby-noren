@@ -11,6 +11,15 @@ All notable changes to this project are documented here. Versions follow
   **[privacy text]**. Every site using the plugin must then review its privacy
   policy.
 
+## [1.1.0] — 2026-10-17
+
+### Fixed
+
+- **Special hours spanning several days** show both dates in the table and
+  compact notes ("6.7. bis 10.7.2026 Sommerwoche: 10:00–14:00 Uhr"). Before,
+  the note named only the first day, so a running week of short hours read
+  like a single past date. New translation key `note.dateRange`.
+
 ## [1.0.0] — 2026-10-11
 
 First release as a Composer package. Before 1.0.0 the hours logic lived as a
