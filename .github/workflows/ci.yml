@@ -18,6 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Ubuntu's PHP reads the system zoneinfo; since 24.04 the backward-compatible
+      # names (Europe/Kiev, US/Eastern) live in tzdata-legacy. Hosters keep them.
+      - name: Legacy time zone names
+        run: sudo apt-get install -y --no-install-recommends tzdata-legacy
+
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}

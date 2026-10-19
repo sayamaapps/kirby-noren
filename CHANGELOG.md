@@ -11,6 +11,18 @@ All notable changes to this project are documented here. Versions follow
   **[privacy text]**. Every site using the plugin must then review its privacy
   policy.
 
+## [1.2.0] — 2026-10-19
+
+### Added
+
+- **`noren.mergeAreas`** (default `false`, opt-in). Areas of one location with
+  identical status and table become one unit: "Hofladen und Hofcafé", three
+  areas "Hofladen, Hofcafé und Werkstatt" (English: "and"). Equal means equal
+  output, so a closure for one area splits the group again. Units have an
+  `areas` list when the option is on, a merged unit's `area` is its first key.
+  `norenSchedule()`, `norenSchema()` and the schema.org data stay per area. With
+  the default, output is unchanged.
+
 ## [1.1.0] — 2026-10-17
 
 ### Fixed

@@ -579,4 +579,121 @@ withSite(function (string $tmp): void {
     expect(1, count(array_filter($on14, static fn (array $n) => $n['type'] === 'holiday')), 'holidayNoteDays default 14: holiday 14 days ahead noted');
 });
 
+/* --- 11. noren.mergeAreas (SPEC.md §3.7) --------------------------------- */
+
+/** Monday 9–17 and Saturday 10–14 for each of these areas: identical output. */
+function ktMergeRows(array $areas): array
+{
+    $rows = [];
+    foreach ($areas as $area) {
+        $rows[] = ['bereich' => $area, 'tag' => 'Montag', 'von1' => '09:00', 'bis1' => '17:00'];
+        $rows[] = ['bereich' => $area, 'tag' => 'Samstag', 'von1' => '10:00', 'bis1' => '14:00'];
+    }
+    return $rows;
+}
+
+/** A date $days after today in Europe/Berlin: inside the lead time, so closures show in the table at any run date. */
+function ktInDays(int $days): string
+{
+    return (new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin')))->modify('+' . $days . ' days')->format('Y-m-d');
+}
+
+/** unit ids, in order */
+function ktIds(array $units): array
+{
+    return array_map(static fn (array $u) => $u['id'], $units);
+}
+
+// Two areas with the same hours: one unit "Hofladen und Hofcafé", the snippet finds it by either area.
+withSite(function (string $tmp): void {
+    noren_page($tmp, '1_kontakt', 'betrieb', [
+        'title' => 'Kontakt',
+        'bereiche' => [['schluessel' => 'laden', 'name' => 'Hofladen', 'kurzname' => 'Laden'], ['schluessel' => 'cafe', 'name' => 'Hofcafé']],
+        'zeiten' => ktMergeRows(['laden', 'cafe']),
+    ]);
+
+    $merged = noren_kirby($tmp, ['noren.active' => true, 'noren.mergeAreas' => true, 'locale' => 'de_DE']);
+    $units = $merged->site()->norenUnits();
+    expect(['kontakt#laden+cafe'], ktIds($units), 'mergeAreas: equal areas → one unit');
+    expect('Hofladen und Hofcafé', $units[0]['name'] ?? null, 'mergeAreas: name "A und B"');
+    expect('Laden und Hofcafé', $units[0]['label'] ?? null, 'mergeAreas: label from the short names');
+    expect(['laden', 'cafe'], $units[0]['areas'] ?? null, 'mergeAreas: areas in order');
+    expect('laden', $units[0]['area'] ?? null, 'mergeAreas: area is the first key');
+    expect([[540, 1020]], $units[0]['schedule']->blocks(0), 'mergeAreas: the group carries the schedule');
+    expect([[540, 1020]], $merged->site()->norenSchedule('cafe')->blocks(0), 'mergeAreas: norenSchedule() per area is unchanged');
+    holds(str_contains((string) $merged->snippet('noren/status', ['only' => 'cafe'], true), 'noren-status-line'), 'mergeAreas: status $only = cafe finds the merged unit');
+
+    $off = noren_kirby($tmp, ['noren.active' => true, 'locale' => 'de_DE']);
+    $offUnits = $off->site()->norenUnits();
+    expect(['kontakt#laden', 'kontakt#cafe'], ktIds($offUnits), 'mergeAreas off (default): one unit per area');
+    holds(!array_key_exists('areas', $offUnits[0]), 'mergeAreas off: units have no areas key');
+    expect('Hofladen', $offUnits[0]['name'], 'mergeAreas off: name is the area name');
+});
+
+// A closure for the café alone splits the same-hours areas again.
+withSite(function (string $tmp): void {
+    noren_page($tmp, '1_kontakt', 'betrieb', [
+        'title' => 'Kontakt',
+        'bereiche' => [['schluessel' => 'laden', 'name' => 'Hofladen', 'kurzname' => 'Laden'], ['schluessel' => 'cafe', 'name' => 'Hofcafé']],
+        'zeiten' => ktMergeRows(['laden', 'cafe']),
+        'schliessungen' => [['von' => ktInDays(1), 'bis' => ktInDays(3), 'bereich' => 'cafe']],
+    ]);
+    $kirby = noren_kirby($tmp, ['noren.active' => true, 'noren.mergeAreas' => true, 'locale' => 'de_DE']);
+    $units = $kirby->site()->norenUnits();
+    expect(['kontakt#laden', 'kontakt#cafe'], ktIds($units), 'mergeAreas: closure for the café only → two units');
+    expect(['Hofladen', 'Hofcafé'], array_map(static fn (array $u) => $u['name'], $units), 'mergeAreas: two units keep their names');
+    expect(['laden'], $units[0]['areas'] ?? null, 'mergeAreas: single unit lists its own area');
+});
+
+// Three areas, the first and the last alike: the group sits at the first area's place, "A und C".
+withSite(function (string $tmp): void {
+    noren_page($tmp, '1_kontakt', 'betrieb', [
+        'title' => 'Kontakt',
+        'bereiche' => [
+            ['schluessel' => 'laden', 'name' => 'Hofladen', 'kurzname' => 'Laden'],
+            ['schluessel' => 'cafe', 'name' => 'Hofcafé'],
+            ['schluessel' => 'werkstatt', 'name' => 'Werkstatt'],
+        ],
+        'zeiten' => array_merge(ktMergeRows(['laden', 'werkstatt']), [['bereich' => 'cafe', 'tag' => 'Montag', 'von1' => '13:00', 'bis1' => '18:00']]),
+    ]);
+    $kirby = noren_kirby($tmp, ['noren.active' => true, 'noren.mergeAreas' => true, 'locale' => 'de_DE']);
+    $units = $kirby->site()->norenUnits();
+    expect(['kontakt#laden+werkstatt', 'kontakt#cafe'], ktIds($units), 'mergeAreas: 3 areas, two alike → group first, then the other');
+    expect(['Hofladen und Werkstatt', 'Hofcafé'], array_map(static fn (array $u) => $u['name'], $units), 'mergeAreas: "A und C" in German');
+});
+
+// Three alike, English: "A, B and C".
+withSite(function (string $tmp): void {
+    noren_page($tmp, '1_kontakt', 'betrieb', [
+        'title' => 'Kontakt',
+        'bereiche' => [
+            ['schluessel' => 'laden', 'name' => 'Hofladen', 'kurzname' => 'Laden'],
+            ['schluessel' => 'cafe', 'name' => 'Hofcafé'],
+            ['schluessel' => 'werkstatt', 'name' => 'Werkstatt'],
+        ],
+        'zeiten' => ktMergeRows(['laden', 'cafe', 'werkstatt']),
+    ]);
+    $kirby = noren_kirby($tmp, ['noren.active' => true, 'noren.mergeAreas' => true, 'noren.language' => 'en', 'locale' => 'de_DE']);
+    $units = $kirby->site()->norenUnits();
+    expect(['kontakt#laden+cafe+werkstatt'], ktIds($units), 'mergeAreas: three alike → one unit');
+    expect('Hofladen, Hofcafé and Werkstatt', $units[0]['name'] ?? null, 'mergeAreas: "A, B and C" in English');
+});
+
+// Public holidays: the group is one unit, so its holiday note is shown once and equals the single area's.
+withSite(function (string $tmp): void {
+    noren_page($tmp, '1_kontakt', 'betrieb', [
+        'title' => 'Kontakt',
+        'bereiche' => [['schluessel' => 'laden', 'name' => 'Hofladen'], ['schluessel' => 'cafe', 'name' => 'Hofcafé']],
+        'zeiten' => ktMergeRows(['laden', 'cafe']),
+    ]);
+    $kirby = noren_kirby($tmp, ['noren.active' => true, 'noren.mergeAreas' => true, 'noren.holidays' => 'BY', 'locale' => 'de_DE']);
+    $units = $kirby->site()->norenUnits();
+    expect(1, count($units), 'mergeAreas with holidays: one unit');
+    $holidayNotes = static fn (array $table) => array_values(array_filter($table['notes'], static fn (array $n) => $n['type'] === 'holiday'));
+    $single = \Noren\Locations::table($kirby->site()->norenSchedule('laden'));
+    $group = \Noren\Locations::table($units[0]['schedule']);
+    expect($holidayNotes($single), $holidayNotes($group), 'mergeAreas with holidays: holiday note of the group equals the single area\'s');
+    holds(count($holidayNotes($group)) <= 1, 'mergeAreas with holidays: at most one holiday note');
+});
+
 finish('Noren with Kirby');
