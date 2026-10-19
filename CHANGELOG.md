@@ -11,6 +11,17 @@ All notable changes to this project are documented here. Versions follow
   **[privacy text]**. Every site using the plugin must then review its privacy
   policy.
 
+## [Unreleased]
+
+### Fixed
+
+- **`noren.timezone`** accepts legacy names (`Europe/Kiev`, `US/Eastern`, and
+  a few more `US/*` and `Asia/*` names) also on servers whose tzdata lacks
+  them. They resolve to the current zone with the same rules (`Europe/Kyiv`,
+  `America/New_York`), so the hours do not change. Before, such a site fell
+  back to `Europe/Berlin` with a logged error. Names the server's tzdata knows
+  are kept as before.
+
 ## [1.2.0] — 2026-10-19
 
 ### Added

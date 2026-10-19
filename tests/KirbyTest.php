@@ -521,17 +521,37 @@ withSite(function (string $tmp): void {
     holds(str_contains($logged, 'unknown noren.timezone'), 'debug off: the problem is logged');
 });
 
-// Findings 8 and 16: every zone PHP accepts is valid, including those missing from listIdentifiers().
+// Findings 8, 16 and 236: every zone PHP accepts is valid, including those missing from listIdentifiers().
+// Legacy aliases (Europe/Kiev, US/Eastern) must work even where the runner's tzdata lacks them: they
+// resolve to their canonical zone, which has the same rules, so the hours are the same either way.
 withSite(function (string $tmp): void {
     noren_page($tmp, '1_kontakt', 'betrieb', ktStarter());
     foreach (['Etc/UTC', 'GMT', 'Europe/Kiev', 'US/Eastern'] as $zone) {
         $kirby = noren_kirby($tmp, ['noren.active' => true, 'noren.timezone' => $zone, 'locale' => 'de_DE']);
         $logged = withErrorLog($tmp, function () use ($kirby, $zone): void {
-            expect($zone, $kirby->site()->norenSchedule()->timezone()->getName(), "timezone $zone is kept");
+            $resolved = $kirby->site()->norenSchedule()->timezone();
+            $canonical = new DateTimeZone(\Noren\Options::legacyZone($zone) ?? $zone);
+            foreach (['2026-01-15 12:00', '2026-07-15 12:00'] as $at) {
+                expect(
+                    (new DateTimeImmutable($at, $canonical))->getOffset(),
+                    (new DateTimeImmutable($at, $resolved))->getOffset(),
+                    "timezone $zone has the rules of its zone at $at",
+                );
+            }
         });
         expect('', $logged, "timezone $zone is not logged as unknown");
     }
 });
+
+// Finding 236: every canonical target of the alias table is a zone PHP knows.
+foreach (\Noren\Options::LEGACY_ZONES as $alias => $canonical) {
+    try {
+        new DateTimeZone($canonical);
+        holds(true, "legacy zone $alias maps to a known zone");
+    } catch (\Exception) {
+        holds(false, "legacy zone $alias maps to $canonical, which PHP does not know");
+    }
+}
 
 // Finding 21: a boolean option given as a string is reported, the default is used.
 withSite(function (string $tmp): void {
