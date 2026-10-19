@@ -4,7 +4,7 @@
     "type": "kirby-plugin",
     "license": "MIT",
     "keywords": ["kirby", "kirby-plugin", "kirby-5", "opening-hours", "holidays", "schema-org", "local-business"],
-    "homepage": "https://github.com/simsimmal/kirby-noren",
+    "homepage": "https://github.com/sayamaapps/kirby-noren",
     "authors": [
         {
             "name": "Simon Räder",
@@ -12,8 +12,8 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/simsimmal/kirby-noren/issues",
-        "source": "https://github.com/simsimmal/kirby-noren"
+        "issues": "https://github.com/sayamaapps/kirby-noren/issues",
+        "source": "https://github.com/sayamaapps/kirby-noren"
     },
     "require": {
         "php": "^8.2",
