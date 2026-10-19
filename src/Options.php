@@ -45,6 +45,16 @@ final class Options
     }
 
     /**
+     * `noren.mergeAreas`: areas of one location with identical output become
+     * one unit, "Hofladen und Hofcafé" (Locations::units(), SPEC.md §3.7).
+     * Off by default: every area is its own unit.
+     */
+    public static function mergeAreas(App $kirby): bool
+    {
+        return self::flag($kirby, 'mergeAreas', false);
+    }
+
+    /**
      * Field names, `noren.fields` merged over the defaults. Unknown keys are
      * ignored, empty or non-string values keep the default.
      *

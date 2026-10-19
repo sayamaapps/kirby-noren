@@ -103,6 +103,7 @@ A broken value (an unknown time zone, an unknown holiday state, an `overnightUnt
 | `closureLabel` | translated: `Betriebsferien` (de) / `Closed for holidays` (en) | Name of a multi-day closure, for example `'Praxisurlaub'` or `'Winterpause'`. |
 | `compact` | `'grouped'` | Default mode of `noren/compact`: `grouped` (any days with equal hours) or `consecutive` (only neighbouring days). |
 | `status` | `true` | `false` hides the `noren/status` snippet. |
+| `mergeAreas` | `false` | Areas of one location with the same status and table become one unit, such as "Hofladen und Hofcafé". A closure for one area splits them again. See [Areas with the same hours](#areas-with-the-same-hours). |
 | `language` | site language | `en` or `de`. Otherwise: the current language of a multi-language site, its default language, the first two letters of Kirby's `locale` option, and English. **A German site without multi-language setup and without a `locale` must set `'noren.language' => 'de'`**, otherwise its texts are English. |
 
 A complete example with the options most sites change:
@@ -177,6 +178,12 @@ bereiche:
 `$site->norenUnits()` then returns one unit per area that has hours (`kontakt#laden`, `kontakt#cafe`). The status line shows the short names as labels. An area without any hours is left out, because "closed" for a missing plan would send people to a door that may be open.
 
 Closures can name an area in their `bereich` field. A closure with an empty area applies to every area.
+
+### Areas with the same hours
+
+With `'noren.mergeAreas' => true`, areas of one location whose status and table are identical become one unit. Two areas with the same hours then give one line, "Hofladen und Hofcafé", and three give "Hofladen, Hofcafé und Werkstatt" (English: "and"). Each group sits where its first area was. A group is split again as soon as the outputs differ, for example when a closure names only one of the areas. The group's `area` is its first key, and every area unit has `areas`, the list of its area keys (a location without areas has none).
+
+The option changes only the units and the status and table built from them. `norenSchedule('area')` and the schema.org data stay per area. Off (the default), every area is its own unit.
 
 ### Several locations, one plan each
 
@@ -424,6 +431,8 @@ Units (`norenUnits()`):
   // …
 ]
 ```
+
+With `noren.mergeAreas` on, every area unit also has `areas`, for example `['laden', 'cafe']`, and a merged unit reads `'id' => 'kontakt#laden+cafe'`, `'name' => 'Hofladen und Hofcafé'`.
 
 Holidays (`norenHolidays(2026)`):
 

@@ -190,13 +190,14 @@ final class Locations
                 continue;
             }
 
+            $found = [];
             foreach ($areas as $area) {
                 $schedule = self::schedule($page, $area['key']);
                 if ($schedule === null || !$schedule->maintained()) {
                     // No hours: "closed" would send people to a door that may be open.
                     continue;
                 }
-                $units[] = [
+                $found[] = [
                     'id'       => $page->id() . '#' . $area['key'],
                     'location' => $page,
                     'area'     => $area['key'],
@@ -206,8 +207,75 @@ final class Locations
                     'schedule' => $schedule,
                 ];
             }
+            $units = array_merge($units, Options::mergeAreas($kirby) && $found !== []
+                ? self::merge($found, $page, $locationShort, $several, $kirby)
+                : $found);
         }
         return $units;
+    }
+
+    /**
+     * `noren.mergeAreas` (SPEC.md §3.7): the areas of ONE location whose
+     * output is identical right now become one unit, named "Hofladen und
+     * Hofcafé". Identical means status() and Presenter::table() (with notes,
+     * closures ahead and the holiday note), so a closure for one area splits
+     * them again. A group sits where its first area was. The group's schedule
+     * is the first area's; schema.org stays per area, see SPEC.md §3.7.
+     *
+     * @param list<array> $found units of one location, in area order
+     * @return list<array>
+     */
+    private static function merge(array $found, Page $page, string $locationShort, bool $several, App $kirby): array
+    {
+        $settings = Options::settings($kirby);
+        $now = new DateTimeImmutable('now', $found[0]['schedule']->timezone());
+
+        $groups = [];
+        foreach ($found as $unit) {
+            $schedule = $unit['schedule'];
+            $output = serialize([
+                $schedule->status($now),
+                Presenter::table($schedule, $now, [
+                    'holidayRow'      => $settings['holidayRow'],
+                    'holidayNote'     => $settings['holidayNote'],
+                    'holidayNoteDays' => $settings['holidayNoteDays'],
+                    'leadDays'        => $settings['leadDays'],
+                ]),
+            ]);
+            $groups[$output][] = $unit;
+        }
+
+        $units = [];
+        foreach ($groups as $members) {
+            $first = $members[0];
+            $keys = array_column($members, 'area');
+            if (count($members) === 1) {
+                $units[] = $first + ['areas' => $keys];
+                continue;
+            }
+            $short = self::joinNames(array_column($members, 'short'));
+            $units[] = [
+                'id'       => $page->id() . '#' . implode('+', $keys),
+                'location' => $page,
+                'area'     => $first['area'],
+                'areas'    => $keys,
+                'name'     => self::joinNames(array_column($members, 'name')),
+                'short'    => $short,
+                'label'    => $several ? $locationShort . ' · ' . $short : $short,
+                'schedule' => $first['schedule'],
+            ];
+        }
+        return $units;
+    }
+
+    /** ["A", "B", "C"] → "A, B und C" (de) / "A, B and C" (en), the word from compact.and. */
+    private static function joinNames(array $names): string
+    {
+        $last = (string) array_pop($names);
+        if ($names === []) {
+            return $last;
+        }
+        return implode(', ', $names) . ' ' . trim(I18n::t('compact.and')) . ' ' . $last;
     }
 
     /**

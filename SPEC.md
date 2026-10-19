@@ -561,6 +561,19 @@ All of them return `null` / `[]` when `Options::active()` is false.
  'schedule' => Schedule]
 ```
 
+  **`noren.mergeAreas`** (default `false`): the areas of ONE location whose
+  output is identical right now become one unit. Identical means
+  `status()` and `Presenter::table()` with the settings, so notes, closures
+  ahead and the holiday note count; a closure for one area splits them again.
+  The group's `id` is the page id plus `'#' . keys joined by '+'`, its `name`
+  and `short` join the members' values with "A und B" / "A, B und C"
+  (`compact.and`), `label` as above with the joined short names, `area` is the
+  first key, and every area unit gets `'areas' => [keys]` (list of area keys, one
+  for an ungrouped unit). The group's `schedule` is the first area's; its
+  output equals each member's. The group sits at the place of its first area.
+  `norenSchedule(area)`, `norenSchema()` and the schema.org data stay per area.
+  Off: units exactly as above, no `areas` key.
+
 - **holidayConfig(App)**: `Holidays::config(Options::get('holidays'))`;
   `InvalidArgumentException` → `error_log('Noren: ' . message . ' — public holidays are off.')`, null.
 - **holidayChecker(App)**: `Holidays::checker(config)` or null.
@@ -683,6 +696,7 @@ All read as `noren.<name>`, flat or nested; `null` = not set.
 | `closureLabel` | translated (`Betriebsferien` / `Closed for holidays`) | Name of a multi-day closure ("Praxisurlaub", "Winterpause"). |
 | `compact` | `'grouped'` | Default mode of noren/compact: `grouped` (any days with equal hours) or `consecutive`. |
 | `status` | `true` | `false` hides the noren/status snippet. |
+| `mergeAreas` | `false` | Areas of one location with identical output (status and table) become one unit, "A und B" (§3.7). Off: one unit per area. |
 | `language` | site language | `en` or `de`; else current/default language, `locale`, English. |
 
 ---
