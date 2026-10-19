@@ -30,7 +30,7 @@ Composer installs the plugin into `site/plugins/noren/` (via `getkirby/composer-
 Until the package is on Packagist, add the repository first:
 
 ```json
-"repositories": [{ "type": "vcs", "url": "https://github.com/simsimmal/kirby-noren" }]
+"repositories": [{ "type": "vcs", "url": "https://github.com/sayamaapps/kirby-noren" }]
 ```
 
 Manual installation (download into `site/plugins/noren/`) also works.
