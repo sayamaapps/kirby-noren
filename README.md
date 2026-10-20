@@ -91,7 +91,7 @@ A broken value (an unknown time zone, an unknown holiday state, an `overnightUnt
 | `template` | `'betrieb'` | Template name of the location pages: a string or a list of strings. |
 | `locations` | `null` | A Closure or a list of page ids. Overrides `template`. |
 | `fields` | see [Content field contract](#content-field-contract) | Page field names, as a map: `areas` (`bereiche`), `hours` (`zeiten`), `closures` (`schliessungen`), `areaRef` (`zeitenschluessel`), `short` (`kurzname`). Give only the keys you change. |
-| `timezone` | `'Europe/Berlin'` | Time zone of all date logic: any zone PHP accepts, such as `'Etc/UTC'`. An invalid value is logged and the default is used. |
+| `timezone` | `'Europe/Berlin'` | Time zone of all date logic: any zone PHP accepts, such as `'Etc/UTC'`. Legacy names such as `'Europe/Kiev'` or `'US/Eastern'` resolve to their current zone (`Europe/Kyiv`, `America/New_York`) where the server's tzdata lacks them. An invalid value is logged and the default is used. |
 | `holidays` | `false` | Public holidays. Off by default. See [Public holidays](#public-holidays). |
 | `holidayEve` | `false` | Adds a notice to the status when tomorrow is a public holiday. |
 | `holidayRow` | `true` | The "Public holidays: closed" row in the table. Shown only when holidays are on. |
