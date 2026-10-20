@@ -7,9 +7,12 @@ All notable changes to this project are documented here. Versions follow
   row rules the Panel writes) **or to the default output** (what the snippets
   and schema.org show without configuration) is a **major** version: a site
   would show other hours after a routine update.
-- **A change to the privacy text** (`DATENSCHUTZ.md` / `PRIVACY.md`) is marked
-  **[privacy text]**. Every site using the plugin must then review its privacy
-  policy.
+
+## [Unreleased]
+
+### Removed
+
+- **`DATENSCHUTZ.md` and `PRIVACY.md`.** Noren processes no visitor data, so it has no place in a site's privacy policy. The README says so under "Privacy".
 
 ## [1.2.1] — 2026-10-20
 
