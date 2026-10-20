@@ -709,7 +709,7 @@ The switch is not byte-identical in all cases. Seven changes, each listed in the
 
 ## Privacy
 
-Noren sets no cookies, uses no browser storage, makes no request to a third party and processes no visitor data. The status is computed on your server for each page request from the business's own content. [PRIVACY.md](PRIVACY.md) describes the implementation in English, and [DATENSCHUTZ.md](DATENSCHUTZ.md) holds the German text block for a site's privacy policy. Both describe the implementation and are not legal advice.
+Noren processes no visitor data. It sets no cookies, uses no browser storage and makes no request to a third party, so there is nothing to add to a site's privacy policy.
 
 ## Development
 

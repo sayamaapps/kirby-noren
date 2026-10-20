@@ -26,7 +26,7 @@ comments and task prompts.
   no 8.3+ functions). Run with `ASDF_PHP_VERSION=8.5.3 php …` (asdf otherwise
   says "No version is set").
 - Code, identifiers, comments, README in **English**. German only in
-  `translations/de.php` and `DATENSCHUTZ.md`.
+  `translations/de.php`.
 - Never hard-code `Europe/Berlin` in logic: use `Schedule::DEFAULT_TIMEZONE`,
   `$schedule->timezone()` or `Options::timezone()`.
 - Every user-facing string comes from `I18n::t()` (keys in §5). If you need a
@@ -60,7 +60,7 @@ comments and task prompts.
 | Several locations, eve-of-holiday notice | `../praxis-beispiel/site/plugins/praxis/{index.php,src/Sprechzeiten.php}`, `praxis-beispiel/site/blueprints/pages/standort.yml` |
 | Consecutive grouping | `../gasthaus-muster/site/plugins/gasthaus/src/Karte.php` (`zeitgruppen()`), `gasthaus-muster/tests/KarteTest.php` |
 | Non-consecutive grouping | `../radladen-muster/site/snippets/zeiten-kurz.php` |
-| Family conventions | `../kirby-koe` (README, CHANGELOG, PRIVACY, DATENSCHUTZ, tests), `../kirby-kizami` |
+| Family conventions | `../kirby-koe` (README, CHANGELOG, tests), `../kirby-kizami` |
 
 ---
 
@@ -116,9 +116,7 @@ kirby-noren/
 │   ├── KirbyTest.php                kirby         (§9.7)
 │   └── BlueprintsTest.php           panel         (§9.8)
 ├── README.md                        docs   (§10)
-├── CHANGELOG.md                     docs
-├── PRIVACY.md                       docs
-└── DATENSCHUTZ.md                   docs
+└── CHANGELOG.md                     docs
 ```
 
 Run everything: `cd this repository && ASDF_PHP_VERSION=8.5.3 sh tests/run.sh`.
@@ -1080,7 +1078,7 @@ languages; every registered key loads on its own in a site blueprint via
 
 ## 10. Documentation (owner `docs`)
 
-Modelled on kirby-koe (read its README, CHANGELOG, PRIVACY, DATENSCHUTZ).
+Modelled on kirby-koe (read its README, CHANGELOG).
 
 - **README.md** (English): what it is (Noren 暖簾), feature list, requirements
   (PHP 8.2–8.4, Kirby 5), install (composer + VCS repository note, manual),
@@ -1094,18 +1092,13 @@ Modelled on kirby-koe (read its README, CHANGELOG, PRIVACY, DATENSCHUTZ).
   beat holidays, half-filled rows, empty plan = nothing shown, lead time vs
   schema.org, closure "back on" skipping rest days, eve notice, timezone,
   DST), "Upgrading from site/plugins/betrieb" with §8 (decisions + rename
-  table + behaviour changes), privacy pointer, development (composer install,
+  table + behaviour changes), development (composer install,
   `composer test`), license.
 - **CHANGELOG.md**: `## [1.0.0] — unreleased`, Keep-a-Changelog sections like
   koe (project rules at the top: a change of the content field contract or
-  of default output is major; privacy text changes marked **[privacy text]**),
+  of default output is major),
   "Changed — renamed to English", "Added", "Changed behaviour" (§8 list),
   "Unchanged (data continuity)".
-- **PRIVACY.md** (English summary) and **DATENSCHUTZ.md** (German text block,
-  "beschreibt die Implementierung, keine Rechtsberatung"): no cookies, no
-  storage, no external requests, no visitor data; status computed on the
-  server per request; content is business data only; holiday calculation
-  local; schema.org output is public business data.
 
 ### 5.1 All keys (generated from translations/*.php on 2026-10-10)
 
