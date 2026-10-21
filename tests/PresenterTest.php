@@ -108,6 +108,13 @@ expect([
     ],
 ], $table['notes'], 'table at 17.12.: holiday, Heiligabend, Silvester');
 
+// An occasion that already says "geschlossen": no ": geschlossen" behind it
+$table = Presenter::table(new Schedule(
+    array_fill(0, 7, ['blocks' => [[510, 1080]], 'note' => null]),
+    [['from' => '2026-10-23', 'to' => '2026-10-23', 'note' => null, 'occasion' => 'Geschlossene Gesellschaft']],
+), at('2026-10-21 10:00'));
+expect('23.10. Geschlossene Gesellschaft', $table['notes'][0]['text'] ?? null, 'table: occasion with geschlossen stands alone');
+
 // Holiday on a rest day / weekday today on a special-hours day
 $table = Presenter::table($s, at('2026-12-24 10:00'));
 expect(true, $table['days'][3]['today'], 'table: special hours day stays on the weekday row');

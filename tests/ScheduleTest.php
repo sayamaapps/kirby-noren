@@ -315,6 +315,23 @@ expect(
     'Silvester 10 Uhr',
 );
 expect('Heute geschlossen', $sonder->status(at('2027-02-16 10:00'))['text'], 'Einzelner Tag ohne Anlass');
+
+// An occasion that already says "geschlossen" stands alone, without ": geschlossen".
+$gesellschaft = new Schedule(
+    array_fill(0, 7, ['blocks' => [[510, 1080]], 'note' => null]),
+    [['from' => '2026-10-21', 'to' => '2026-10-21', 'note' => null, 'occasion' => 'Geschlossene Gesellschaft']],
+);
+expect(
+    ['open' => false, 'text' => 'Geschlossene Gesellschaft', 'detail' => 'öffnet morgen um 8:30 Uhr'],
+    only($gesellschaft->status(at('2026-10-21 12:00')), ['open', 'text', 'detail']),
+    'Anlass mit „geschlossen“ steht allein',
+);
+I18n::setLanguage('en');
+expect('Closed for a private party', (new Schedule(
+    array_fill(0, 7, ['blocks' => [[510, 1080]], 'note' => null]),
+    [['from' => '2026-10-21', 'to' => '2026-10-21', 'note' => null, 'occasion' => 'Closed for a private party']],
+))->status(at('2026-10-21 12:00'))['text'], 'en: occasion with "closed" stands alone');
+I18n::setLanguage('de');
 expect('öffnet am Samstag um 8:00 Uhr', $sonder->status(at('2026-12-30 19:00'))['detail'], 'Tag vor Silvester abends: überspringt Silvester und Neujahr');
 
 // Christmas Eve shortened: open until 12, closed afterwards; the evening before shows the right time.

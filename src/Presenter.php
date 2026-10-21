@@ -105,9 +105,11 @@ final class Presenter
                 ]);
             } elseif ($closure['from'] === $closure['to']) {
                 $type = 'closedDay';
-                $text = $closure['occasion'] !== null
-                    ? I18n::t('note.closedDayOccasion', ['date' => $date, 'occasion' => $closure['occasion']])
-                    : I18n::t('note.closedDay', ['date' => $date]);
+                $text = match (true) {
+                    $closure['occasion'] === null => I18n::t('note.closedDay', ['date' => $date]),
+                    I18n::namesClosed($closure['occasion']) => I18n::t('note.closedDayNamed', ['date' => $date, 'occasion' => $closure['occasion']]),
+                    default => I18n::t('note.closedDayOccasion', ['date' => $date, 'occasion' => $closure['occasion']]),
+                };
             } else {
                 $type = 'closure';
                 $text = I18n::t('note.closure', [

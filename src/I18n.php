@@ -57,6 +57,17 @@ final class I18n
         return strtr($text, $pairs);
     }
 
+    /**
+     * Whether an occasion already says that the business is closed
+     * ("Geschlossene Gesellschaft", "Closed for a private party"). Such an
+     * occasion stands alone; with the closed template it would read
+     * "Geschlossene Gesellschaft: geschlossen".
+     */
+    public static function namesClosed(string $occasion): bool
+    {
+        return mb_stripos($occasion, self::t('table.closed')) !== false;
+    }
+
     /** Full weekday name, $weekday 0 = Monday … 6 = Sunday. */
     public static function day(int $weekday): string
     {
