@@ -7,7 +7,7 @@
  *
  * Variables (all optional):
  *   $units  list of units as site()->norenUnits() (default: that call)
- *   $only   keep only units whose id, area or location id equals this value
+ *   $only   keep only units whose id, area, areas or location id equals this value
  *   $link   URL of a page with all opening hours
  *   $now    DateTimeImmutable, default now in each schedule's timezone
  */
@@ -30,6 +30,7 @@ if ($only !== null && $only !== '') {
     $units = array_values(array_filter($units, static function (array $unit) use ($only): bool {
         return ($unit['id'] ?? null) === $only
             || ($unit['area'] ?? null) === $only
+            || in_array($only, $unit['areas'] ?? [], true)
             || (string) ($unit['location']?->id() ?? '') === $only;
     }));
 }

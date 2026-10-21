@@ -26,6 +26,14 @@ return [
     'status.allHours' => 'Alle Öffnungszeiten',
     'detail.until' => 'noch bis {time} Uhr',
     'detail.untilOccasion' => 'noch bis {time} Uhr ({occasion})',
+    'detail.untilTomorrow' => 'noch bis morgen um {time} Uhr',
+    'detail.untilTomorrowOccasion' => 'noch bis morgen um {time} Uhr ({occasion})',
+    'detail.untilWeekday' => 'noch bis {weekday} um {time} Uhr',
+    'detail.untilWeekdayOccasion' => 'noch bis {weekday} um {time} Uhr ({occasion})',
+    'detail.untilDate' => 'noch bis {date} um {time} Uhr',
+    'detail.untilDateOccasion' => 'noch bis {date} um {time} Uhr ({occasion})',
+    'detail.alwaysOpen' => 'rund um die Uhr geöffnet',
+    'detail.alwaysOpenOccasion' => 'rund um die Uhr geöffnet ({occasion})',
     'detail.opensToday' => 'öffnet heute um {time} Uhr',
     'detail.opensTomorrow' => 'öffnet morgen um {time} Uhr',
     'detail.opensWeekday' => 'öffnet am {weekday} um {time} Uhr',
@@ -47,7 +55,9 @@ return [
     'note.special' => '{date} {occasion}: {from}–{to} Uhr',
     'note.closedDay' => '{date}: geschlossen',
     'note.closedDayOccasion' => '{date} {occasion}: geschlossen',
+    'note.closedDayNamed' => '{date} {occasion}',
     'note.closure' => '{label} {from} bis {to}',
+    'note.dateRange' => '{from} bis {to}',
 
     // Compact (Grouping::byHours()).
     'compact.hours' => '{hours} Uhr',
@@ -92,7 +102,7 @@ return [
     'panel.area.short.help' => 'Für enge Stellen wie das Statusband. Leer = Name wird verwendet.',
 
     'panel.hours.label' => 'Öffnungszeiten',
-    'panel.hours.info' => "**Eine Zeile je Bereich und Wochentag.** Ein Tag, an dem geschlossen ist, bekommt **keine Zeile** — nicht eine Zeile mit leeren Feldern.\n\nEs gibt zwei Blöcke je Zeile, für Betriebe mit Mittagspause. Wer durchgehend offen hat, füllt nur den ersten.\n\nEin Block zählt nur, wenn **beide** Zeiten gesetzt sind und das Ende nach dem Anfang liegt. Halb ausgefüllte Zeilen werden ignoriert — lieber keine Auskunft als eine falsche.\n\n**Über Mitternacht** (etwa Freitag 18:00 bis 2:00): als Zeile des Freitags eintragen, mit dem Ende am frühen Morgen. Das Ende darf nur wenig nach Mitternacht liegen; wie spät höchstens, legt die Konfiguration der Website fest.",
+    'panel.hours.info' => "**Eine Zeile je Bereich und Wochentag.** Ein Tag, an dem geschlossen ist, bekommt **keine Zeile** — nicht eine Zeile mit leeren Feldern.\n\nEs gibt zwei Blöcke je Zeile, für Betriebe mit Mittagspause. Wer durchgehend offen hat, füllt nur den ersten.\n\nEin Block zählt nur, wenn **beide** Zeiten gesetzt sind und das Ende nach dem Anfang liegt — oder beide 00:00 sind, das heißt rund um die Uhr. Halb ausgefüllte Zeilen werden ignoriert — lieber keine Auskunft als eine falsche.\n\n**Über Mitternacht** (etwa Freitag 18:00 bis 2:00): als Zeile des Freitags eintragen, mit dem Ende am frühen Morgen. Das Ende darf nur wenig nach Mitternacht liegen; wie spät höchstens, legt die Konfiguration der Website fest.",
     'panel.hours.area.label' => 'Bereich',
     'panel.hours.area.help' => 'Leer lassen, wenn der Betrieb keine getrennten Bereiche hat.',
     'panel.hours.day.label' => 'Wochentag',

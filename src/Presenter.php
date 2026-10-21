@@ -96,16 +96,20 @@ final class Presenter
             if ($closure['hours'] !== null) {
                 $type = 'special';
                 $text = I18n::t('note.special', [
-                    'date'     => $date,
+                    'date'     => $closure['from'] === $closure['to']
+                        ? $date
+                        : I18n::t('note.dateRange', ['from' => $date, 'to' => I18n::date($closure['to'], true)]),
                     'occasion' => $closure['occasion'] ?? I18n::t('special.label'),
                     'from'     => Schedule::formatTime($closure['hours'][0]),
                     'to'       => Schedule::formatTime($closure['hours'][1]),
                 ]);
             } elseif ($closure['from'] === $closure['to']) {
                 $type = 'closedDay';
-                $text = $closure['occasion'] !== null
-                    ? I18n::t('note.closedDayOccasion', ['date' => $date, 'occasion' => $closure['occasion']])
-                    : I18n::t('note.closedDay', ['date' => $date]);
+                $text = match (true) {
+                    $closure['occasion'] === null => I18n::t('note.closedDay', ['date' => $date]),
+                    I18n::namesClosed($closure['occasion']) => I18n::t('note.closedDayNamed', ['date' => $date, 'occasion' => $closure['occasion']]),
+                    default => I18n::t('note.closedDayOccasion', ['date' => $date, 'occasion' => $closure['occasion']]),
+                };
             } else {
                 $type = 'closure';
                 $text = I18n::t('note.closure', [

@@ -254,9 +254,10 @@ final class Schedule
      * A block from two parsed times, or null.
      *
      * - end after start: a normal block.
-     * - end 00:00 (and start after 00:00): open until midnight, [start, 1440].
+     * - end 00:00: open until midnight, [start, 1440]; 00:00–00:00 is a full
+     *   day, [0, 1440] (the Panel's time fields have no 24:00).
      * - end before start and end <= $overnightUntil: overnight, [start, end + 1440].
-     * - anything else (equal times, end 08:00 after start 18:00 with the
+     * - anything else (equal times other than 00:00–00:00, end 08:00 after start 18:00 with the
      *   default limit 06:00 — most likely a typo): null, ignored.
      *
      * @return array{0:int,1:int}|null
@@ -269,7 +270,7 @@ final class Schedule
         if ($to > $from) {
             return [$from, $to];
         }
-        if ($to === 0 && $from > 0) {
+        if ($to === 0) {
             return [$from, self::MINUTES_PER_DAY];
         }
         if ($overnightUntil !== null && $to < $from && $to <= $overnightUntil) {
@@ -315,13 +316,14 @@ final class Schedule
     }
 
     /**
-     * 510 → "8:30", 1080 → "18:00", 1440 → "24:00", 1560 → "2:00"
-     * (an overnight end is shown as the clock time on the next day).
+     * 510 → "8:30", 1080 → "18:00", 1440 → "24:00", 1560 → "2:00", 2880 → "24:00"
+     * (an end after midnight is shown as the clock time of its day, however
+     * many days later; exact midnight stays "24:00").
      */
     public static function formatTime(int $minutes): string
     {
         if ($minutes > self::MINUTES_PER_DAY) {
-            $minutes -= self::MINUTES_PER_DAY;
+            $minutes = (($minutes - 1) % self::MINUTES_PER_DAY) + 1;
         }
         return sprintf('%d:%02d', intdiv($minutes, 60), $minutes % 60);
     }
@@ -519,8 +521,8 @@ final class Schedule
                     if (!$this->exceptionOn($today)) {
                         $end = $this->runEnd($today, $end);
                     }
-                    if ($minutes < $end) {
-                        return $this->openResult($end, $this->specialOn($yesterday)['occasion'] ?? null);
+                    if ($end === null || $minutes < $end) {
+                        return $this->openResult($end, $this->specialOn($yesterday)['occasion'] ?? null, $today);
                     }
                 }
             }
@@ -534,9 +536,11 @@ final class Schedule
                 $next = $this->nextOpenDay($today);
                 return $this->result(
                     false,
-                    $closure['occasion'] !== null
-                        ? I18n::t('status.occasionClosed', ['occasion' => $closure['occasion']])
-                        : I18n::t('status.closedToday'),
+                    match (true) {
+                        $closure['occasion'] === null => I18n::t('status.closedToday'),
+                        I18n::namesClosed($closure['occasion']) => $closure['occasion'],
+                        default => I18n::t('status.occasionClosed', ['occasion' => $closure['occasion']]),
+                    },
                     $closure['note'] ?? ($next !== null ? $this->opens($today, $next) : ''),
                     'closure',
                     next: $this->nextIso($next),
@@ -581,7 +585,7 @@ final class Schedule
         //    after midnight (Friday 18:00–00:00 and Saturday 00:00–02:00).
         foreach ($todayBlocks as [$from, $to]) {
             if ($minutes >= $from && $minutes < $to) {
-                return $this->openResult($this->runEnd($today, $to), $special['occasion'] ?? null);
+                return $this->openResult($this->runEnd($today, $to), $special['occasion'] ?? null, $today);
             }
         }
 
@@ -633,14 +637,16 @@ final class Schedule
 
     /**
      * End of the opening run that reaches $end: minutes since 0:00 of $day,
-     * may exceed 1440 for an overnight end. Blocks that start at or before the
-     * end extend it, on this day and across midnight, as long as the next day
-     * is not closed by a closure or a holiday. Returns minutes of $day's frame.
+     * may exceed 1440 by several days. Blocks that start at or before the end
+     * extend it, on this day and across midnight, as long as the next day is
+     * not closed by a closure or a holiday. Returns minutes of $day's frame, or
+     * null when the run covers today and the next seven days without ending
+     * (the weekly plan repeats, so it never ends unless an exception comes).
      */
-    private function runEnd(DateTimeImmutable $day, int $end): int
+    private function runEnd(DateTimeImmutable $day, int $end): ?int
     {
         $shift = 0;
-        for ($hop = 0; $hop < 8; $hop++) {
+        for ($hop = 0; $hop <= 7; $hop++) {
             do {
                 $extended = false;
                 foreach ($this->blocksOn($day) as [$from, $to]) {
@@ -657,6 +663,9 @@ final class Schedule
             $next = $day->modify('+1 day');
             if ($this->exceptionOn($next)) {
                 break;
+            }
+            if ($hop === 7) {
+                return null;
             }
             $end -= self::MINUTES_PER_DAY;
             $shift += self::MINUTES_PER_DAY;
@@ -706,15 +715,48 @@ final class Schedule
         return $day->setTime(intdiv($start, 60), $start % 60)->format('Y-m-d\TH:i');
     }
 
-    private function openResult(int $to, ?string $occasion): array
+    /**
+     * "open until …" for a run ending at $end (minutes in $today's frame, may
+     * reach into later days), or "open around the clock" for null. Wording as
+     * for opens(): tomorrow, a weekday within the week, otherwise a date.
+     */
+    private function openResult(?int $end, ?string $occasion, DateTimeImmutable $today): array
     {
-        $time = self::formatTime($to);
+        if ($end === null) {
+            return $this->result(
+                true,
+                I18n::t('status.openNow'),
+                $occasion !== null
+                    ? I18n::t('detail.alwaysOpenOccasion', ['occasion' => $occasion])
+                    : I18n::t('detail.alwaysOpen'),
+                'open',
+                occasion: $occasion,
+            );
+        }
+
+        $dayOffset = intdiv($end - 1, self::MINUTES_PER_DAY);
+        $clock = $end - $dayOffset * self::MINUTES_PER_DAY;
+        $time = self::formatTime($clock);
+        $params = ['time' => $time];
+        if ($dayOffset === 0 || ($dayOffset === 1 && $clock <= self::DEFAULT_OVERNIGHT_UNTIL)) {
+            $key = 'until';
+        } elseif ($dayOffset === 1) {
+            $key = 'untilTomorrow';
+        } elseif ($dayOffset <= 6) {
+            $key = 'untilWeekday';
+            $params['weekday'] = I18n::day($this->weekday($today->modify("+$dayOffset day")));
+        } else {
+            $key = 'untilDate';
+            $params['date'] = I18n::date($today->modify("+$dayOffset day"));
+        }
+        if ($occasion !== null) {
+            $key .= 'Occasion';
+            $params['occasion'] = $occasion;
+        }
         return $this->result(
             true,
             I18n::t('status.openNow'),
-            $occasion !== null
-                ? I18n::t('detail.untilOccasion', ['time' => $time, 'occasion' => $occasion])
-                : I18n::t('detail.until', ['time' => $time]),
+            I18n::t('detail.' . $key, $params),
             'open',
             until: $time,
             occasion: $occasion,

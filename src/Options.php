@@ -45,6 +45,16 @@ final class Options
     }
 
     /**
+     * `noren.mergeAreas`: areas of one location with identical output become
+     * one unit, "Hofladen und Hofcafé" (Locations::units(), SPEC.md §3.7).
+     * Off by default: every area is its own unit.
+     */
+    public static function mergeAreas(App $kirby): bool
+    {
+        return self::flag($kirby, 'mergeAreas', false);
+    }
+
+    /**
      * Field names, `noren.fields` merged over the defaults. Unknown keys are
      * ignored, empty or non-string values keep the default.
      *
@@ -113,23 +123,57 @@ final class Options
     }
 
     /**
+     * Legacy zone names (tzdata "backward" links) mapped to the canonical zone
+     * with the same rules. Some tzdata builds, e.g. a new CI runner image, lack
+     * them, and PHP then rejects the old name.
+     */
+    public const LEGACY_ZONES = [
+        'Asia/Calcutta'  => 'Asia/Kolkata',
+        'Asia/Katmandu'  => 'Asia/Kathmandu',
+        'Asia/Saigon'    => 'Asia/Ho_Chi_Minh',
+        'Europe/Kiev'    => 'Europe/Kyiv',
+        'US/Central'     => 'America/Chicago',
+        'US/Eastern'     => 'America/New_York',
+        'US/Mountain'    => 'America/Denver',
+        'US/Pacific'     => 'America/Los_Angeles',
+    ];
+
+    /** The canonical zone of a legacy name (`Europe/Kiev` gives `Europe/Kyiv`), or null. */
+    public static function legacyZone(string $zone): ?string
+    {
+        return self::LEGACY_ZONES[$zone] ?? null;
+    }
+
+    /**
      * `noren.timezone`, default Europe/Berlin. Any zone PHP accepts is valid,
      * including the ones missing from DateTimeZone::listIdentifiers() (Etc/UTC,
-     * GMT, Europe/Kiev). An invalid zone is logged and replaced by the default.
+     * GMT). A legacy name PHP does not know resolves to its canonical zone
+     * (Europe/Kiev gives Europe/Kyiv). An invalid zone is logged and replaced by the default.
      */
     public static function timezone(App $kirby): string
     {
         $zone = self::get($kirby, 'timezone', Schedule::DEFAULT_TIMEZONE);
         if (is_string($zone)) {
-            try {
-                new \DateTimeZone($zone);
+            if (self::knowsZone($zone)) {
                 return $zone;
-            } catch (\Exception) {
-                // Reported below.
+            }
+            $canonical = self::legacyZone($zone);
+            if ($canonical !== null && self::knowsZone($canonical)) {
+                return $canonical;
             }
         }
         self::invalid($kirby, 'Noren: unknown noren.timezone ' . var_export($zone, true) . ' — using ' . Schedule::DEFAULT_TIMEZONE . '.');
         return Schedule::DEFAULT_TIMEZONE;
+    }
+
+    private static function knowsZone(string $zone): bool
+    {
+        try {
+            new \DateTimeZone($zone);
+            return true;
+        } catch (\Exception) {
+            return false;
+        }
     }
 
     /**

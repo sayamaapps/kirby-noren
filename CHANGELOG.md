@@ -7,9 +7,76 @@ All notable changes to this project are documented here. Versions follow
   row rules the Panel writes) **or to the default output** (what the snippets
   and schema.org show without configuration) is a **major** version: a site
   would show other hours after a routine update.
-- **A change to the privacy text** (`DATENSCHUTZ.md` / `PRIVACY.md`) is marked
-  **[privacy text]**. Every site using the plugin must then review its privacy
-  policy.
+
+## [1.2.2] — 2026-10-21
+
+### Fixed
+
+- **An occasion that already says "closed"** stands alone. A one-day closure
+  "Geschlossene Gesellschaft" read "Geschlossene Gesellschaft: geschlossen" in
+  the status and "23.10. Geschlossene Gesellschaft: geschlossen" in the table
+  notes; now "Geschlossene Gesellschaft" and "23.10. Geschlossene Gesellschaft".
+  The check uses the closed word of the current language, case-insensitive.
+  Occasions like "Silvester" keep ": geschlossen".
+
+### Removed
+
+- **`DATENSCHUTZ.md` and `PRIVACY.md`.** Noren processes no visitor data, so it has no place in a site's privacy policy. The README says so under "Privacy".
+
+## [1.2.1] — 2026-10-20
+
+### Fixed
+
+- **`noren.timezone`** accepts legacy names (`Europe/Kiev`, `US/Eastern`, and
+  a few more `US/*` and `Asia/*` names) also on servers whose tzdata lacks
+  them. They resolve to the current zone with the same rules (`Europe/Kyiv`,
+  `America/New_York`), so the hours do not change. Before, such a site fell
+  back to `Europe/Berlin` with a logged error. Names the server's tzdata knows
+  are kept as before.
+
+## [1.2.0] — 2026-10-19
+
+### Added
+
+- **`noren.mergeAreas`** (default `false`, opt-in). Areas of one location with
+  identical status and table become one unit: "Hofladen und Hofcafé", three
+  areas "Hofladen, Hofcafé und Werkstatt" (English: "and"). Equal means equal
+  output, so a closure for one area splits the group again. Units have an
+  `areas` list when the option is on, a merged unit's `area` is its first key.
+  `norenSchedule()`, `norenSchema()` and the schema.org data stay per area. With
+  the default, output is unchanged.
+
+## [1.1.0] — 2026-10-17
+
+### Fixed
+
+- **Special hours spanning several days** show both dates in the table and
+  compact notes ("6.7. bis 10.7.2026 Sommerwoche: 10:00–14:00 Uhr"). Before,
+  the note named only the first day, so a running week of short hours read
+  like a single past date. New translation key `note.dateRange`.
+- **Continuous opening across days.** The status said "until 48:00" for three
+  full days in a row (and nonsense for a plan open around the clock). It now
+  names the day the run ends: "noch bis Mittwoch um 24:00 Uhr", "noch bis morgen
+  um 18:00 Uhr". A plan whose run still continues after today and the following
+  seven days says "rund um die Uhr geöffnet" and `until` is `null`. The day is
+  named whenever the run ends later than 06:00 of the next day, whatever
+  `overnightUntil` is set to. schema.org gives full days as `00:00`–`23:59`,
+  because `00:00`–`00:00` means closed in Google's LocalBusiness notation
+  (weekly plan and special hours).
+
+### Changed
+
+- `00:00` to `00:00` is read as a full day `[0, 1440]`, in a weekly row and in
+  the `oeffnet`/`schliesst` fields of a closure (special hours all day). Before,
+  it was ignored as equal times, so such a closure row counted as closed. The
+  Panel help says so now.
+
+### Added
+
+- Translation keys `detail.untilTomorrow`, `detail.untilTomorrowOccasion`,
+  `detail.untilWeekday`, `detail.untilWeekdayOccasion`, `detail.untilDate`,
+  `detail.untilDateOccasion`, `detail.alwaysOpen` and
+  `detail.alwaysOpenOccasion`.
 
 ## [1.0.0] — 2026-10-11
 

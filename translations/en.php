@@ -27,6 +27,14 @@ return [
     'status.allHours' => 'All opening hours',
     'detail.until' => 'open until {time}',
     'detail.untilOccasion' => 'open until {time} ({occasion})',
+    'detail.untilTomorrow' => 'open until {time} tomorrow',
+    'detail.untilTomorrowOccasion' => 'open until {time} tomorrow ({occasion})',
+    'detail.untilWeekday' => 'open until {time} on {weekday}',
+    'detail.untilWeekdayOccasion' => 'open until {time} on {weekday} ({occasion})',
+    'detail.untilDate' => 'open until {time} on {date}',
+    'detail.untilDateOccasion' => 'open until {time} on {date} ({occasion})',
+    'detail.alwaysOpen' => 'open around the clock',
+    'detail.alwaysOpenOccasion' => 'open around the clock ({occasion})',
     'detail.opensToday' => 'opens today at {time}',
     'detail.opensTomorrow' => 'opens tomorrow at {time}',
     'detail.opensWeekday' => 'opens on {weekday} at {time}',
@@ -48,7 +56,9 @@ return [
     'note.special' => '{date} {occasion}: {from}–{to}',
     'note.closedDay' => '{date}: closed',
     'note.closedDayOccasion' => '{date} {occasion}: closed',
+    'note.closedDayNamed' => '{date} {occasion}',
     'note.closure' => '{label} {from} to {to}',
+    'note.dateRange' => '{from} to {to}',
 
     // Compact (Grouping::byHours()).
     'compact.hours' => '{hours}',
@@ -93,7 +103,7 @@ return [
     'panel.area.short.help' => 'For tight spots such as the status band. Empty = the name is used.',
 
     'panel.hours.label' => 'Opening hours',
-    'panel.hours.info' => "**One row per area and weekday.** A day on which the business is closed gets **no row** — not a row with empty fields.\n\nEach row has two blocks, for businesses with a lunch break. Open all day? Fill in only the first.\n\nA block counts only when **both** times are set and the end is after the start. Half-filled rows are ignored — no information is better than wrong information.\n\n**Past midnight** (Friday 18:00 to 2:00, for example): enter it as Friday’s row with the end in the early morning. The end may lie only shortly after midnight; the site’s configuration sets how late.",
+    'panel.hours.info' => "**One row per area and weekday.** A day on which the business is closed gets **no row** — not a row with empty fields.\n\nEach row has two blocks, for businesses with a lunch break. Open all day? Fill in only the first.\n\nA block counts only when **both** times are set and the end is after the start — or both are 00:00, which means around the clock. Half-filled rows are ignored — no information is better than wrong information.\n\n**Past midnight** (Friday 18:00 to 2:00, for example): enter it as Friday’s row with the end in the early morning. The end may lie only shortly after midnight; the site’s configuration sets how late.",
     'panel.hours.area.label' => 'Area',
     'panel.hours.area.help' => 'Leave empty if the business has no separate areas.',
     'panel.hours.day.label' => 'Weekday',

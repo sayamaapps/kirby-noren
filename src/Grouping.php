@@ -154,12 +154,13 @@ final class Grouping
         return I18n::t('compact.hours', ['hours' => implode(I18n::t('compact.and'), $ranges)]);
     }
 
-    /** Full hours without ":00": 600 → "10", 630 → "10:30", 1440 → "24", 1560 → "2". */
+    /** Full hours without ":00": 600 → "10", 630 → "10:30", 1440 → "24", 1560 → "2", 2880 → "24". */
     public static function shortTime(int $minutes): string
     {
-        // Overnight ends are shown as the clock time of the next day (1560 → 2:00).
+        // Ends after midnight are shown as the clock time of their day (1560 → 2:00),
+        // exact midnight as 24 (2880 → 24).
         if ($minutes > Schedule::MINUTES_PER_DAY) {
-            $minutes -= Schedule::MINUTES_PER_DAY;
+            $minutes = (($minutes - 1) % Schedule::MINUTES_PER_DAY) + 1;
         }
         return $minutes % 60 === 0 ? (string) intdiv($minutes, 60) : Schedule::formatTime($minutes);
     }

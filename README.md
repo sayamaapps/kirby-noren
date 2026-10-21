@@ -30,7 +30,7 @@ Composer installs the plugin into `site/plugins/noren/` (via `getkirby/composer-
 Until the package is on Packagist, add the repository first:
 
 ```json
-"repositories": [{ "type": "vcs", "url": "https://github.com/simsimmal/kirby-noren" }]
+"repositories": [{ "type": "vcs", "url": "https://github.com/sayamaapps/kirby-noren" }]
 ```
 
 Manual installation (download into `site/plugins/noren/`) also works.
@@ -91,7 +91,7 @@ A broken value (an unknown time zone, an unknown holiday state, an `overnightUnt
 | `template` | `'betrieb'` | Template name of the location pages: a string or a list of strings. |
 | `locations` | `null` | A Closure or a list of page ids. Overrides `template`. |
 | `fields` | see [Content field contract](#content-field-contract) | Page field names, as a map: `areas` (`bereiche`), `hours` (`zeiten`), `closures` (`schliessungen`), `areaRef` (`zeitenschluessel`), `short` (`kurzname`). Give only the keys you change. |
-| `timezone` | `'Europe/Berlin'` | Time zone of all date logic: any zone PHP accepts, such as `'Etc/UTC'`. An invalid value is logged and the default is used. |
+| `timezone` | `'Europe/Berlin'` | Time zone of all date logic: any zone PHP accepts, such as `'Etc/UTC'`. Legacy names such as `'Europe/Kiev'` or `'US/Eastern'` resolve to their current zone (`Europe/Kyiv`, `America/New_York`) where the server's tzdata lacks them. An invalid value is logged and the default is used. |
 | `holidays` | `false` | Public holidays. Off by default. See [Public holidays](#public-holidays). |
 | `holidayEve` | `false` | Adds a notice to the status when tomorrow is a public holiday. |
 | `holidayRow` | `true` | The "Public holidays: closed" row in the table. Shown only when holidays are on. |
@@ -103,6 +103,7 @@ A broken value (an unknown time zone, an unknown holiday state, an `overnightUnt
 | `closureLabel` | translated: `Betriebsferien` (de) / `Closed for holidays` (en) | Name of a multi-day closure, for example `'Praxisurlaub'` or `'Winterpause'`. |
 | `compact` | `'grouped'` | Default mode of `noren/compact`: `grouped` (any days with equal hours) or `consecutive` (only neighbouring days). |
 | `status` | `true` | `false` hides the `noren/status` snippet. |
+| `mergeAreas` | `false` | Areas of one location with the same status and table become one unit, such as "Hofladen und Hofcafé". A closure for one area splits them again. See [Areas with the same hours](#areas-with-the-same-hours). |
 | `language` | site language | `en` or `de`. Otherwise: the current language of a multi-language site, its default language, the first two letters of Kirby's `locale` option, and English. **A German site without multi-language setup and without a `locale` must set `'noren.language' => 'de'`**, otherwise its texts are English. |
 
 A complete example with the options most sites change:
@@ -177,6 +178,12 @@ bereiche:
 `$site->norenUnits()` then returns one unit per area that has hours (`kontakt#laden`, `kontakt#cafe`). The status line shows the short names as labels. An area without any hours is left out, because "closed" for a missing plan would send people to a door that may be open.
 
 Closures can name an area in their `bereich` field. A closure with an empty area applies to every area.
+
+### Areas with the same hours
+
+With `'noren.mergeAreas' => true`, areas of one location whose status and table are identical become one unit. Two areas with the same hours then give one line, "Hofladen und Hofcafé", and three give "Hofladen, Hofcafé und Werkstatt" (English: "and"). Each group sits where its first area was. A group is split again as soon as the outputs differ, for example when a closure names only one of the areas. The group's `area` is its first key, and every area unit has `areas`, the list of its area keys (a location without areas has none).
+
+The option changes only the units and the status and table built from them. `norenSchedule('area')` and the schema.org data stay per area. Off (the default), every area is its own unit.
 
 ### Several locations, one plan each
 
@@ -346,7 +353,7 @@ $status = site()->norenStatus('laden');
 //   'text'     => 'Jetzt geöffnet',      // headline, translated
 //   'detail'   => 'noch bis 18:00 Uhr',  // '' when there is nothing to say
 //   'state'    => 'open',                // 'open' | 'closed' | 'holiday' | 'closure'
-//   'until'    => '18:00',               // end of the running block, else null
+//   'until'    => '18:00',               // end of the running opening as a clock time, null when open around the clock
 //   'next'     => null,                  // next opening 'Y-m-d\TH:i' while closed
 //   'occasion' => null,                  // occasion of the special day or closure in effect
 //   'holiday'  => null,                  // holiday today, or tomorrow with holidayEve
@@ -373,6 +380,7 @@ Table (`norenTable()`), shortened:
 ```
 
 Note types: `holiday`, `special` (a day with hours), `closedDay` (a single closed day), `closure` (a range).
+A `special` entry spanning several days shows both dates in its text ("6.7. bis 10.7.2026 Sommerwoche: 10:00–14:00 Uhr").
 
 Compact (`norenCompact()`):
 
@@ -392,7 +400,8 @@ Schema (`norenSchema()`):
 [
   'openingHoursSpecification' => [
     ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'https://schema.org/Monday', 'opens' => '13:00', 'closes' => '18:00'],
-    // one entry per block, Monday to Sunday; closed days have none
+    // one entry per block, Monday to Sunday; closed days have none;
+    // a full day is 00:00 to 23:59 (00:00 to 00:00 would mean closed)
   ],
   'specialOpeningHoursSpecification' => [
     ['@type' => 'OpeningHoursSpecification', 'validFrom' => '2026-12-24', 'validThrough' => '2026-12-24', 'opens' => '08:30', 'closes' => '12:00'],
@@ -422,6 +431,8 @@ Units (`norenUnits()`):
   // …
 ]
 ```
+
+With `noren.mergeAreas` on, every area unit also has `areas`, for example `['laden', 'cafe']`, and a merged unit reads `'id' => 'kontakt#laden+cafe'`, `'name' => 'Hofladen und Hofcafé'`.
 
 Holidays (`norenHolidays(2026)`):
 
@@ -568,10 +579,14 @@ Names come from the translations (`holiday.<id>`), so `I18n` language changes ar
 A block that ends after midnight is entered on its **start day**: Friday 18:00 to 2:00 goes into Friday's row, with the end as `02:00`. The table shows `18:00 – 2:00`, schema.org gives Friday `opens 18:00 closes 02:00`, and the status is open on Saturday until 2:00.
 
 - `overnightUntil` (default `'06:00'`) is the latest end on the next day. An end later than that, such as `18:00` to `08:00`, is most likely a typo and is ignored.
-- `18:00` to `00:00` is a block until midnight. The status shows `until 24:00`, or later if the next day's first block continues the run.
+- `18:00` to `00:00` is a block until midnight. The status shows `until 24:00`, or later if the next day's first block continues the run. When the run ends later than 6:00 of the next day, the status names the day: "noch bis morgen um 18:00 Uhr", "noch bis Mittwoch um 24:00 Uhr".
 - `false` switches overnight blocks off. Such a row (ending after midnight) is then ignored. A row ending at `00:00` still counts as until midnight.
 - The status follows the opening as far as it runs. Friday `18:00–00:00` and Saturday `00:00–02:00` are one run, so on Friday at 23:30 the status says `until 2:00`. The run stops at midnight when the next day does not open at `00:00`, and a next day that is closed or a holiday without special hours stops it as well.
 - The part after midnight is cancelled when the **start day** (Friday) is a full closure, or a holiday without special hours. A closure that begins on Saturday does not cancel Friday's block, because the block belongs to Friday.
+
+### Open around the clock
+
+A full day is entered as `00:00` to `00:00` (or as two blocks that meet at midnight, such as 00:00–12:00 and 12:00–00:00). The table shows `0:00 – 24:00`, schema.org gives `opens 00:00 closes 23:59` (00:00 to 00:00 would mean closed), and the status follows the run across days: "noch bis Mittwoch um 24:00 Uhr". A plan whose run still continues after today and the following seven days (the next closure or holiday is more than eight days away) says "rund um die Uhr geöffnet" and `until` is `null`. The day is named whenever the run ends later than 6:00 of the next day, whatever `overnightUntil` is set to.
 
 ### Special hours beat holidays
 
@@ -694,7 +709,7 @@ The switch is not byte-identical in all cases. Seven changes, each listed in the
 
 ## Privacy
 
-Noren sets no cookies, uses no browser storage, makes no request to a third party and processes no visitor data. The status is computed on your server for each page request from the business's own content. [PRIVACY.md](PRIVACY.md) describes the implementation in English, and [DATENSCHUTZ.md](DATENSCHUTZ.md) holds the German text block for a site's privacy policy. Both describe the implementation and are not legal advice.
+Noren processes no visitor data. It sets no cookies, uses no browser storage and makes no request to a third party, so there is nothing to add to a site's privacy policy.
 
 ## Development
 
