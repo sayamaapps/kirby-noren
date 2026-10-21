@@ -536,9 +536,11 @@ final class Schedule
                 $next = $this->nextOpenDay($today);
                 return $this->result(
                     false,
-                    $closure['occasion'] !== null
-                        ? I18n::t('status.occasionClosed', ['occasion' => $closure['occasion']])
-                        : I18n::t('status.closedToday'),
+                    match (true) {
+                        $closure['occasion'] === null => I18n::t('status.closedToday'),
+                        I18n::namesClosed($closure['occasion']) => $closure['occasion'],
+                        default => I18n::t('status.occasionClosed', ['occasion' => $closure['occasion']]),
+                    },
                     $closure['note'] ?? ($next !== null ? $this->opens($today, $next) : ''),
                     'closure',
                     next: $this->nextIso($next),

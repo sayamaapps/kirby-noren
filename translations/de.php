@@ -55,6 +55,7 @@ return [
     'note.special' => '{date} {occasion}: {from}–{to} Uhr',
     'note.closedDay' => '{date}: geschlossen',
     'note.closedDayOccasion' => '{date} {occasion}: geschlossen',
+    'note.closedDayNamed' => '{date} {occasion}',
     'note.closure' => '{label} {from} bis {to}',
     'note.dateRange' => '{from} bis {to}',
 

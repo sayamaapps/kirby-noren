@@ -8,7 +8,16 @@ All notable changes to this project are documented here. Versions follow
   and schema.org show without configuration) is a **major** version: a site
   would show other hours after a routine update.
 
-## [Unreleased]
+## [1.2.2] — 2026-10-21
+
+### Fixed
+
+- **An occasion that already says "closed"** stands alone. A one-day closure
+  "Geschlossene Gesellschaft" read "Geschlossene Gesellschaft: geschlossen" in
+  the status and "23.10. Geschlossene Gesellschaft: geschlossen" in the table
+  notes; now "Geschlossene Gesellschaft" and "23.10. Geschlossene Gesellschaft".
+  The check uses the closed word of the current language, case-insensitive.
+  Occasions like "Silvester" keep ": geschlossen".
 
 ### Removed
 
