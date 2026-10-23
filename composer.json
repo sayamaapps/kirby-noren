@@ -1,6 +1,6 @@
 {
     "name": "sayamaapps/kirby-noren",
-    "description": "Opening hours for Kirby CMS: weekly plan with several blocks per day, areas and locations, closures and special hours, German public holidays for all 16 states, an \"open now\" status and schema.org data. No styling.",
+    "description": "Opening hours for Kirby CMS with an open-now status, closures and German public holidays.",
     "type": "kirby-plugin",
     "license": "MIT",
     "keywords": ["kirby", "kirby-plugin", "kirby-5", "opening-hours", "holidays", "schema-org", "local-business"],
