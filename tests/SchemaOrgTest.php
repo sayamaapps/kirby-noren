@@ -8,7 +8,7 @@
  * The expected holiday list is written by hand from a calendar (Bavaria,
  * default flags: assumption day on, Augsburg off, Corpus Christi on).
  *
- *   ASDF_PHP_VERSION=8.5.3 php tests/SchemaOrgTest.php
+ *   php tests/SchemaOrgTest.php
  */
 
 require_once __DIR__ . '/helpers.php';

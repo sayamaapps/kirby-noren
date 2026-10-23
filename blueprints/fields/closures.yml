@@ -1,6 +1,5 @@
 # Structure field `schliessungen`: closures and special days, inclusive date
 # range. Field names are a compatibility contract (SPEC.md §6).
-# Ported from kirby-starter site/blueprints/pages/betrieb.yml, tab "zeiten".
 label: noren.panel.closures.label
 type: structure
 columns:

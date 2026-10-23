@@ -6,7 +6,6 @@ use DateTimeImmutable;
 
 /**
  * Kirby-free view models for the snippets and for own markup (SPEC.md §3.5).
- * OWNER: task `presentation`.
  *
  * The snippets render exactly these arrays; `$site->norenTable()` and
  * `norenCompact()` return them for sites with their own markup.

@@ -3,7 +3,7 @@
 namespace Noren;
 
 /**
- * Strings of the plugin, Kirby-free. Shared file — owned by the architect.
+ * Strings of the plugin, Kirby-free.
  *
  * The tables live in translations/<language>.php and are also registered as
  * Kirby plugin translations under `noren.<key>` (index.php), so site snippets

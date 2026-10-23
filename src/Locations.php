@@ -15,8 +15,6 @@ use Kirby\Cms\Page;
  * the status band, and the null-safe wrappers behind the site and page
  * methods registered in index.php.
  *
- * OWNER: task `kirby`.
- *
  * NEVER memoise a schedule keyed on the page id (two areas share a page).
  */
 final class Locations

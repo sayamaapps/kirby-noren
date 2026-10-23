@@ -10,7 +10,6 @@ use DateTimeZone;
  * Answers the one question visitors really ask the site: "Are you open right
  * now, and if not — when again?" (SPEC.md §3.1)
  *
- * Port of Betrieb\Oeffnungszeiten (kirby-starter, site/plugins/betrieb).
  * Kirby-free on purpose: the class works on plain arrays; reading the Panel
  * structure fields happens in fromFields(), which only needs objects with
  * toStructure() and field methods. tests/ScheduleTest.php checks the logic
@@ -188,7 +187,7 @@ final class Schedule
             $note = trim((string) $row->hinweis());
             $occasion = trim((string) $row->anlass());
             // Short hours instead of closed: only when both times make sense.
-            // Half-filled counts as closed, as before.
+            // Half-filled counts as closed.
             $hours = self::block(self::parseTime((string) $row->oeffnet()), self::parseTime((string) $row->schliesst()), $overnightUntil);
             $closures[] = [
                 'from'     => substr($from, 0, 10),

@@ -255,7 +255,7 @@ expect(2, count($compact['notes']), 'compact: leadDays 14 shows Heiligabend and 
 
 
 /* --------------------------------------------------------------------------
- * A holiday with special hours keeps "today" on the weekday row (finding 5).
+ * A holiday with special hours keeps "today" on the weekday row.
  * 3 October 2026 is a Saturday, a Bavarian holiday.
  * -------------------------------------------------------------------------- */
 

@@ -2,7 +2,7 @@
 /**
  * The plugin with real Kirby (SPEC.md §9.7), in throwaway site directories:
  *  1. registered, off by default, translations, noren_option();
- *  2. starter shape: areas laden / cafe / werkstatt, legacy nm_ row, closures
+ *  2. sample shape: areas laden / cafe / werkstatt, legacy nm_ row, closures
  *     per area, two call orders without memoisation, units;
  *  3. no areas: one unit with id = page id;
  *  4. medical-practice shape: several locations, vm_/nm_ rows, closures in `urlaub`,
@@ -17,7 +17,7 @@
  * Kirby loads the plugin through the symlink noren_site() creates, so no src
  * file is required here.
  *
- *   ASDF_PHP_VERSION=8.5.3 php tests/KirbyTest.php
+ *   php tests/KirbyTest.php
  */
 
 require_once __DIR__ . '/helpers.php';
@@ -35,7 +35,7 @@ function withSite(callable $fn): void
     }
 }
 
-/** Starter shape: laden (Hofladen, kurzname Laden), cafe (Hofcafé), werkstatt (no hours). */
+/** Sample shape: laden (Hofladen, kurzname Laden), cafe (Hofcafé), werkstatt (no hours). */
 function ktStarter(): array
 {
     return [
@@ -59,7 +59,7 @@ function ktStarter(): array
     ];
 }
 
-/** The three areas of the starter shape, as norenAreas() returns them. */
+/** The three areas of the sample shape, as norenAreas() returns them. */
 const KT_AREAS = [
     ['key' => 'laden', 'name' => 'Hofladen', 'short' => 'Laden'],
     ['key' => 'cafe', 'name' => 'Hofcafé', 'short' => 'Hofcafé'],
@@ -109,49 +109,49 @@ withSite(function (string $tmp): void {
     expect('fallback', noren_option('gibtsnicht', 'fallback'), 'noren_option() returns the fallback for an unset key');
 });
 
-/* --- 2. starter shape --------------------------------------------------- */
+/* --- 2. sample shape --------------------------------------------------- */
 
 withSite(function (string $tmp): void {
     noren_page($tmp, '1_kontakt', 'betrieb', ktStarter());
 
     $kirby = noren_kirby($tmp, ['noren.active' => true, 'locale' => 'de_DE']);
-    expect('kontakt', $kirby->site()->norenLocation()?->id(), 'starter: first location is kontakt');
-    expect(KT_AREAS, $kirby->site()->norenAreas(), 'starter: areas laden (Hofladen/Laden), cafe (Hofcafé), werkstatt');
+    expect('kontakt', $kirby->site()->norenLocation()?->id(), 'sample: first location is kontakt');
+    expect(KT_AREAS, $kirby->site()->norenAreas(), 'sample: areas laden (Hofladen/Laden), cafe (Hofcafé), werkstatt');
 
     // Both call orders on one instance: no memoisation keyed on the page.
     $laden = $kirby->site()->norenSchedule('laden');
     $cafe = $kirby->site()->norenSchedule('cafe');
-    expect([[780, 1080]], $laden->blocks(0), 'starter: laden Monday 13:00–18:00');
-    expect([[540, 1020]], $cafe->blocks(0), 'starter: cafe Monday 9:00–17:00 (second call, same page)');
+    expect([[780, 1080]], $laden->blocks(0), 'sample: laden Monday 13:00–18:00');
+    expect([[540, 1020]], $cafe->blocks(0), 'sample: cafe Monday 9:00–17:00 (second call, same page)');
 
     $kirby2 = noren_kirby($tmp, ['noren.active' => true, 'locale' => 'de_DE']);
     $cafe2 = $kirby2->site()->norenSchedule('cafe');
     $laden2 = $kirby2->site()->norenSchedule('laden');
-    expect([[540, 1020]], $cafe2->blocks(0), 'starter: cafe first on a new instance');
-    expect([[780, 1080]], $laden2->blocks(0), 'starter: laden second on the same instance');
+    expect([[540, 1020]], $cafe2->blocks(0), 'sample: cafe first on a new instance');
+    expect([[780, 1080]], $laden2->blocks(0), 'sample: laden second on the same instance');
 
     $page = $kirby2->page('kontakt');
-    expect([[780, 1080]], $page->norenSchedule('laden')->blocks(0), 'starter: page norenSchedule(laden)');
-    expect([[540, 1020]], $page->norenSchedule('cafe')->blocks(0), 'starter: page norenSchedule(cafe) right after it');
+    expect([[780, 1080]], $page->norenSchedule('laden')->blocks(0), 'sample: page norenSchedule(laden)');
+    expect([[540, 1020]], $page->norenSchedule('cafe')->blocks(0), 'sample: page norenSchedule(cafe) right after it');
 
     // Legacy nm_von/nm_bis row is read as the second pair; the Tuesday note comes along.
-    expect([[600, 840]], $laden->blocks(5), 'starter: legacy nm_von/nm_bis row, Saturday 10:00–14:00');
-    expect([[510, 720], [780, 1080]], $laden->blocks(1), 'starter: Tuesday two blocks');
-    expect('Mittags Lieferung', $laden->note(1), 'starter: Tuesday note');
-    holds(!$kirby->site()->norenSchedule('werkstatt')->maintained(), 'starter: werkstatt has no hours');
+    expect([[600, 840]], $laden->blocks(5), 'sample: legacy nm_von/nm_bis row, Saturday 10:00–14:00');
+    expect([[510, 720], [780, 1080]], $laden->blocks(1), 'sample: Tuesday two blocks');
+    expect('Mittags Lieferung', $laden->note(1), 'sample: Tuesday note');
+    holds(!$kirby->site()->norenSchedule('werkstatt')->maintained(), 'sample: werkstatt has no hours');
 
     // Closures follow the area filter: laden gets the two all-area rows, cafe also Silvester.
-    expect(2, count($laden->closures()), 'starter: laden sees two closures (all-area rows)');
-    expect(3, count($cafe->closures()), 'starter: cafe sees its own closure too');
+    expect(2, count($laden->closures()), 'sample: laden sees two closures (all-area rows)');
+    expect(3, count($cafe->closures()), 'sample: cafe sees its own closure too');
 
-    expect(KT_AREAS, $kirby->page('kontakt')->norenAreas(), 'starter: page norenAreas() of the location page');
+    expect(KT_AREAS, $kirby->page('kontakt')->norenAreas(), 'sample: page norenAreas() of the location page');
 
     $units = $kirby->site()->norenUnits();
-    expect(['kontakt#laden', 'kontakt#cafe'], array_map(static fn (array $u) => $u['id'], $units), 'starter: units ids (werkstatt left out)');
-    expect(['Laden', 'Hofcafé'], array_map(static fn (array $u) => $u['label'], $units), 'starter: unit labels');
-    expect(['Hofladen', 'Hofcafé'], array_map(static fn (array $u) => $u['name'], $units), 'starter: unit names');
-    expect('kontakt', $units[0]['location']->id(), 'starter: unit location is the page');
-    expect('laden', $units[0]['area'], 'starter: unit area key');
+    expect(['kontakt#laden', 'kontakt#cafe'], array_map(static fn (array $u) => $u['id'], $units), 'sample: units ids (werkstatt left out)');
+    expect(['Laden', 'Hofcafé'], array_map(static fn (array $u) => $u['label'], $units), 'sample: unit labels');
+    expect(['Hofladen', 'Hofcafé'], array_map(static fn (array $u) => $u['name'], $units), 'sample: unit names');
+    expect('kontakt', $units[0]['location']->id(), 'sample: unit location is the page');
+    expect('laden', $units[0]['area'], 'sample: unit area key');
 });
 
 /* --- 3. no areas ---------------------------------------------------------- */
@@ -173,7 +173,7 @@ withSite(function (string $tmp): void {
     expect('Laden', $units[0]['short'] ?? null, 'no areas: unit short is kurzname');
     expect('Laden', $units[0]['label'] ?? null, 'no areas: a single location labels with its short name');
     expect([], $kirby->site()->norenAreas(), 'no areas: norenAreas() is []');
-    holds(is_array($kirby->site()->norenStatus()), 'no areas: a status line exists (the starter returned nothing here)');
+    holds(is_array($kirby->site()->norenStatus()), 'no areas: a status line exists ');
 });
 
 /* --- 4. medical-practice shape: several locations ------------------------------- */
@@ -410,9 +410,9 @@ withSite(function (string $tmp): void {
 });
 
 
-/* --- 11. review regressions ------------------------------------------------ */
+/* --- 11. regressions ------------------------------------------------ */
 
-// Finding 2: no locale and no noren.language gives English; noren.language de gives German.
+// No locale and no noren.language gives English; noren.language de gives German.
 withSite(function (string $tmp): void {
     noren_page($tmp, '1_kontakt', 'betrieb', ktStarter());
     $none = noren_kirby($tmp, ['noren.active' => true]);
@@ -425,7 +425,7 @@ withSite(function (string $tmp): void {
     })(), 'language: the status texts follow noren.language de');
 });
 
-// Finding 13: time-dependent output is not kept by Kirby's page cache.
+// Time-dependent output is not kept by Kirby's page cache.
 withSite(function (string $tmp): void {
     noren_page($tmp, '1_kontakt', 'betrieb', ktStarter());
     $calls = [
@@ -445,7 +445,7 @@ withSite(function (string $tmp): void {
     expect(false, $snippetKirby->response()->cache(), 'cache: the status snippet switches the page cache off');
 });
 
-// Finding 14: a field that is not structure data is ignored and logged, the page still renders.
+// A field that is not structure data is ignored and logged, the page still renders.
 withSite(function (string $tmp): void {
     noren_page($tmp, '1_kontakt', 'betrieb', ['title' => 'Kontakt', 'zeiten' => 'Mo-Fr 9-18 Uhr']);
     noren_page($tmp, '2_bar', 'betrieb', ['title' => 'Bar', 'zeiten' => ['Montag', 'Dienstag']]);
@@ -460,7 +460,7 @@ withSite(function (string $tmp): void {
     holds(str_contains($logged, 'field zeiten on page kontakt is not structure data'), 'the bad field is logged with its page and name');
 });
 
-// Finding 19: a plan without hours gives no status, table, compact or schema: never "closed".
+// A plan without hours gives no status, table, compact or schema: never "closed".
 withSite(function (string $tmp): void {
     noren_page($tmp, '1_leer', 'betrieb', ['title' => 'Leer', 'zeiten' => [['tag' => 'Montag']]]);
     $kirby = noren_kirby($tmp, ['noren.active' => true, 'locale' => 'de_DE']);
@@ -472,7 +472,7 @@ withSite(function (string $tmp): void {
     expect('', (string) $kirby->snippet('noren/status', ['only' => 'leer'], true), 'no hours: the status snippet prints nothing');
 });
 
-// Findings 9 and 17: a broken option is logged once per process, however often it is read.
+// A broken option is logged once per process, however often it is read.
 withSite(function (string $tmp): void {
     noren_page($tmp, '1_kontakt', 'betrieb', ktStarter());
     \Noren\Log::forget();
@@ -491,7 +491,7 @@ withSite(function (string $tmp): void {
     expect('Europe/Berlin', $kirby->site()->norenSchedule()->timezone()->getName(), 'the broken timezone falls back to Europe/Berlin');
 });
 
-// Finding 15: with Kirby's debug option on, a broken config throws; without it, it is logged and the default is used.
+// With Kirby's debug option on, a broken config throws; without it, it is logged and the default is used.
 withSite(function (string $tmp): void {
     noren_page($tmp, '1_kontakt', 'betrieb', ktStarter());
     $thrownBy = function (App $kirby, callable $call): ?string {
@@ -521,7 +521,7 @@ withSite(function (string $tmp): void {
     holds(str_contains($logged, 'unknown noren.timezone'), 'debug off: the problem is logged');
 });
 
-// Findings 8, 16 and 236: every zone PHP accepts is valid, including those missing from listIdentifiers().
+// Every zone PHP accepts is valid, including those missing from listIdentifiers().
 // Legacy aliases (Europe/Kiev, US/Eastern) must work even where the runner's tzdata lacks them: they
 // resolve to their canonical zone, which has the same rules, so the hours are the same either way.
 withSite(function (string $tmp): void {
@@ -543,7 +543,7 @@ withSite(function (string $tmp): void {
     }
 });
 
-// Finding 236: every canonical target of the alias table is a zone PHP knows.
+// Every canonical target of the alias table is a zone PHP knows.
 foreach (\Noren\Options::LEGACY_ZONES as $alias => $canonical) {
     try {
         new DateTimeZone($canonical);
@@ -553,7 +553,7 @@ foreach (\Noren\Options::LEGACY_ZONES as $alias => $canonical) {
     }
 }
 
-// Finding 21: a boolean option given as a string is reported, the default is used.
+// A boolean option given as a string is reported, the default is used.
 withSite(function (string $tmp): void {
     noren_page($tmp, '1_kontakt', 'betrieb', ktStarter());
     $strings = noren_kirby($tmp, ['noren.active' => true, 'noren.status' => 'false', 'noren.holidayRow' => '0', 'locale' => 'de_DE']);
@@ -568,7 +568,7 @@ withSite(function (string $tmp): void {
     holds(str_contains((string) $strings->snippet('noren/status', [], true), 'noren-status-line'), 'the status band still prints with status => "false"');
 });
 
-// Finding 6: overnightUntil false ignores rows past midnight, but a row ending at 00:00 is "until midnight".
+// overnightUntil false ignores rows past midnight, but a row ending at 00:00 is "until midnight".
 withSite(function (string $tmp): void {
     noren_page($tmp, '2_bar', 'betrieb', ['title' => 'Bar', 'zeiten' => [['tag' => 'Freitag', 'von1' => '18:00', 'bis1' => '00:00'], ['tag' => 'Samstag', 'von1' => '18:00', 'bis1' => '02:00']]]);
     $noOvernight = noren_kirby($tmp, ['noren.active' => true, 'noren.overnightUntil' => false, 'locale' => 'de_DE']);
@@ -576,7 +576,7 @@ withSite(function (string $tmp): void {
     expect([], $noOvernight->page('bar')->norenSchedule()->blocks(5), "overnightUntil false: Saturday 18:00–02:00 is ignored");
 });
 
-// Finding 5: the default leadDays (14) and holidayNoteDays (14) are asserted.
+// The default leadDays (14) and holidayNoteDays (14) are asserted.
 withSite(function (string $tmp): void {
     noren_page($tmp, '1_kontakt', 'betrieb', [
         'title' => 'Kontakt',

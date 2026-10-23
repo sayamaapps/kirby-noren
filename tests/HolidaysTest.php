@@ -4,10 +4,10 @@
  * table of all 16 states (the 2026 lists are written out by hand from the
  * rules and the official sources, never printed from the implementation),
  * introduction years, the switches, config() normalisation, extra days,
- * checker() and state(). Ports tests/FeiertageTest.php of kirby-starter.
+ * checker() and state().
  * Kirby-free.
  *
- *   ASDF_PHP_VERSION=8.5.3 php tests/HolidaysTest.php
+ *   php tests/HolidaysTest.php
  */
 
 require_once __DIR__ . '/helpers.php';
@@ -34,7 +34,7 @@ function holidaysThrows(callable $fn): ?string
 $berlin = new DateTimeZone('Europe/Berlin');
 
 /* ---------------------------------------------------------------------------
- * Easter Sunday (Meeus/Jones/Butcher). Dates from the starter test (checked
+ * Easter Sunday (Meeus/Jones/Butcher). Dates checked
  * against published Easter tables) plus the SPEC §9.2 extremes.
  * ------------------------------------------------------------------------- */
 
@@ -62,7 +62,7 @@ expect('Europe/Berlin', Holidays::easterSunday(2026)->getTimezone()->getName(), 
 expect('UTC', Holidays::easterSunday(2026, 'UTC')->getTimezone()->getName(), 'Ostersonntag: Zeitzone als Argument');
 
 /* ---------------------------------------------------------------------------
- * Bavaria 2026, the starter's complete list (names verbatim).
+ * Bavaria 2026, the complete list (names verbatim).
  * ------------------------------------------------------------------------- */
 
 $bayern2026 = [
@@ -522,7 +522,7 @@ expect(
 expect(
     ['state' => 'BY', 'assumption' => false, 'augsburg' => true, 'corpusChristi' => false, 'sundays' => true, 'extra' => []],
     Holidays::config(['land' => 'bayern', 'mariaeHimmelfahrt' => false, 'friedensfest' => true]),
-    'config(legacy betrieb.feiertage)'
+    'config(legacy array)'
 );
 expect(
     ['state' => 'BB', 'assumption' => true, 'augsburg' => false, 'corpusChristi' => true, 'sundays' => false, 'extra' => []],
@@ -682,7 +682,7 @@ expect('Weltkindertag', Holidays::name('childrensDay'), 'Name childrensDay (de)'
 
 
 /* --------------------------------------------------------------------------
- * Review findings 1, 3, 7, 21: Berlin 2028, legacy arrays without `land`,
+ * Berlin 2028, legacy arrays without `land`,
  * boolean switches only.
  * -------------------------------------------------------------------------- */
 
@@ -694,7 +694,7 @@ holds(!array_key_exists('2028-06-17', Holidays::ids(2028, 'BY')), 'BY 2028: no 1
 expect('Jahrestag des Volksaufstands 1953', Holidays::name('uprisingDay'), 'name uprisingDay (de)');
 holds(array_key_exists('2028-06-17', Holidays::forYear(2028, Holidays::config('BE'))), 'forYear: BE 2028 lists 17 June');
 
-// Legacy array without `land`: the starter read it as Bavaria.
+// Legacy array without `land`: Bavaria.
 $legacyNoLand = Holidays::config(['mariaeHimmelfahrt' => false]);
 expect('BY', $legacyNoLand['state'], 'legacy array with mariaeHimmelfahrt and no land counts as Bavaria');
 expect(false, $legacyNoLand['assumption'], 'legacy mariaeHimmelfahrt => false is read without land');

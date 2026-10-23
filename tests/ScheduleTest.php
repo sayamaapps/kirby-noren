@@ -9,13 +9,12 @@
  * notice, English texts, closure labels, timezones, dayIndex, parseTime,
  * lookahead, closures per area, upcoming holidays, week/maintained/sorting.
  *
- * Ports every check of kirby-starter's OeffnungszeitenTest.php (same sample
- * business, same dates, same German strings) plus the extra check of
- * the shop site's OeffnungszeitenTest.php ("Ohne Feiertagsprüfung wäre derselbe
- * Samstag offen"), renamed per SPEC §8. Regression guards kept: no memoisation
+ * Covers every check of the original sample set (same sample business, same
+ * dates, same German strings) plus the shop extra check ("Ohne Feiertagsprüfung
+ * wäre derselbe Samstag offen"). Regression guards: no memoisation
  * across areas, appended rows, DST, running closure, 14-day lead boundary.
  *
- * Run:  cd kirby-noren && ASDF_PHP_VERSION=8.5.3 php tests/ScheduleTest.php
+ * Run:  php tests/ScheduleTest.php
  */
 
 require_once __DIR__ . '/helpers.php';
@@ -29,7 +28,7 @@ use Noren\{I18n, Schedule, Holidays};
 I18n::setLanguage('de');
 
 /* --------------------------------------------------------------------------
- * Sample business (starter): shop "laden" Mo 13–18, Di–Fr 8:30–18, Sa 8–18;
+ * Sample business: shop "laden" Mo 13–18, Di–Fr 8:30–18, Sa 8–18;
  * café "cafe" Di–Sa 9–17; Monday and Sunday closed for both.
  * Monday of the shop is written with the legacy vm_/nm_ fields on purpose:
  * that row is needed in several checks below.
@@ -80,7 +79,7 @@ $musterOhneFeiertage = Schedule::fromFields($musterFeld, null, null, 'Betriebsfe
 $muster = Schedule::fromFields($musterFeld, null, null, 'Betriebsferien', $checkerBY);
 
 /* ==========================================================================
- * 1. Starter: status at fixed moments
+ * 1. Sample: status at fixed moments
  * ========================================================================== */
 
 expect('Jetzt geschlossen', $laden->status(at('2026-07-06 10:00'))['text'], 'Montagvormittag: jetzt geschlossen');
@@ -117,7 +116,7 @@ expect('öffnet morgen um 13:00 Uhr', $sl['detail'], 'So Laden öffnet morgen (M
 expect('öffnet am Dienstag um 9:00 Uhr', $sc['detail'], 'So Café öffnet am Dienstag');
 
 /* ==========================================================================
- * 2. Starter: closures (Betriebsferien) and the running closure
+ * 2. Sample: closures (Betriebsferien) and the running closure
  * ========================================================================== */
 
 $ferien = field([
@@ -158,7 +157,7 @@ $mitFerien2 = Schedule::fromFields($feld, $ferien2, 'laden');
 expect('öffnet am Donnerstag um 8:30 Uhr', $mitFerien2->status(at('2026-07-05 11:00'))['detail'], 'nächste Öffnung überspringt die Ferien');
 
 /* ==========================================================================
- * 3. Starter: half-filled rows, no field, unknown area
+ * 3. Sample: half-filled rows, no field, unknown area
  * ========================================================================== */
 
 $halb = field([
@@ -182,7 +181,7 @@ $fremd = Schedule::fromFields($feld, null, 'werkstatt');
 expect(false, $fremd->maintained(), 'unbekannter Bereich: nicht gepflegt');
 
 /* ==========================================================================
- * 4. Starter: regression guard — no memoisation per page
+ * 4. Sample: regression guard — no memoisation per page
  * ========================================================================== */
 
 // Both plans come from the SAME field and the same page. A cache keyed on the
@@ -198,7 +197,7 @@ expect(0, count($cafeZuerst->blocks(0)), 'Reihenfolge: Café zuerst, hat montags
 expect(1, count($ladenZuerst->blocks(0)), 'Reihenfolge: Laden danach, hat montags einen Block');
 
 /* ==========================================================================
- * 5. Starter: several rows per weekday are appended
+ * 5. Sample: several rows per weekday are appended
  * ========================================================================== */
 
 $geteilt = field([
@@ -213,14 +212,14 @@ expect(false, $g->status(at('2026-07-06 13:00'))['open'], 'Mittagspause gilt als
 expect('öffnet heute um 14:00 Uhr', $g->status(at('2026-07-06 13:00'))['detail'], 'Mittagspause nennt die Nachmittagszeit');
 
 /* ==========================================================================
- * 6. Starter: DST change (29 March 2026)
+ * 6. Sample: DST change (29 March 2026)
  * ========================================================================== */
 
 // modify('+1 day') across the switch must not move the next opening.
 expect('öffnet morgen um 13:00 Uhr', $laden->status(at('2026-03-29 11:00'))['detail'], 'Zeitumstellung: nächste Öffnung stimmt');
 
 /* ==========================================================================
- * 7. Starter: upcoming closures (constructor input, no lead time)
+ * 7. Sample: upcoming closures (constructor input, no lead time)
  * ========================================================================== */
 
 $mitFerienKonstruktor = new Schedule(
@@ -254,7 +253,7 @@ expect(0, count((new Schedule(
 expect('Betriebsferien', $mitFerienKonstruktor->closureLabel(), 'Label ist auslesbar');
 
 /* ==========================================================================
- * 8. Starter: public holidays (Bavaria)
+ * 8. Sample: public holidays (Bavaria)
  * ========================================================================== */
 
 $s = $muster->status(at('2026-10-03 10:00'));
@@ -291,7 +290,7 @@ expect([], $musterOhneFeiertage->upcomingHolidays(at('2026-09-27'), 60), 'Ohne O
 expect(true, $musterOhneFeiertage->status(at('2026-10-03 10:00'))['open'], 'Ohne Feiertagsprüfung wäre derselbe Samstag offen');
 
 /* ==========================================================================
- * 9. Starter: special days (Muster) and their names
+ * 9. Sample: special days (Muster) and their names
  * ========================================================================== */
 
 // Notice only 14 days ahead; without lead time (schema.org) everything.
@@ -491,7 +490,7 @@ $s = $musterEveZu->status(at('2026-10-02 19:00'));
 expect('öffnet am Montag um 13:00 Uhr', $s['detail'], 'Eve notice: tomorrow with closure → no notice');
 expect(null, $s['holiday'], 'Eve notice: tomorrow with closure → holiday null');
 
-// Without the setting the ported check stays as it was.
+// Without the setting the check stays as it was.
 expect('öffnet am Montag um 13:00 Uhr', $muster->status(at('2026-10-02 19:00'))['detail'], 'Eve notice off: plain detail');
 
 /* ==========================================================================
@@ -625,7 +624,7 @@ I18n::setLanguage('de');
 
 
 /* --------------------------------------------------------------------------
- * Runs and merged blocks (review findings 4, 5, 18, 20).
+ * Runs and merged blocks.
  * -------------------------------------------------------------------------- */
 
 // Touching rows (morning and afternoon split at 12:00) are one opening.

@@ -4,7 +4,6 @@ namespace Noren;
 
 /**
  * Day grouping for compact output (SPEC.md §3.4). Kirby-free.
- * OWNER: task `presentation`.
  *
  * Group shape (both functions):
  *   ['days' => [1, 2], 'label' => 'Di – Mi', 'blocks' => [[660, 960]],
@@ -14,7 +13,7 @@ namespace Noren;
 final class Grouping
 {
     /**
-     * CONSECUTIVE days with identical blocks (restaurant zeitgruppen()).
+     * CONSECUTIVE days with identical blocks.
      * With $withNote also an identical note is required, and the group
      * carries it; without, `note` is always null.
      * label = rangeLabel(), hours = blocksLabel(). In week order.
@@ -57,8 +56,7 @@ final class Grouping
     }
 
     /**
-     * Days with identical blocks ANYWHERE in the week (bike shop
-     * zeiten-kurz). With $withNote (default) the note must match too and the
+     * Days with identical blocks ANYWHERE in the week. With $withNote (default) the note must match too and the
      * group carries it. Sorted by the start of the first block, ties in week
      * order. label = listLabel(), hours = shortHoursLabel().
      *
