@@ -1,6 +1,5 @@
 # Structure field `bereiche`: the parts of the business that have their own
 # opening hours. Field names are a compatibility contract (SPEC.md §6).
-# Ported from kirby-starter site/blueprints/pages/betrieb.yml, tab "bereiche".
 label: noren.panel.areas.label
 type: structure
 columns:

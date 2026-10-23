@@ -80,59 +80,14 @@ All notable changes to this project are documented here. Versions follow
 
 ## [1.0.0] — 2026-10-11
 
-First release as a Composer package. Before 1.0.0 the hours logic lived as a
-copy in each site: `site/plugins/betrieb` (kirby-starter, with the snippets
-`zeiten-tabelle`, `statusband` and the hours part of `strukturdaten`), and
-variants in a practice site (`Praxis\Sprechzeiten`), a restaurant site
-(`Karte::zeitgruppen()`) and a bike-shop site (`zeiten-kurz`). The changes below are
-measured against kirby-starter's `betrieb` copy.
-
-### Changed — renamed to English (breaking)
-
-Code, options, site and page methods, snippets, CSS classes and the blueprint
-keys are English now. There are no fallbacks for the old names: a site switching
-from the copy updates its calls and snippets once, using the table below.
-
-| Before (`betrieb` copy) | Now (Noren) |
-|---|---|
-| `Betrieb\Oeffnungszeiten` | `Noren\Schedule` |
-| `::ausFeld($zeiten, $schliessungen, $bereich, $label, $feiertag)` | `::fromFields($hours, $closures, $area, $closureLabel, $holiday, $settings)` |
-| `::TAGE` | `::DAYS_DE` (display names: `I18n::day()`) |
-| `::formatiere()` | `::formatTime()` |
-| `bloecke()`, `hinweis()`, `gepflegt()` | `blocks()`, `note()`, `maintained()` |
-| `schliessungAm()`, `sonderzeitAm()`, `bloeckeAm()` | `closureOn()`, `specialOn()`, `blocksOn()` |
-| `bezeichnung()`, `schliessungLabel()` | `label()`, `closureLabel()` |
-| `feiertagAm()` | `holidayOn()` |
-| `kommendeFeiertage()` → `datum`, `name` | `upcomingHolidays()` → `date`, `name` |
-| `kommendeSchliessungen()` → `von`, `bis`, `hinweis`, `anlass`, `zeiten` | `upcomingClosures()` → `from`, `to`, `note`, `occasion`, `hours` (+ `area`) |
-| `status()` → `offen`, `text`, `detail` | `status()` → `open`, `text`, `detail` (+ `state`, `until`, `next`, `occasion`, `holiday`) |
-| constructor `['bloecke' => …, 'hinweis' => …]` | `['blocks' => …, 'note' => …]` |
-| `Betrieb\Feiertage::ostersonntag()` | `Noren\Holidays::easterSunday()` |
-| `Feiertage::bayern($jahr, $mariae, $friedensfest)` | `Holidays::forYear($jahr, Holidays::config(['state' => 'BY', 'assumption' => …, 'augsburg' => …]))` |
-| `Feiertage::pruefer(['land' => 'bayern'])` | `Holidays::checker(Holidays::config('BY'))` |
-| option `betrieb.feiertage` | `noren.holidays` |
-| option `betrieb.schliessungLabel` | `noren.closureLabel` |
-| `$site->betrieb()` | `$site->norenLocation()` |
-| `$site->bereiche()` (Structure) | `$site->norenAreas()` (array `key`, `name`, `short`) |
-| `$site->oeffnungszeiten($bereich)` | `$site->norenSchedule($area)` |
-| `$site->bereicheMitZeiten()` → `schluessel`, `name`, `plan` | `$site->norenUnits()` → `id`, `area`, `name`, `short`, `label`, `location`, `schedule` |
-| `$page->oeffnungszeiten()`, `$page->hatZeiten()` | `$page->norenSchedule()`, `$page->norenHasHours()` |
-| snippet `zeiten-tabelle` (`$bereich`, `$plan`) | `noren/table` (`$area`, `$schedule`) |
-| snippet `statusband` (`$nur`, `$mehrLink`) | `noren/status` (`$only`, `$link`) |
-| bike shop `zeiten-kurz` (`$plan`) | `noren/compact` (`$schedule`, `$mode`, `$title`) |
-| restaurant `Karte::zeitgruppen($plan)` → `tage`, `zeiten` | `Grouping::consecutive($schedule)` → `label`, `hours` |
-| `strukturdaten.php` week and special closures | `$site->norenSchema()` |
-| CSS `zeiten-raster`, `zeile`, `zeile-tag`, `zeile-zeit`, `zeile-zu`, `zeile-hinweis`, `zeile--feiertage`, `zeiten-zusatz`, `schliessung`, `data-heute="ja"` | `noren-table`, `noren-row`, `noren-day`, `noren-hours`, `noren-closed`, `noren-note`, `noren-row--holidays`, `noren-extra`, `noren-closure`, `data-today="true"` |
-| CSS `band-status`, `band-bereich`, `data-offen="ja"` | `noren-status-line`, `noren-status-label`, `data-open="true"` |
-| blueprint tabs `Bereiche` and `Zeiten` (in the site's `betrieb.yml`) | `noren/pages/location` with the tabs `noren/tabs/areas` and `noren/tabs/hours` (same field names) |
-
-Parts of the `betrieb` copy that are out of scope stay with the site:
-`telefonUri`, `betriebsangabe` and the address fields.
+First release as a Composer package.
 
 ### Added
 
 - Package `sayamaapps/kirby-noren`, Kirby plugin id `sayamaapps/noren`, PHP
   namespace `Noren\`, installed to `site/plugins/noren/`.
+- **English names** for code, options, site and page methods, snippets, CSS
+  classes and blueprint keys. The German content field names are unchanged.
 - **Several blocks per day** (lunch break, split shifts) and a **weekly plan**
   with one schedule per area and per location.
 - **Areas and locations**: one location with several areas (`bereiche`), or
@@ -188,54 +143,40 @@ Parts of the `betrieb` copy that are out of scope stay with the site:
   holiday in 2028, as passed by the Abgeordnetenhaus in July 2024.
 - Time zones: any zone PHP accepts is valid (`Etc/UTC`, `GMT`, `Europe/Kiev`).
 
-### Changed behaviour
+### Behaviour
 
-These seven changes against the `betrieb` copy are deliberate. Each one is
-visible on the site after the switch.
+The following behaviour is deliberate and visible on the site:
 
-1. **Overnight blocks are read.** Before, a row whose end lay before its start
-   was ignored. Now Friday 18:00 to 2:00 is a block on Friday that is open until
-   2:00 on Saturday. The default `overnightUntil` (`06:00`) keeps an end such as
-   08:00 as a typo. `noren.overnightUntil` = `false` ignores rows that end after
-   midnight, as the copy did. A row ending at 00:00 (Friday 18:00 to 00:00) is
-   read as "until midnight" in every case, also with `false`; the copy ignored it.
-2. **A business without areas gets a status line.** The copy's
-   `bereicheMitZeiten()` returned nothing when no areas were defined, so the
-   status band stayed empty.
+1. **Overnight blocks are read.** Friday 18:00 to 2:00 is a block on Friday that
+   is open until 2:00 on Saturday. The default `overnightUntil` (`06:00`) keeps an
+   end such as 08:00 as a typo. `noren.overnightUntil` = `false` ignores rows that
+   end after midnight. A row ending at 00:00 (Friday 18:00 to 00:00) is read as
+   "until midnight" in every case, also with `false`.
+2. **A business without areas gets a status line.**
 3. **The status label uses the area's short name** (`kurzname`), as its Panel
-   help always promised.
-4. **A holiday with special hours is no longer listed as closed** in the table
-   note and in schema.org. Special hours beat holidays everywhere.
-5. **Holidays for all 16 states**, not only Bavaria. An unknown state in
-   `noren.holidays` is logged and holidays stay off; before it silently meant
-   "no holidays".
+   help says.
+4. **A holiday with special hours is not listed as closed** in the table note and
+   in schema.org. Special hours beat holidays everywhere.
+5. **Holidays for all 16 states.** An unknown state in `noren.holidays` is logged
+   and holidays stay off.
 6. **The texts follow the language of the site.** `noren.language`, else the
    current or default language of a multi-language site, else Kirby's `locale`,
-   else English. The copy always printed German. A German single-language site
-   without a `locale` must set `noren.language` => `de` when it switches.
+   else English. A German single-language site without a `locale` must set
+   `noren.language` => `de`.
 7. **Touching and overlapping blocks are one opening.** `08:00–12:00` and
    `12:00–18:00` on the same day show as `08:00 – 18:00`, and the status says
-   "until 18:00". The copy listed two rows and said "until 12:00".
+   "until 18:00".
 
-### Unchanged (data continuity)
+### Content
 
-- **No content has to change.** The German field names (`bereiche`, `zeiten`,
-  `schliessungen`, `zeitenschluessel`, `kurzname`), the row names (`bereich`,
-  `tag`, `von1`/`bis1`, `von2`/`bis2`, legacy `vm_`/`nm_`, `hinweis`,
-  `nm_hinweis`) and the closure names (`von`, `bis`, `bereich`, `anlass`,
-  `hinweis`, `oeffnet`, `schliesst`) are the contract of
+- The German field names (`bereiche`, `zeiten`, `schliessungen`, `zeitenschluessel`,
+  `kurzname`), the row names (`bereich`, `tag`, `von1`/`bis1`, `von2`/`bis2`, legacy
+  `vm_`/`nm_`, `hinweis`, `nm_hinweis`) and the closure names (`von`, `bis`,
+  `bereich`, `anlass`, `hinweis`, `oeffnet`, `schliesst`) are the contract of
   [README](README.md#content-field-contract).
-- The default template `betrieb` and the blueprint file `betrieb.yml` are
-  unchanged.
-- The old option values move verbatim: `betrieb.feiertage` is read as
-  `noren.holidays` (its legacy keys `land`, `mariaeHimmelfahrt`,
-  `friedensfest` are accepted; without `land` the legacy keys mean Bavaria),
-  `betrieb.schliessungLabel` becomes `noren.closureLabel`.
-- Hours, closures and special days of existing content produce the same
-  status, table and notes as before, apart from the five changes above.
-- Bavarian holidays are calculated with the same flags as before. Holiday names
-  are the same German names.
-- Both plugins can be installed side by side during the switch.
+- The default template name is `betrieb`.
+- The legacy holidays array keys `land`, `mariaeHimmelfahrt` and `friedensfest` are
+  accepted by `noren.holidays`; without `land` they mean Bavaria.
 
 ### [privacy text]
 

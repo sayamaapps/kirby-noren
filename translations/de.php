@@ -2,9 +2,7 @@
 
 /**
  * German strings. Keys and placeholders as in en.php; tests/I18nTest.php
- * checks that both files have the same keys and placeholders. The wording of
- * status, table and Panel texts is the one site/plugins/betrieb printed
- * (kirby-starter) — it is the reference.
+ * checks that both files have the same keys and placeholders.
  */
 return [
     // Weekdays, ISO-8601 numbering (1 = Monday).

@@ -177,7 +177,7 @@ YAML);
 
         // Page title: the location blueprint is extended, but Kirby keeps its
         // own fallback title ("Pages /betrieb") over an extended title, so the
-        // site sets the key itself — see NOTES-panel.md. The key resolves here.
+        // site sets the key itself. The key resolves here.
         $eigen = $kirby->page('eigen');
         $eigenForm = Form::for($eigen);
         $eigenFields = $eigenForm->fields()->toArray();

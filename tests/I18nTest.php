@@ -3,7 +3,6 @@
  * Translations: every language has the same keys and placeholders as
  * English, no value is empty, and the helpers follow the language.
  *   php tests/I18nTest.php
- * Owned by the architect (shared file).
  */
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/../src/I18n.php';
@@ -59,7 +58,7 @@ expect('nonsense', I18n::date('nonsense'), 'unparsable date string comes back un
 I18n::setLanguage('en');
 
 
-/* Panel help texts must not hard-code options a site can change (review finding 10). */
+/* Panel help texts must not hard-code options a site can change */
 foreach (['en', 'de'] as $language) {
     $panel = I18n::table($language);
     holds(!str_contains($panel['panel.hours.info'], '6:00') && !str_contains($panel['panel.hours.info'], '6 Uhr'), "$language: hours help does not hard-code 6:00");

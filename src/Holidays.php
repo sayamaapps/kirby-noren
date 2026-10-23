@@ -17,7 +17,7 @@ use InvalidArgumentException;
  *
  * - `assumption` (Mariä Himmelfahrt, 15.8.) in Bavaria: only in
  *   predominantly Catholic municipalities (list: Bayerisches Landesamt für
- *   Statistik). Default ON, as in site/plugins/betrieb. Always in Saarland.
+ *   Statistik). Default ON. Always in Saarland.
  * - `augsburg` (Augsburger Friedensfest, 8.8.): only in the city of Augsburg.
  *   Default off.
  * - `corpusChristi` (Fronleichnam) in Saxony and Thuringia: only in some
@@ -212,9 +212,9 @@ final class Holidays
      *   ['state' => 'BY', 'assumption' => true, 'augsburg' => false,
      *    'corpusChristi' => false, 'sundays' => true,
      *    'extra' => ['06-24' => 'Stadtfest', '2027-07-02' => 'Dorffest']]
-     *   legacy (site/plugins/betrieb): ['land' => 'bayern',
+     *   legacy array: ['land' => 'bayern',
      *    'mariaeHimmelfahrt' => true, 'friedensfest' => false]; without `land`
-     *    the legacy keys mean Bavaria, as they did in the starter.
+     *    the legacy keys mean Bavaria.
      *
      * Invalid `extra` entries (key neither MM-DD nor Y-m-d, empty name) are
      * skipped and logged. A flag that is not a real boolean (for example the
@@ -236,7 +236,7 @@ final class Holidays
         }
 
         $state = $option['state'] ?? $option['land'] ?? null;
-        // The starter's legacy array without `land` was Bavarian: its keys say so.
+        // A legacy array without `land` is Bavarian: its keys say so.
         if ($state === null && (array_key_exists('mariaeHimmelfahrt', $option) || array_key_exists('friedensfest', $option))) {
             $state = 'BY';
         }

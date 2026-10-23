@@ -23,17 +23,16 @@ use Noren\Schedule;
  * for Kirby 5. Off by default: without `'noren.active' => true` every site and
  * page method returns null or [] and the snippets print nothing.
  *
- * Shared file — owned by the architect (SPEC.md §2). Builders never edit it;
- * all logic lives in src/Locations.php and the Kirby-free classes.
+ * All logic lives in src/Locations.php and the Kirby-free classes.
  *
  * Defaults are passed as fallback values directly at each option call, NOT
  * in an 'options' block (Kirby would file them under sayamaapps.noren.*
  * otherwise).
  *
- * site/plugins/betrieb (the copy this package replaces) may stay installed
+ * A separately installed plugin with a similar purpose may stay installed
  * next to it: different plugin id, namespace, method and snippet names, so
- * both load without conflict. Noren deliberately registers none of the old
- * German method names (SPEC.md §8).
+ * both load without conflict. Noren registers no aliases for other method
+ * names (SPEC.md §8).
  */
 
 /** Reads `noren.<key>`. Also meant for site snippets with their own markup. */

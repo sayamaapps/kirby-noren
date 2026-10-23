@@ -5,7 +5,7 @@ namespace Noren;
 use Kirby\Cms\App;
 
 /**
- * Reads `noren.*` options. Shared file — owned by the architect (SPEC.md §4).
+ * Reads `noren.*` options.
  *
  * `null` counts as "not set", like Kirby's own option() (A::get() checks
  * isset() as well), so `'noren.timezone' => null` falls back to the default.
@@ -77,7 +77,7 @@ final class Options
 
     /**
      * Templates whose pages are locations: `noren.template`, a string or a
-     * list of strings. Default `['betrieb']` (the starter's template).
+     * list of strings. Default `['betrieb']`.
      *
      * @return list<string>
      */
@@ -180,7 +180,7 @@ final class Options
      * `noren.overnightUntil`: latest end time ("HH:MM") on the next day up to
      * which a block whose end lies before its start counts as overnight
      * (Fri 18:00–02:00). Default "06:00". `false` switches overnight blocks
-     * off: a row that ends after midnight is then ignored, as before, while a
+     * off: a row that ends after midnight is then ignored, while a
      * row ending at 00:00 still counts as "until midnight" (Schedule::block()).
      * Returns minutes or null.
      */

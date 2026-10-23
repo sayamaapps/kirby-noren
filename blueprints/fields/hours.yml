@@ -1,7 +1,6 @@
 # Structure field `zeiten`: one row per area and weekday, two blocks per row.
 # Field names are a compatibility contract (SPEC.md §6). Option values stay
 # the German weekday names; only the shown texts are translated.
-# Ported from kirby-starter site/blueprints/pages/betrieb.yml, tab "zeiten".
 label: noren.panel.hours.label
 type: structure
 columns:

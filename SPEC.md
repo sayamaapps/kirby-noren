@@ -9,33 +9,29 @@ Package `sayamaapps/kirby-noren`, plugin id `sayamaapps/noren`, namespace
 `Noren`, option prefix `noren.`, directory
 this repository.
 
-It replaces `site/plugins/betrieb` of kirby-starter (`Betrieb\Oeffnungszeiten`,
-`Betrieb\Feiertage`, the snippets `zeiten-tabelle`, `statusband`, the hours part
-of `strukturdaten`) and the variants in practice (`Praxis\Sprechzeiten`),
-a restaurant (`Karte::zeitgruppen()`) and a bike shop (`zeiten-kurz`).
-`Telefon.php`, address fields and `betriebsangabe` are **out of scope**.
+Out of scope: telephone links, address fields and the business description;
+the site provides them.
 
 This document is the contract. Section numbers are referenced from code
-comments and task prompts.
+comments and other documentation.
 
 ---
 
-## 1. Ground rules for every builder
+## 1. Ground rules
 
 - PHP 8.2 compatible code (no typed class constants, no `readonly` classes,
-  no 8.3+ functions). Run with `ASDF_PHP_VERSION=8.5.3 php …` (asdf otherwise
-  says "No version is set").
+  no 8.3+ functions). Run the tests with PHP 8.2 to 8.4.
 - Code, identifiers, comments, README in **English**. German only in
   `translations/de.php`.
 - Never hard-code `Europe/Berlin` in logic: use `Schedule::DEFAULT_TIMEZONE`,
   `$schedule->timezone()` or `Options::timezone()`.
 - Every user-facing string comes from `I18n::t()` (keys in §5). If you need a
-  key that does not exist, do NOT add it — write it into `NOTES-<task>.md`
+  key that does not exist, do not add it on the way: raise it in the pull request
   and use the closest existing key.
-- Only edit files your task owns (§2). Need a change in a file you do not
-  own (a bug in Schedule.php, a missing translation, a helper)? Write it into
-  `NOTES-<task>.md` in the plugin root: file, problem, proposed change. Do not
-  work around it with a copy of the logic.
+- Keep a change to the files it needs. A fix in another file (a bug in
+  Schedule.php, a missing translation, a helper) goes into the pull request
+  with file, problem and proposed change. Do not work around it with a copy of
+  the logic.
 - Tests: standalone PHP scripts `tests/<Name>Test.php`, exit code 0 = pass, no
   PHPUnit. Use `tests/helpers.php` (`expect()`, `holds()`, `only()`, `at()`,
   `field()`, `finish()`, Kirby fixtures `noren_site()`, `noren_kirby()`,
@@ -43,83 +39,70 @@ comments and task prompts.
   `src/I18n.php` and the classes they need directly, never `index.php`.
   Kirby tests never require src files; Kirby loads the plugin through the
   symlink `noren_site()` creates.
-- Do not push, do not create GitHub repos, do not touch any other repository
-  (the sources in §0 are read-only). Never delete files outside the plugin
-  directory. Do not run `git commit`.
+- Keep changes inside this repository. Never delete files outside the plugin
+  directory.
 - No memoisation of schedules keyed on the page id, anywhere (two areas live
   on the same page; the second call would silently get the first plan).
 
-### 0. Sources (read-only)
+### 0. Sources
 
-| What | Path |
-|---|---|
-| Original plugin | `../kirby-starter/site/plugins/betrieb/{index.php,src/Oeffnungszeiten.php,src/Feiertage.php}` |
-| Original snippets | `../kirby-starter/site/snippets/{zeiten-tabelle.php,statusband.php,strukturdaten.php}` |
-| Original blueprint, config | `../kirby-starter/site/blueprints/pages/betrieb.yml`, `site/config/betrieb.example.php` |
-| Original tests | `../kirby-starter/tests/{OeffnungszeitenTest.php,FeiertageTest.php}`, `../muster-laden/tests/OeffnungszeitenTest.php` (one extra check "Ohne Feiertagsprüfung wäre derselbe Samstag offen") |
-| Several locations, eve-of-holiday notice | `../praxis-beispiel/site/plugins/praxis/{index.php,src/Sprechzeiten.php}`, `praxis-beispiel/site/blueprints/pages/standort.yml` |
-| Consecutive grouping | `../gasthaus-muster/site/plugins/gasthaus/src/Karte.php` (`zeitgruppen()`), `gasthaus-muster/tests/KarteTest.php` |
-| Non-consecutive grouping | `../radladen-muster/site/snippets/zeiten-kurz.php` |
-| Family conventions | `../kirby-koe` (README, CHANGELOG, tests), `../kirby-kizami` |
+None. The package is written from this specification; building and testing it
+needs nothing outside this repository.
 
 ---
 
-## 2. File tree and owners
-
-`architect` = written before the build, shared, **builders never edit**.
-`architect → <task>` = written by the architect as working code; from now on
-owned by that task, which verifies it with tests and may fix it.
+## 2. File tree
 
 ```
 kirby-noren/
-├── composer.json                    architect
+├── composer.json
 ├── composer.lock, vendor/           generated (composer install), not committed
-├── .gitignore, .gitattributes       architect
-├── LICENSE                          architect
-├── .github/workflows/ci.yml         architect
-├── SPEC.md                          architect
-├── index.php                        architect   (complete registration, §3.9)
+├── .gitignore, .gitattributes
+├── LICENSE
+├── .github/workflows/ci.yml
+├── SPEC.md
+├── index.php                        (complete registration, §3.9)
 ├── src/
-│   ├── I18n.php                     architect   (§3.3)
-│   ├── Options.php                  architect   (§3.3, §4)
-│   ├── Schedule.php                 architect → schedule      (§3.1)
-│   ├── Holidays.php                 architect → holidays      (§3.2)
-│   ├── Grouping.php                 stub → presentation       (§3.4)
-│   ├── Presenter.php                stub → presentation       (§3.5)
-│   ├── SchemaOrg.php                stub → kirby              (§3.6)
-│   └── Locations.php                stub → kirby              (§3.7)
+│   ├── I18n.php                     (§3.3)
+│   ├── Options.php                  (§3.3, §4)
+│   ├── Schedule.php                 (§3.1)
+│   ├── Holidays.php                 (§3.2)
+│   ├── Grouping.php                 (§3.4)
+│   ├── Presenter.php                (§3.5)
+│   ├── SchemaOrg.php                (§3.6)
+│   └── Locations.php                (§3.7)
 ├── snippets/noren/
-│   ├── status.php                   placeholder → presentation (§3.8)
-│   ├── table.php                    placeholder → presentation (§3.8)
-│   └── compact.php                  placeholder → presentation (§3.8)
+│   ├── status.php                   (§3.8)
+│   ├── table.php                    (§3.8)
+│   └── compact.php                  (§3.8)
 ├── blueprints/
-│   ├── fields/areas.yml             placeholder → panel (§7)
-│   ├── fields/areas-info.yml        placeholder → panel
-│   ├── fields/hours.yml             placeholder → panel
-│   ├── fields/hours-info.yml        placeholder → panel
-│   ├── fields/closures.yml          placeholder → panel
-│   ├── fields/closures-info.yml     placeholder → panel
-│   ├── tabs/areas.yml               placeholder → panel
-│   ├── tabs/hours.yml               placeholder → panel
-│   └── pages/location.yml           placeholder → panel
-├── translations/en.php, de.php      architect   (§5)
+│   ├── fields/areas.yml             (§7)
+│   ├── fields/areas-info.yml
+│   ├── fields/hours.yml
+│   ├── fields/hours-info.yml
+│   ├── fields/closures.yml
+│   ├── fields/closures-info.yml
+│   ├── tabs/areas.yml
+│   ├── tabs/hours.yml
+│   └── pages/location.yml
+├── translations/en.php, de.php      (§5)
 ├── tests/
-│   ├── run.sh                       architect
-│   ├── helpers.php                  architect
-│   ├── I18nTest.php                 architect
-│   ├── ScheduleTest.php             schedule      (§9.1)
-│   ├── HolidaysTest.php             holidays      (§9.2)
-│   ├── GroupingTest.php             presentation  (§9.3)
-│   ├── PresenterTest.php            presentation  (§9.4)
-│   ├── SnippetsTest.php             presentation  (§9.5)
-│   ├── SchemaOrgTest.php            kirby         (§9.6)
-│   ├── KirbyTest.php                kirby         (§9.7)
-│   └── BlueprintsTest.php           panel         (§9.8)
-├── README.md                        docs   (§10)
-└── CHANGELOG.md                     docs
+│   ├── run.sh
+│   ├── helpers.php
+│   ├── I18nTest.php
+│   ├── ScheduleTest.php  (§9.1)
+│   ├── HolidaysTest.php  (§9.2)
+│   ├── GroupingTest.php  (§9.3)
+│   ├── PresenterTest.php  (§9.4)
+│   ├── SnippetsTest.php  (§9.5)
+│   ├── SchemaOrgTest.php  (§9.6)
+│   ├── KirbyTest.php  (§9.7)
+│   └── BlueprintsTest.php  (§9.8)
+├── README.md  (§10)
+└── CHANGELOG.md
 ```
 
-Run everything: `cd this repository && ASDF_PHP_VERSION=8.5.3 sh tests/run.sh`.
+Run everything from the repository root: `sh tests/run.sh`.
 
 ---
 
@@ -146,10 +129,9 @@ everywhere in PHP; translation keys use ISO numbers (`day.1` = Monday).
 Times are **minutes since 0:00** of the block's day (`int`); a block is
 `[from, to]` with `to > from`; `to` may exceed 1440 (overnight, §3.1.4).
 
-### 3.1 `Noren\Schedule` (src/Schedule.php — written, owner `schedule`)
+### 3.1 `Noren\Schedule` (src/Schedule.php)
 
-Port of `Betrieb\Oeffnungszeiten`. Read the file; its docblocks are part of
-this spec. Public surface:
+Read the file; its docblocks are part of this spec. Public surface:
 
 ```php
 final class Schedule {
@@ -279,8 +261,7 @@ Order of evaluation (first match wins):
    holiday, has no special hours, no closure, and the weekly plan would be
    open → detail = `detail.holidayTomorrow` + `detail.separator` + detail
    ("morgen Feiertag (Tag der Deutschen Einheit) · öffnet am Montag um 13:00
-   Uhr"), `holiday` = tomorrow's name. Default off (the starter's tests
-   expect the plain detail).
+   Uhr"), `holiday` = tomorrow's name. Default off; without it the plain detail is shown.
 
 Runs over several days: the end of the running opening is followed across
 midnight as long as the next day starts with a block at 00:00 and is not an
@@ -298,18 +279,17 @@ Day wording of "öffnet …" (days between today's and the target's midnight):
 `blocksOn(target)`.
 
 Special opening beats holiday everywhere (status, next open day,
-`upcomingHolidays()` skips days with special hours — a fix over the
-original, which listed such a day as closed in table and schema.org).
+`upcomingHolidays()` skips days with special hours; a holiday with special hours
+is not listed as closed in table and schema.org).
 
 #### 3.1.4 Overnight blocks
 
 A block like Fri 18:00–02:00 is stored as `[1080, 1560]` on **Friday** (the
 start day). It is shown as "18:00 – 2:00", in schema.org as Friday opens
 "18:00" closes "02:00". Status at Sat 01:00 is open ("noch bis 2:00 Uhr"),
-Sat 02:00 is closed. The original ignored such rows (end before start); the
-default `overnightUntil` 06:00 keeps treating "18:00–08:00" as a typo.
+Sat 02:00 is closed. The default `overnightUntil` 06:00 keeps treating "18:00–08:00" as a typo.
 
-### 3.2 `Noren\Holidays` (src/Holidays.php — written, owner `holidays`)
+### 3.2 `Noren\Holidays` (src/Holidays.php)
 
 ```php
 final class Holidays {
@@ -335,7 +315,7 @@ Holidays::config(false) === null;  Holidays::config(null) === null;
 Holidays::config('BY') === ['state' => 'BY', 'assumption' => true, 'augsburg' => false,
                             'corpusChristi' => false, 'sundays' => true, 'extra' => []];
 Holidays::config(['state' => 'BY', 'augsburg' => true, 'extra' => ['06-24' => 'Stadtfest', '2027-07-02' => 'Dorffest']]);
-Holidays::config(['land' => 'bayern', 'mariaeHimmelfahrt' => false, 'friedensfest' => true]); // legacy betrieb.feiertage
+Holidays::config(['land' => 'bayern', 'mariaeHimmelfahrt' => false, 'friedensfest' => true]); // legacy array form (`land`, `mariaeHimmelfahrt`, `friedensfest`)
 // throws InvalidArgumentException: true, 42, ['assumption' => true] (no state), 'XX'
 // invalid extra entries are skipped with error_log('Noren: noren.holidays extra entry … skipped …')
 ```
@@ -371,7 +351,7 @@ HH 10, HE 10, MV 11, NI 10, NW 11, RP 11, SL 12, SN 11, ST 11, SH 10, TH 11.
 
 **Decision on Easter/Whit Sunday**: included only for Brandenburg, the one
 state where they are statutory holidays (Feiertagsgesetz BB). Elsewhere a
-Sunday holiday changes nothing (the original's reasoning). Flag `sundays`
+Sunday holiday changes nothing. Flag `sundays`
 (default on) lets a BB site drop them. Valid for years from 1995 on (earlier
 rules, e.g. Buß- und Bettag nationwide until 1994, are not modelled).
 
@@ -379,7 +359,7 @@ Names are translated on lookup (`checker()` caches untranslated entries per
 year), so a language switch is respected. Extra days: a statutory holiday
 keeps its name on the same date; `MM-DD` recurs every year, `Y-m-d` once.
 
-### 3.3 `Noren\I18n`, `Noren\Options` (written, architect)
+### 3.3 `Noren\I18n`, `Noren\Options`
 
 - `I18n::setLanguage()`, `language()`, `table()`, `t($key, $values)`,
   `day(int $weekday)`, `dayShort(int $weekday)`,
@@ -399,9 +379,9 @@ site → its default language → first two letters of `locale` → `en`. Every
 code path that produces text in a Kirby context calls
 `Options::applyLanguage($kirby)` first (Locations wrappers, snippets).
 
-### 3.4 `Noren\Grouping` (owner `presentation`)
+### 3.4 `Noren\Grouping`
 
-Kirby-free. Signatures and examples in the stub `src/Grouping.php`. Group:
+Kirby-free. Signatures and examples are in `src/Grouping.php`. Group:
 
 ```php
 ['days' => [1, 2], 'label' => 'Di – Mi', 'blocks' => [[660, 960]], 'hours' => '11:00 – 16:00', 'note' => null]
@@ -428,7 +408,7 @@ Kirby-free. Signatures and examples in the stub `src/Grouping.php`. Group:
   "10–12:30 and 14–18" (`compact.and`, `compact.hours`).
 - `shortTime(600)` "10", `630` "10:30", `1440` "24", `1560` "2", `2880` "24".
 
-### 3.5 `Noren\Presenter` (owner `presentation`)
+### 3.5 `Noren\Presenter`
 
 Kirby-free view models; the snippets render exactly these, and
 `$site->norenTable()` / `norenCompact()` return them for own markup.
@@ -489,9 +469,9 @@ options `mode` ('grouped' | 'consecutive', default 'grouped'), `leadDays`
  'notes'  => array_slice(Presenter::closureNotes($s, $today, $leadDays), 0, $closures)]
 ```
 
-### 3.6 `Noren\SchemaOrg` (owner `kirby`)
+### 3.6 `Noren\SchemaOrg`
 
-Kirby-free, plain arrays, no JSON. Stub has the signatures.
+Kirby-free, plain arrays, no JSON.
 
 ```php
 SchemaOrg::openingHours($s) === [
@@ -518,9 +498,9 @@ LocalBusiness notation. A block until midnight (`[1080, 1440]`) stays opens
 `$from` default: today in the schedule's timezone. Overnight Fri 18:00–02:00
 → Friday opens "18:00" closes "02:00".
 
-### 3.7 `Noren\Locations` (owner `kirby`)
+### 3.7 `Noren\Locations`
 
-Kirby glue, static methods exactly as in the stub (index.php calls them).
+Kirby glue, static methods (index.php calls them).
 All of them return `null` / `[]` when `Options::active()` is false.
 
 - **pages(App)**: `noren.locations` set → a Closure is called (may return
@@ -583,7 +563,7 @@ All of them return `null` / `[]` when `Options::active()` is false.
 - **holidays(App, ?year)**: `Holidays::forYear(year ?? current year in
   noren.timezone, config)` with language applied; [] when off or no config.
 
-### 3.8 Snippets (owner `presentation`)
+### 3.8 Snippets
 
 Unstyled, only `noren-*` classes, all output escaped with `esc()`. Each
 snippet first returns silently when `!Options::active(kirby())`, then calls
@@ -646,7 +626,7 @@ nothing for null or `!maintained()`.
 (title paragraph only with `$title`; note span only with a note; closure
 paragraphs from `notes`, " — " + note when set.)
 
-### 3.9 Site and page methods (index.php — written)
+### 3.9 Site and page methods (index.php)
 
 | Site method | Returns |
 |---|---|
@@ -702,7 +682,7 @@ All read as `noren.<name>`, flat or nested; `null` = not set.
 ## 5. Translation keys
 
 The complete tables are `translations/en.php` and `translations/de.php`
-(written; `tests/I18nTest.php` keeps them in sync). Registered in Kirby as
+(`tests/I18nTest.php` keeps them in sync). Registered in Kirby as
 `noren.<key>`. The generated list of every key with both texts follows in
 §5.1. Groups:
 
@@ -742,12 +722,11 @@ names can be changed with `noren.fields`; the row-level names cannot.
 
 ---
 
-## 7. Blueprints (owner `panel`)
+## 7. Blueprints
 
 YAML files registered in index.php under the keys `noren/fields/*`,
 `noren/tabs/*`, `noren/pages/location`; sites use them with `extends:`.
-They port `kirby-starter/site/blueprints/pages/betrieb.yml` tabs "Bereiche"
-and "Zeiten" exactly (same field names, types, widths, `display: HH:mm`,
+They provide the tabs "Bereiche" and "Zeiten" (same field names, types, widths, `display: HH:mm`,
 `required`, columns, select queries), with every label/help/placeholder/info
 text replaced by a translation key.
 
@@ -786,61 +765,20 @@ next to the site's own address tab.
 
 ## 8. Compatibility decisions
 
-- **No deprecated aliases.** Noren registers none of the old German method
-  names (`oeffnungszeiten`, `bereiche`, `bereicheMitZeiten`, `betrieb`,
-  `hatZeiten`). Reason: while `site/plugins/betrieb` is still installed,
-  identical names would collide (Kirby keeps one), and the objects they
-  return have different method names anyway, so old snippets would break
-  regardless. Instead both plugins load side by side without conflict;
-  a site switches its snippets at its own pace and then deletes the copy.
-- Content stays unchanged (§6). The old option value `betrieb.feiertage`
-  moves verbatim to `noren.holidays` (legacy keys accepted);
-  `betrieb.schliessungLabel` → `noren.closureLabel`.
-- Behaviour changes, each documented in CHANGELOG:
-  1. overnight blocks (§3.1.4) — before: rows with end < start ignored;
-  2. a business without areas now gets a status line (the starter's
-     `bereicheMitZeiten()` returned [] when no areas were defined, so the band
-     stayed empty);
-  3. the status label uses the area's short name (`kurzname`, as its Panel
-     help always promised);
-  4. a holiday with special hours entered is no longer listed as closed in
-     the table note and schema.org;
-  5. holidays for all states, not only Bavaria; an unknown state is logged
-     instead of silently meaning "no holidays".
-
-Rename table (for README "Upgrading from site/plugins/betrieb"):
-
-| Before | Now |
-|---|---|
-| `Betrieb\Oeffnungszeiten` | `Noren\Schedule` |
-| `::ausFeld($zeiten, $schliessungen, $bereich, $label, $feiertag)` | `::fromFields($hours, $closures, $area, $closureLabel, $holiday, $settings)` |
-| `::TAGE` | `::DAYS_DE` (display names: `I18n::day()`) |
-| `::formatiere()` | `::formatTime()` |
-| `bloecke()`, `hinweis()`, `gepflegt()` | `blocks()`, `note()`, `maintained()` |
-| `schliessungAm()`, `sonderzeitAm()`, `bloeckeAm()` | `closureOn()`, `specialOn()`, `blocksOn()` |
-| `bezeichnung()`, `schliessungLabel()` | `label()`, `closureLabel()` |
-| `feiertagAm()` | `holidayOn()` |
-| `kommendeFeiertage()` → `datum`, `name` | `upcomingHolidays()` → `date`, `name` |
-| `kommendeSchliessungen()` → `von`, `bis`, `hinweis`, `anlass`, `zeiten` | `upcomingClosures()` → `from`, `to`, `note`, `occasion`, `hours` (+ `area`) |
-| `status()` → `offen`, `text`, `detail` | `status()` → `open`, `text`, `detail` (+ `state`, `until`, `next`, `occasion`, `holiday`) |
-| constructor `['bloecke' => …, 'hinweis' => …]` | `['blocks' => …, 'note' => …]` |
-| `Betrieb\Feiertage::ostersonntag()` | `Noren\Holidays::easterSunday()` |
-| `Feiertage::bayern($jahr, $mariae, $friedensfest)` | `Holidays::forYear($jahr, Holidays::config(['state' => 'BY', 'assumption' => …, 'augsburg' => …]))` |
-| `Feiertage::pruefer(['land' => 'bayern'])` | `Holidays::checker(Holidays::config('BY'))` |
-| option `betrieb.feiertage` | `noren.holidays` |
-| option `betrieb.schliessungLabel` | `noren.closureLabel` |
-| `$site->betrieb()` | `$site->norenLocation()` |
-| `$site->bereiche()` (Structure) | `$site->norenAreas()` (array `key`, `name`, `short`) |
-| `$site->oeffnungszeiten($bereich)` | `$site->norenSchedule($area)` |
-| `$site->bereicheMitZeiten()` → `schluessel`, `name`, `plan` | `$site->norenUnits()` → `id`, `area`, `name`, `short`, `label`, `location`, `schedule` |
-| `$page->oeffnungszeiten()`, `$page->hatZeiten()` | `$page->norenSchedule()`, `$page->norenHasHours()` |
-| snippet `zeiten-tabelle` (`$bereich`, `$plan`) | `noren/table` (`$area`, `$schedule`) |
-| snippet `statusband` (`$nur`, `$mehrLink`) | `noren/status` (`$only`, `$link`) |
-| bike shop `zeiten-kurz` (`$plan`) | `noren/compact` (`$schedule`, `$mode`, `$title`) |
-| restaurant `Karte::zeitgruppen($plan)` → `tage`, `zeiten` | `Grouping::consecutive($schedule)` → `label`, `hours` |
-| `strukturdaten.php` week/special closures | `$site->norenSchema()` |
-| CSS `zeiten-raster`, `zeile`, `zeile-tag`, `zeile-zeit`, `zeile-zu`, `zeile-hinweis`, `zeile--feiertage`, `zeiten-zusatz`, `schliessung`, `data-heute="ja"` | `noren-table`, `noren-row`, `noren-day`, `noren-hours`, `noren-closed`, `noren-note`, `noren-row--holidays`, `noren-extra`, `noren-closure`, `data-today="true"` |
-| CSS `band-status`, `band-bereich`, `data-offen="ja"` | `noren-status-line`, `noren-status-label`, `data-open="true"` |
+- **No aliases.** Noren registers only the English method names of §3.9, and no
+  aliases for other names.
+- Content stays unchanged (§6). The legacy holidays array keys `land`,
+  `mariaeHimmelfahrt` and `friedensfest` are accepted (§3.2); without `land`
+  they mean Bavaria.
+- Behaviour notes, each documented in CHANGELOG:
+  1. overnight blocks (§3.1.4) are read;
+  2. a business without areas gets a status line;
+  3. the status label uses the area's short name (`kurzname`), as its Panel
+     help says;
+  4. a holiday with special hours entered is not listed as closed in the table
+     note and in schema.org;
+  5. holidays for all states; an unknown state is logged instead of silently
+     meaning "no holidays".
 
 ---
 
@@ -850,12 +788,10 @@ Every test file starts with a docblock (what it covers, how to run), uses
 `tests/helpers.php`, ends with `finish('<Suite>')`. German expectations run
 with `I18n::setLanguage('de')`; reset to `'en'` where English is checked.
 
-### 9.1 tests/ScheduleTest.php (task `schedule`)
+### 9.1 tests/ScheduleTest.php
 
-Port **every** check of `kirby-starter/tests/OeffnungszeitenTest.php` (same
-sample business, same dates, same German expected strings) plus the
-shop extra check, renamed per §8:
-`Oeffnungszeiten::ausFeld($feld, null, 'laden')` →
+Covers **every** check of the original sample set (same sample business,
+same dates, same German expected strings) plus the shop extra check:
 `Schedule::fromFields(field($rows), null, 'laden')`; constructor arrays with
 `blocks`/`note` and closures `from`/`to`/`note`; holiday checker
 `Holidays::checker(Holidays::config('BY'))` (require src/Holidays.php);
@@ -901,7 +837,7 @@ New checks (expected values exact):
   `holiday` 'Tag der Deutschen Einheit'; Fri 2026-10-02 07:00 → 'öffnet heute um 8:30 Uhr',
   `holiday` null; Sat 2026-10-31 19:00 (1.11. is a Sunday) → no notice;
   tomorrow with special hours → no notice; tomorrow with closure → no notice;
-  without the setting the ported check stays 'öffnet am Montag um 13:00 Uhr'.
+  without the setting the check stays 'öffnet am Montag um 13:00 Uhr'.
 - English (`I18n::setLanguage('en')`): Mon 14:00 'Open now' / 'open until 18:00';
   Sunday 11:00 café 'Closed today' / 'opens on Tuesday at 9:00';
   closure range 'Closed for holidays' / 'back on 11 Jul'; holiday 'Public holiday today';
@@ -919,12 +855,12 @@ New checks (expected values exact):
 - Hoffest (special hours on 3.10.2026, BY): `upcomingHolidays(at('2026-09-27'), 60)` === [].
 - `week()` has 7 entries; `hasHolidays()` true/false; constructor sorts blocks.
 
-### 9.2 tests/HolidaysTest.php (task `holidays`)
+### 9.2 tests/HolidaysTest.php
 
-- Easter Sunday: the 12 years of kirby-starter's FeiertageTest plus
+- Easter Sunday: 12 years (2000–2049) plus
   1818-03-22, 2285-03-22 (earliest), 1943-04-25, 2038-04-25 (latest);
   `easterSunday(2026)->getTimezone()->getName()` 'Europe/Berlin'.
-- Bavaria 2026 complete list (ported verbatim incl. names); without
+- Bavaria 2026 complete list (names verbatim); without
   assumption 12 entries; augsburg → '2026-08-08' 'Augsburger Friedensfest';
   Fronleichnam 2027-05-27.
 - **All 16 states, 2026, complete `forYear()` lists (date => German name)
@@ -951,9 +887,9 @@ New checks (expected values exact):
   checker after `I18n::setLanguage('en')` → 'German Unity Day'.
 - `state()`: 'de-nw' 'NW', 'Thüringen' 'TH', 'XX' throws.
 
-### 9.3 tests/GroupingTest.php (task `presentation`)
+### 9.3 tests/GroupingTest.php
 
-- restaurant cases ported: Di–Mi 11–16, Do–Sa 11–22 → consecutive
+- restaurant cases: Di–Mi 11–16, Do–Sa 11–22 → consecutive
   `[['days' => [1, 2], 'label' => 'Di – Mi', 'blocks' => [[660, 960]], 'hours' => '11:00 – 16:00', 'note' => null], ['days' => [3, 4, 5], 'label' => 'Do – Sa', 'blocks' => [[660, 1320]], 'hours' => '11:00 – 22:00', 'note' => null]]`;
   gap case (Di, Do, So two blocks) → labels 'Di', 'Do', 'So', hours
   '10:00 – 14:00 · 17:00 – 21:00'; empty plan → [].
@@ -964,7 +900,7 @@ New checks (expected values exact):
 - English: 'Wed, Fri', '10–18', 'Tue – Wed', '10–12:30 and 14–18'.
 - shortTime / blocksLabel cases of §3.4 incl. overnight.
 
-### 9.4 tests/PresenterTest.php (task `presentation`)
+### 9.4 tests/PresenterTest.php
 
 Muster plan (Mo 13–18, Di–Fr 8:30–18, Sa 8–18) with BY:
 
@@ -990,7 +926,7 @@ Muster plan (Mo 13–18, Di–Fr 8:30–18, Sa 8–18) with BY:
 - `compact()`: default mode grouped; 'consecutive'; notes limited to 1 and
   to leadDays; `closures` 0 → []; unknown mode → 'grouped'.
 
-### 9.5 tests/SnippetsTest.php (task `presentation`, Kirby)
+### 9.5 tests/SnippetsTest.php (Kirby)
 
 Boot with `noren_site()` / `noren_kirby($tmp, ['noren.active' => true, 'locale' => 'de_DE'])`
 and render with `$kirby->snippet('noren/<name>', $data, true)`, always
@@ -1003,7 +939,7 @@ span/holidays row/notes; compact title/groups/note/closure; schedule not
 maintained → ''; HTML in a note is escaped; `noren.language` 'en' → English.
 A site's own `site/snippets/noren/table.php` wins over the package snippet.
 
-### 9.6 tests/SchemaOrgTest.php (task `kirby`)
+### 9.6 tests/SchemaOrgTest.php
 
 - `time()` cases; `openingHours()` for the Muster plan (6 entries, first
   Monday 13:00–18:00), a two-block day (2 entries), overnight Fri
@@ -1018,7 +954,7 @@ A site's own `site/snippets/noren/table.php` wins over the package snippet.
   block until midnight stays '18:00'/'00:00'; a closed entry stays '00:00'/'00:00'.
 - `forSchedule()` keys.
 
-### 9.7 tests/KirbyTest.php (task `kirby`)
+### 9.7 tests/KirbyTest.php
 
 Real Kirby via helpers, content written with `noren_page()`:
 
@@ -1026,7 +962,7 @@ Real Kirby via helpers, content written with `noren_page()`:
    [], `norenLocations()` [], `norenHolidays()` []); `'noren.active' => 'yes'`
    stays off; translations `noren.status.openNow` in en and de;
    `noren_option()` exists.
-2. Starter shape `1_kontakt/betrieb.txt`: areas laden (name Hofladen,
+2. Sample shape `1_kontakt/betrieb.txt`: areas laden (name Hofladen,
    kurzname Laden), cafe (Hofcafé), werkstatt (no hours); hours rows incl.
    one legacy `nm_von/nm_bis` row; closures. Check `norenLocation()->id()`,
    `norenAreas()` exact, `norenSchedule('laden')->blocks(0)` vs
@@ -1049,15 +985,11 @@ Real Kirby via helpers, content written with `noren_page()`:
 8. Options: timezone, holidayEve, overnightUntil false, closureLabel,
    language (`locale`, `noren.language`).
 9. `norenSchema()` shape; `norenStatus()` keys; `norenTable()` /
-   `norenCompact()` shapes — these two depend on task `presentation`: wrap in
-   try/catch `LogicException` and print `SKIP` (not a failure) while
-   Presenter is still a stub.
+   `norenCompact()` shapes.
 10. Default data path: `snippet('noren/status')` with real content contains
-    'Jetzt' (skip with a printed SKIP while the snippet is still the
-    placeholder, i.e. renders ''); a site's own `site/snippets/noren/status.php`
-    wins.
+    'Jetzt'; a site's own `site/snippets/noren/status.php` wins.
 
-### 9.8 tests/BlueprintsTest.php (task `panel`, Kirby)
+### 9.8 tests/BlueprintsTest.php (Kirby)
 
 Site blueprint `site/blueprints/pages/betrieb.yml` with
 `extends: noren/pages/location`, a page `kontakt` with areas. Load with
@@ -1076,29 +1008,22 @@ languages; every registered key loads on its own in a site blueprint via
 
 ---
 
-## 10. Documentation (owner `docs`)
+## 10. Documentation
 
-Modelled on kirby-koe (read its README, CHANGELOG).
-
-- **README.md** (English): what it is (Noren 暖簾), feature list, requirements
-  (PHP 8.2–8.4, Kirby 5), install (composer + VCS repository note, manual),
-  quick start (config + blueprint `extends` + snippets), **every option of
-  §4 with default**, content field contract §6, locations and areas (Beim
-  Muster 1×N, practice N×1, `noren.locations` example), snippets with
-  variables and markup classes (§3.8), own markup (site/page methods §3.9 with
-  return shapes as PHP array examples), blueprints (§7, incl. the query note),
-  public holidays (table per state from §3.2, flags, extra days, the
-  Easter/Whit Sunday decision, 1995+), edge cases (overnight, special hours
-  beat holidays, half-filled rows, empty plan = nothing shown, lead time vs
-  schema.org, closure "back on" skipping rest days, eve notice, timezone,
-  DST), "Upgrading from site/plugins/betrieb" with §8 (decisions + rename
-  table + behaviour changes), development (composer install,
-  `composer test`), license.
-- **CHANGELOG.md**: `## [1.0.0] — unreleased`, Keep-a-Changelog sections like
-  koe (project rules at the top: a change of the content field contract or
-  of default output is major),
-  "Changed — renamed to English", "Added", "Changed behaviour" (§8 list),
-  "Unchanged (data continuity)".
+- **README.md** (English): what it is (Noren 暖簾), features, requirements
+  (PHP 8.2–8.4, Kirby 5), installation (composer + VCS repository note), setup
+  (config, blueprint `extends`, snippets), content field contract (§6), locations
+  and areas (one location with several areas, several locations,
+  `noren.locations` example), snippets with variables and markup classes (§3.8),
+  own markup (site and page methods §3.9 with return shapes as PHP array
+  examples), every option of §4 with default, public holidays (flags, extra
+  days, the Easter/Whit Sunday decision, 1995+), edge cases (overnight, special
+  hours beat holidays, half-filled rows, empty plan = nothing shown, lead time
+  vs schema.org, closure "back on" skipping rest days, eve notice, timezone,
+  DST), privacy, maintenance (`composer test`), license.
+- **CHANGELOG.md**: `## [1.0.0] — unreleased`, Keep-a-Changelog sections
+  (project rules at the top: a change of the content field contract or of
+  default output is major), "Added", "Behaviour" (§8 list), "Content".
 
 ### 5.1 All keys (generated from translations/*.php on 2026-10-10)
 
