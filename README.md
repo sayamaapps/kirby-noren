@@ -24,12 +24,6 @@ Opening hours for [Kirby CMS](https://getkirby.com) 5, with an "open now" status
 composer require sayamaapps/kirby-noren
 ```
 
-Until the package is on Packagist, add the repository to `composer.json` first:
-
-```json
-"repositories": [{ "type": "vcs", "url": "https://github.com/sayamaapps/kirby-noren" }]
-```
-
 Composer installs to `site/plugins/noren/`. Add that path to `.gitignore` and deploy it like `vendor/`.
 
 ## Usage
