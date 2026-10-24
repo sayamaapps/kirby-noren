@@ -58,6 +58,23 @@ function norenField(array $fields, string $path): array
     return $sub === null ? $node : ($node['fields'][$sub] ?? []);
 }
 
+/**
+ * The tab labels of a blueprint, keyed by tab name. Blueprint::tabs() returns
+ * a list of arrays in Kirby 5 and a Tabs collection of Tab objects in Kirby 6.
+ */
+function norenTabLabels(object $blueprint): array
+{
+    $labels = [];
+    foreach ($blueprint->tabs() as $tab) {
+        if (is_array($tab)) {
+            $labels[$tab['name']] = $tab['label'];
+        } else {
+            $labels[$tab->name()] = $tab->label();
+        }
+    }
+    return $labels;
+}
+
 // Sanity check of the leak detector itself.
 holds(norenLeaks(['a' => ['b' => 'noren.panel.x']]) === ['.a.b'], 'leak detector finds a nested noren. value');
 holds(norenLeaks(['a' => 'Text']) === [], 'leak detector ignores normal text');
@@ -185,7 +202,7 @@ YAML);
         holds(!str_starts_with($blueprint->title(), 'noren.'), "$language: betrieb title is not an untranslated key");
 
         // Tabs and their labels.
-        $tabs = array_column($blueprint->tabs(), 'label', 'name');
+        $tabs = norenTabLabels($blueprint);
         expect($tabLabels[$language], $tabs, "$language: tab labels bereiche/zeiten");
 
         // Fields of the form, in blueprint order (Kirby lower-cases the names).
@@ -248,7 +265,7 @@ YAML);
         }
 
         // Override page: title key, tab label override, field-level override.
-        $eigenTabs = array_column($eigen->blueprint()->tabs(), 'label', 'name');
+        $eigenTabs = norenTabLabels($eigen->blueprint());
         expect('Eigene Zeiten', $eigenTabs['zeiten'] ?? null, "$language: tab label override wins over extends");
         expect('Eigener Reiter', $eigenTabs['eigen'] ?? null, "$language: own tab label");
         expect('Eigene Zeiten', norenField($eigenFields, 'eigenezeiten')['label'] ?? null, "$language: field label override wins over extends");
