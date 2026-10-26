@@ -8,7 +8,7 @@ All notable changes to this project are documented here. Versions follow
   and schema.org show without configuration) is a **major** version: a site
   would show other hours after a routine update.
 
-## [Unreleased]
+## [1.3.1] — 2026-10-26
 
 ### Fixed
 
