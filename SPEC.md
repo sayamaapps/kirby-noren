@@ -493,7 +493,10 @@ SchemaOrg::time(510) === '08:30'; time(1440) === '00:00'; time(1560) === '02:00'
 A full day (`[0, 1440]`, in the weekly plan and in special hours) is opens
 "00:00" closes "23:59", because "00:00" to "00:00" means closed in Google's
 LocalBusiness notation. A block until midnight (`[1080, 1440]`) stays opens
-"18:00" closes "00:00".
+"18:00" closes "00:00". A block from 00:00 that runs past midnight (`[0, 1560]`,
+Monday 00:00 to Tuesday 02:00, e.g. two rows that touch at midnight) is the full
+Monday ("00:00"/"23:59") plus Tuesday "00:00"/"02:00"; the Sunday overhang lands on
+Monday.
 
 `$from` default: today in the schedule's timezone. Overnight Fri 18:00–02:00
 → Friday opens "18:00" closes "02:00".
@@ -956,6 +959,8 @@ A site's own `site/snippets/noren/table.php` wins over the package snippet.
 - Hoffest special on 3.10. → that date appears once (special), not as closed.
 - A full day `[0, 1440]` is '00:00'/'23:59' (weekly plan and special hours); a
   block until midnight stays '18:00'/'00:00'; a closed entry stays '00:00'/'00:00'.
+- `[0, 1560]` on Monday → Monday '00:00'/'23:59' + Tuesday '00:00'/'02:00'; equal to
+  `[0, 1440]` on Monday plus `[0, 120]` on Tuesday; Sunday's overhang on Monday.
 - `forSchedule()` keys.
 
 ### 9.7 tests/KirbyTest.php

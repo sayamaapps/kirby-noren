@@ -37,21 +37,43 @@ final class SchemaOrg
     }
 
     /**
+     * One block of one weekday as entries. A block from 00:00 that runs past
+     * midnight is a full day plus the rest on the next weekday: Monday
+     * [0, 1560] is Monday 00:00–23:59 and Tuesday 00:00–02:00. Any other block
+     * is one entry on its own weekday (an evening block keeps its start day).
+     *
+     * @return list<array{'@type': string, dayOfWeek: string, opens: string, closes: string}>
+     */
+    private static function entries(int $weekday, int $from, int $to): array
+    {
+        $entry = static fn (int $day, array $hours): array => [
+            '@type'     => 'OpeningHoursSpecification',
+            'dayOfWeek' => 'https://schema.org/' . self::DAYS[$day],
+        ] + $hours;
+
+        if ($from === 0 && $to > Schedule::MINUTES_PER_DAY) {
+            return [
+                $entry($weekday, self::range(0, Schedule::MINUTES_PER_DAY)),
+                ...self::entries(($weekday + 1) % 7, 0, $to - Schedule::MINUTES_PER_DAY),
+            ];
+        }
+        return [$entry($weekday, self::range($from, $to))];
+    }
+
+    /**
      * One OpeningHoursSpecification per block of the weekly plan, Monday
      * first. A day without blocks gets no entry (schema.org's "closed"); a
-     * full day is opens "00:00" / closes "23:59".
+     * full day is opens "00:00" / closes "23:59", and a block from 00:00 past
+     * midnight continues on the next weekday (see entries()).
      *
      * @return list<array{'@type': string, dayOfWeek: string, opens: string, closes: string}>
      */
     public static function openingHours(Schedule $schedule): array
     {
         $specs = [];
-        foreach (self::DAYS as $weekday => $name) {
+        foreach (array_keys(self::DAYS) as $weekday) {
             foreach ($schedule->blocks($weekday) as [$from, $to]) {
-                $specs[] = [
-                    '@type'     => 'OpeningHoursSpecification',
-                    'dayOfWeek' => 'https://schema.org/' . $name,
-                ] + self::range($from, $to);
+                array_push($specs, ...self::entries($weekday, $from, $to));
             }
         }
         return $specs;

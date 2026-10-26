@@ -187,6 +187,55 @@ expect(
     'a closed entry stays 00:00–00:00'
 );
 
+/* --- a block that runs past midnight from 00:00 ---------------------------- */
+
+// Two rows on Monday, 00:00–18:00 and 18:00–02:00, merge to [0, 1560]: the
+// full Monday, and Tuesday until 02:00. The 02:00 must not be dropped.
+$overhang = new Schedule([0 => ['blocks' => [[0, 1080], [1080, 1560]]]], [], null, null, $settings);
+$overhangSpecs = SchemaOrg::openingHours($overhang);
+expect(
+    [
+        ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'https://schema.org/Monday', 'opens' => '00:00', 'closes' => '23:59'],
+        ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'https://schema.org/Tuesday', 'opens' => '00:00', 'closes' => '02:00'],
+    ],
+    $overhangSpecs,
+    'Monday 00:00 to Tuesday 02:00 (merged rows): full Monday plus Tuesday 00:00–02:00'
+);
+
+// The same plan written as two days gives the same entries.
+$twoDays = new Schedule([0 => ['blocks' => [[0, 1440]]], 1 => ['blocks' => [[0, 120]]]], [], null, null, $settings);
+expect(SchemaOrg::openingHours($twoDays), $overhangSpecs, 'Monday full day + Tuesday 00:00–02:00 equals the merged block');
+
+// Sunday's overhang continues into Monday (weekday index wraps).
+$sunday = new Schedule([6 => ['blocks' => [[0, 1560]]]], [], null, null, $settings);
+expect(
+    [
+        ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'https://schema.org/Sunday', 'opens' => '00:00', 'closes' => '23:59'],
+        ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'https://schema.org/Monday', 'opens' => '00:00', 'closes' => '02:00'],
+    ],
+    SchemaOrg::openingHours($sunday),
+    'Sunday 00:00 to Monday 02:00: the overhang lands on Monday'
+);
+
+// Overhang longer than a day: every full day is listed.
+$twoFull = new Schedule([0 => ['blocks' => [[0, 2880]]]], [], null, null, $settings);
+expect(
+    [
+        ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'https://schema.org/Monday', 'opens' => '00:00', 'closes' => '23:59'],
+        ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'https://schema.org/Tuesday', 'opens' => '00:00', 'closes' => '23:59'],
+    ],
+    SchemaOrg::openingHours($twoFull),
+    'Monday 00:00 to Wednesday 00:00: Monday and Tuesday are both full days'
+);
+
+// An evening block that runs past midnight keeps its start day (unchanged).
+$evening = new Schedule([4 => ['blocks' => [[1080, 1560]]]], [], null, null, $settings);
+expect(
+    [['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => 'https://schema.org/Friday', 'opens' => '18:00', 'closes' => '02:00']],
+    SchemaOrg::openingHours($evening),
+    'Friday 18:00–02:00 stays one Friday entry'
+);
+
 /* --- forSchedule() ------------------------------------------------------- */
 
 $both = SchemaOrg::forSchedule($muster, $from);
