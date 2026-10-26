@@ -95,7 +95,7 @@ final class SnippetsTest extends TestCase
 {
 	public function testSuite(): void
 	{
-		$on = ['noren.active' => true, 'locale' => 'de_DE'];
+		$on = ['sayamaapps.noren.active' => true, 'locale' => 'de_DE'];
 
 		// ------------------------------------------------------------------ status
 
@@ -175,8 +175,8 @@ final class SnippetsTest extends TestCase
 
 		// Nothing to show
 		expect('', snip_render('status', $on, static fn () => ['units' => []]), 'status: no units → nothing');
-		expect('', snip_render('status', ['noren.active' => true, 'noren.status' => false], static fn () => ['units' => []]), 'status: noren.status false → nothing');
-		expect('', snip_render('status', ['noren.active' => true, 'noren.status' => false], static function ($kirby) {
+		expect('', snip_render('status', ['sayamaapps.noren.active' => true, 'sayamaapps.noren.status' => false], static fn () => ['units' => []]), 'status: noren.status false → nothing');
+		expect('', snip_render('status', ['sayamaapps.noren.active' => true, 'sayamaapps.noren.status' => false], static function ($kirby) {
 			return ['units' => [snip_unit(snip_muster(false), $kirby->site()->homePage(), 'k', null, 'Laden')], 'now' => at('2026-09-28 10:00')];
 		}), 'status: noren.status false → nothing even with units');
 		expect('', snip_render('status', ['locale' => 'de_DE'], static function ($kirby) {
@@ -227,7 +227,7 @@ final class SnippetsTest extends TestCase
 		snip_has($html, '<p class="noren-closure"><strong>Betriebsferien 2.8. bis 15.8.2027</strong><br>Sommerpause</p>', 'table: closure with note after br');
 
 		// Holidays row off by noren.holidayRow
-		$html = snip_render('table', $on + ['noren.holidayRow' => false], static fn () => ['schedule' => snip_muster(true), 'now' => at('2026-09-28 10:00')]);
+		$html = snip_render('table', $on + ['sayamaapps.noren.holidayRow' => false], static fn () => ['schedule' => snip_muster(true), 'now' => at('2026-09-28 10:00')]);
 		holds(!str_contains($html, 'noren-row--holidays'), 'table: noren.holidayRow false hides the holidays row');
 
 		// Escaping
@@ -241,7 +241,7 @@ final class SnippetsTest extends TestCase
 		expect('', snip_render('table', ['locale' => 'de_DE'], static fn () => ['schedule' => snip_muster(), 'now' => at('2026-09-28 10:00')]), 'table: noren.active missing → nothing');
 
 		// English
-		$html = snip_render('table', ['noren.active' => true, 'noren.language' => 'en', 'locale' => 'de_DE'], static fn () => ['schedule' => snip_muster(), 'now' => at('2026-10-03 10:00')]);
+		$html = snip_render('table', ['sayamaapps.noren.active' => true, 'sayamaapps.noren.language' => 'en', 'locale' => 'de_DE'], static fn () => ['schedule' => snip_muster(), 'now' => at('2026-10-03 10:00')]);
 		snip_has($html, '<div class="noren-row" data-today="false"><div class="noren-day">Saturday</div><div class="noren-hours">8:00 – 18:00<br></div></div>', 'table en: English day names');
 		snip_has($html, '<div class="noren-row noren-row--holidays" data-today="true"><div class="noren-day">Public holidays</div><div class="noren-hours"><span class="noren-closed">closed</span></div></div>', 'table en: holidays row');
 		snip_has($html, '<p class="noren-extra" data-holiday>3 Oct German Unity Day: closed</p>', 'table en: holiday note');
@@ -281,7 +281,7 @@ final class SnippetsTest extends TestCase
 		expect('', snip_render('compact', $on, static fn () => ['schedule' => snip_plan([]), 'now' => at('2026-09-28 10:00')]), 'compact: not maintained → nothing');
 		expect('', snip_render('compact', ['locale' => 'de_DE'], static fn () => ['schedule' => snip_muster(), 'now' => at('2026-09-28 10:00')]), 'compact: noren.active missing → nothing');
 
-		$html = snip_render('compact', ['noren.active' => true, 'noren.language' => 'en', 'locale' => 'de_DE'], static fn () => ['schedule' => snip_muster(), 'now' => at('2026-09-28 10:00')]);
+		$html = snip_render('compact', ['sayamaapps.noren.active' => true, 'sayamaapps.noren.language' => 'en', 'locale' => 'de_DE'], static fn () => ['schedule' => snip_muster(), 'now' => at('2026-09-28 10:00')]);
 		snip_has($html, '<li><span class="noren-compact-days">Sat</span> <span class="noren-compact-hours">8–18</span></li>', 'compact en: English days and hours');
 		snip_has($html, '<li><span class="noren-compact-days">Tue–Fri</span> <span class="noren-compact-hours">8:30–18</span></li>', 'compact en: Tue–Fri');
 	}

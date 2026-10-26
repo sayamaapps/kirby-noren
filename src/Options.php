@@ -3,9 +3,10 @@
 namespace Sayamaapps\Noren;
 
 use Kirby\Cms\App;
+use Kirby\Cms\Helpers;
 
 /**
- * Reads `noren.*` options.
+ * Reads Noren's options: `sayamaapps.noren.<key>`, falling back to the 1.x name `noren.<key>`.
  *
  * `null` counts as "not set", like Kirby's own option() (A::get() checks
  * isset() as well), so `'noren.timezone' => null` falls back to the default.
@@ -17,8 +18,8 @@ use Kirby\Cms\App;
  * Both spellings work, flat (`'noren.active' => true`) and nested
  * (`'noren' => ['active' => true]`), because Kirby's option() finds both.
  *
- * Defaults are given here and at the call sites, never in an `options`
- * block of the plugin (Kirby would file them under sayamaapps.noren.*).
+ * Defaults are given here and at the call sites. The `options` block of the
+ * plugin lists the keys with null: a default there would hide the 1.x spelling.
  */
 final class Options
 {
@@ -30,6 +31,9 @@ final class Options
 		'areaRef'  => 'zeitenschluessel',
 		'short'    => 'kurzname',
 	];
+
+	/** Option prefix of 1.x, read as a fallback until 2.0. */
+	public const LEGACY_PREFIX = 'noren.';
 
 	/**
 	 * Legacy zone names (tzdata "backward" links) mapped to the canonical zone
@@ -46,7 +50,9 @@ final class Options
 		'US/Mountain'    => 'America/Denver',
 		'US/Pacific'     => 'America/Los_Angeles',
 	];
-	public const PREFIX = 'noren.';
+
+	/** Option prefix since 1.4 (OPT-1). */
+	public const PREFIX = 'sayamaapps.noren.';
 
 	/** Master switch: only a real `true` switches Noren on. */
 	public static function active(App $kirby): bool
@@ -105,7 +111,21 @@ final class Options
 
 	public static function get(App $kirby, string $key, mixed $default = null): mixed
 	{
-		return $kirby->option(self::PREFIX . $key) ?? $default;
+		$value = $kirby->option(self::PREFIX . $key);
+		if ($value !== null) {
+			return $value;
+		}
+
+		// The 1.x spelling still works, with a deprecation (README, Deprecations).
+		$legacy = $kirby->option(self::LEGACY_PREFIX . $key);
+		if ($legacy !== null) {
+			Helpers::deprecated(
+				'Noren: noren.' . $key . ' is deprecated, use ' . self::PREFIX . $key,
+				'option-prefix'
+			);
+		}
+
+		return $legacy ?? $default;
 	}
 
 	/**

@@ -192,7 +192,7 @@ final class BlueprintsTest extends TestCase
 
 			foreach ($languages as $language => $index) {
 				// Fresh Kirby per language: page and blueprint objects are cached per app.
-				$kirby = noren_kirby($tmp, ['noren.active' => true]);
+				$kirby = noren_kirby($tmp, ['sayamaapps.noren.active' => true]);
 				$kirby->setCurrentTranslation($language);
 				I18n::$locale = $language;
 
