@@ -32,10 +32,10 @@ comments and other documentation.
   Schedule.php, a missing translation, a helper) goes into the pull request
   with file, problem and proposed change. Do not work around it with a copy of
   the logic.
-- Tests: standalone PHP scripts `tests/<Name>Test.php`, exit code 0 = pass, no
-  PHPUnit. Use `tests/helpers.php` (`expect()`, `holds()`, `only()`, `at()`,
-  `field()`, `finish()`, Kirby fixtures `noren_site()`, `noren_kirby()`,
-  `noren_page()`, `noren_remove_tree()`). Kirby-free tests require
+- Tests: PHPUnit classes `tests/<Name>Test.php` (`phpunit.xml.dist`, bootstrap in
+  `tests/bootstrap.php`). Use `tests/helpers.php` (`expect()`, `holds()`, `only()`,
+  `at()`, `field()`, `norenResetLog()`, Kirby fixtures `noren_site()`, `noren_kirby()`,
+  `noren_page()`; remove sites with Kirby's `Dir::remove()`). Kirby-free tests require
   `src/I18n.php` and the classes they need directly, never `index.php`.
   Kirby tests never require src files; Kirby loads the plugin through the
   symlink `noren_site()` creates.
@@ -87,7 +87,7 @@ kirby-noren/
 │   └── pages/location.yml
 ├── translations/en.php, de.php      (§5)
 ├── tests/
-│   ├── run.sh
+│   ├── bootstrap.php
 │   ├── helpers.php
 │   ├── I18nTest.php
 │   ├── ScheduleTest.php  (§9.1)
@@ -102,7 +102,7 @@ kirby-noren/
 └── CHANGELOG.md
 ```
 
-Run everything from the repository root: `sh tests/run.sh`.
+Run everything from the repository root: `composer test` (PHPUnit, `phpunit.xml.dist`).
 
 ---
 
@@ -791,8 +791,8 @@ next to the site's own address tab.
 
 ## 9. Test plan
 
-Every test file starts with a docblock (what it covers, how to run), uses
-`tests/helpers.php`, ends with `finish('<Suite>')`. German expectations run
+Every test file starts with a docblock (what it covers), uses `tests/helpers.php`
+and holds its checks in one test method. German expectations run
 with `I18n::setLanguage('de')`; reset to `'en'` where English is checked.
 
 ### 9.1 tests/ScheduleTest.php

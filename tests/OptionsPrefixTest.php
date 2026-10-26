@@ -12,6 +12,26 @@ use Sayamaapps\Noren\Options;
 #[CoversClass(Options::class)]
 final class OptionsPrefixTest extends TestCase
 {
+	public function testLegacyFunctionReadsTheNewOptionAndIsDeprecated(): void
+	{
+		$deprecations = [];
+		set_error_handler(function (int $level, string $message) use (&$deprecations): bool {
+			$deprecations[] = $message;
+			return true;
+		}, E_USER_DEPRECATED);
+
+		try {
+			$this->withApp(['debug' => true, 'sayamaapps.noren.active' => true], function ($kirby): void {
+				$kirby->plugins();
+				$this->assertTrue(noren_option('active'), 'noren_option() reads sayamaapps.noren.active');
+			});
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertSame(['noren_option() is deprecated, use Sayamaapps\\Noren\\Options::get()'], $deprecations);
+	}
+
 	public function testNewSpellingSwitchesNorenOn(): void
 	{
 		$this->withApp(['sayamaapps.noren.active' => true], function ($kirby): void {
