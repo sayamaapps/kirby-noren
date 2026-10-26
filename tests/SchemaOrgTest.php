@@ -16,15 +16,11 @@ use PHPUnit\Framework\TestCase;
  */
 require_once __DIR__ . '/helpers.php';
 require_once dirname(__DIR__) . '/src/I18n.php';
-require_once dirname(__DIR__) . '/src/Log.php';
-require_once dirname(__DIR__) . '/src/Schedule.php';
-require_once dirname(__DIR__) . '/src/Holidays.php';
-require_once dirname(__DIR__) . '/src/SchemaOrg.php';
-use Noren\Holidays;
-use Noren\Schedule;
-use Noren\SchemaOrg;
+use Sayamaapps\Noren\Holidays;
+use Sayamaapps\Noren\Schedule;
+use Sayamaapps\Noren\SchemaOrg;
 
-#[CoversClass(Noren\SchemaOrg::class)]
+#[CoversClass(Sayamaapps\Noren\SchemaOrg::class)]
 final class SchemaOrgTest extends TestCase
 {
 	public function testSuite(): void

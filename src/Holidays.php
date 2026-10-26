@@ -1,6 +1,6 @@
 <?php
 
-namespace Noren;
+namespace Sayamaapps\Noren;
 
 use Closure;
 use DateTimeImmutable;

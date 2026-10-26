@@ -2,21 +2,15 @@
 
 use Kirby\Cms\App;
 use Kirby\Cms\Page;
+use Kirby\Filesystem\F;
 
-require_once __DIR__ . '/src/I18n.php';
-require_once __DIR__ . '/src/Log.php';
-require_once __DIR__ . '/src/Options.php';
-require_once __DIR__ . '/src/Schedule.php';
-require_once __DIR__ . '/src/Holidays.php';
-require_once __DIR__ . '/src/Grouping.php';
-require_once __DIR__ . '/src/Presenter.php';
-require_once __DIR__ . '/src/SchemaOrg.php';
-require_once __DIR__ . '/src/Locations.php';
+F::loadClasses(require __DIR__ . '/autoload.php', __DIR__);
+require_once __DIR__ . '/legacy.php';
 
-use Noren\I18n;
-use Noren\Locations;
-use Noren\Options;
-use Noren\Schedule;
+use Sayamaapps\Noren\I18n;
+use Sayamaapps\Noren\Locations;
+use Sayamaapps\Noren\Options;
+use Sayamaapps\Noren\Schedule;
 
 /**
  * Noren (暖簾 — the shop curtain hung out when a shop is open): opening hours

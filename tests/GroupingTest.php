@@ -9,14 +9,9 @@ use PHPUnit\Framework\TestCase;
  */
 require_once __DIR__ . '/helpers.php';
 require_once dirname(__DIR__) . '/src/I18n.php';
-require_once dirname(__DIR__) . '/src/Log.php';
-require_once dirname(__DIR__) . '/src/Schedule.php';
-require_once dirname(__DIR__) . '/src/Holidays.php';
-require_once dirname(__DIR__) . '/src/Grouping.php';
-require_once dirname(__DIR__) . '/src/Presenter.php';
-use Noren\Grouping;
-use Noren\I18n;
-use Noren\Schedule;
+use Sayamaapps\Noren\Grouping;
+use Sayamaapps\Noren\I18n;
+use Sayamaapps\Noren\Schedule;
 
 /** A plan from content rows, the way the Panel stores them. */
 function plan(array $rows): Schedule
@@ -34,7 +29,7 @@ function notedPlan(array $days): Schedule
 	return new Schedule($week);
 }
 
-#[CoversClass(Noren\Grouping::class)]
+#[CoversClass(Sayamaapps\Noren\Grouping::class)]
 final class GroupingTest extends TestCase
 {
 	public function testSuite(): void

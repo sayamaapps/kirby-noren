@@ -2,7 +2,7 @@
 
 /**
  * English strings — the default and the fallback for missing keys.
- * `{name}` placeholders are filled in by Noren\I18n::t(). tests/I18nTest.php
+ * `{name}` placeholders are filled in by Sayamaapps\Noren\I18n::t(). tests/I18nTest.php
  * checks that every language file has the same keys and placeholders as this
  * one. Keys are the contract (SPEC.md §5); never rename one without a
  * CHANGELOG entry.

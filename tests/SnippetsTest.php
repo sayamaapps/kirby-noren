@@ -54,25 +54,25 @@ function snip_render(string $name, array $options, callable $data, array $files 
 }
 
 /** A plan from content rows, as the Panel stores them. */
-function snip_plan(array $rows, array|null $closures = null, bool $holidays = false): Noren\Schedule
+function snip_plan(array $rows, array|null $closures = null, bool $holidays = false): Sayamaapps\Noren\Schedule
 {
-	return Noren\Schedule::fromFields(
+	return Sayamaapps\Noren\Schedule::fromFields(
 		field($rows),
 		$closures !== null ? field($closures) : null,
 		null,
 		null,
-		$holidays ? Noren\Holidays::checker(Noren\Holidays::config('BY')) : null,
+		$holidays ? Sayamaapps\Noren\Holidays::checker(Sayamaapps\Noren\Holidays::config('BY')) : null,
 		[],
 	);
 }
 
-function snip_muster(bool $holidays = true, array|null $closures = null): Noren\Schedule
+function snip_muster(bool $holidays = true, array|null $closures = null): Sayamaapps\Noren\Schedule
 {
 	return snip_plan(SNIP_MUSTER_HOURS, $closures ?? SNIP_MUSTER_CLOSURES, $holidays);
 }
 
 /** The §3.7 unit shape, built by hand. */
-function snip_unit(Noren\Schedule $schedule, Kirby\Cms\Page $location, string $id, string|null $area, string $label): array
+function snip_unit(Sayamaapps\Noren\Schedule $schedule, Kirby\Cms\Page $location, string $id, string|null $area, string $label): array
 {
 	return [
 		'id' => $id,

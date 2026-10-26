@@ -10,15 +10,10 @@ use PHPUnit\Framework\TestCase;
  */
 require_once __DIR__ . '/helpers.php';
 require_once dirname(__DIR__) . '/src/I18n.php';
-require_once dirname(__DIR__) . '/src/Log.php';
-require_once dirname(__DIR__) . '/src/Schedule.php';
-require_once dirname(__DIR__) . '/src/Holidays.php';
-require_once dirname(__DIR__) . '/src/Grouping.php';
-require_once dirname(__DIR__) . '/src/Presenter.php';
-use Noren\Holidays;
-use Noren\I18n;
-use Noren\Presenter;
-use Noren\Schedule;
+use Sayamaapps\Noren\Holidays;
+use Sayamaapps\Noren\I18n;
+use Sayamaapps\Noren\Presenter;
+use Sayamaapps\Noren\Schedule;
 
 const MUSTER_HOURS = [
 	['tag' => 'Montag', 'von1' => '13:00', 'bis1' => '18:00'],
@@ -47,7 +42,7 @@ function muster(Closure|null $holiday = null): Schedule
 	return Schedule::fromFields(field(MUSTER_HOURS), field(MUSTER_CLOSURES), null, null, $holiday ?? bavaria(), []);
 }
 
-#[CoversClass(Noren\Presenter::class)]
+#[CoversClass(Sayamaapps\Noren\Presenter::class)]
 final class PresenterTest extends TestCase
 {
 	public function testSuite(): void

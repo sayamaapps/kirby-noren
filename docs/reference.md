@@ -9,7 +9,7 @@ Details behind the [README](../README.md): methods, return shapes, markup classe
 | `norenLocations()` | All location pages (`[]` when off). |
 | `norenLocation()` | The first location page, or `null`. |
 | `norenAreas()` | Areas of the first location: `key`, `name`, `short`. |
-| `norenSchedule($area = null)` | `Noren\Schedule` of the first location, or `null`. |
+| `norenSchedule($area = null)` | `Sayamaapps\Noren\Schedule` of the first location, or `null`. |
 | `norenUnits()` | One unit per area or location with hours (see [Units](#units)). |
 | `norenStatus($area = null)` | Status array, or `null` without a plan. |
 | `norenTable($area = null)` | Table array, or `null` without a plan. |
@@ -76,7 +76,7 @@ With `mergeAreas`, a merged unit has the id `kontakt#laden+cafe` and an `areas` 
 
 ## Schedule object
 
-`norenSchedule()` returns a `Noren\Schedule`: `blocks($weekday)` (`[[from, to], …]` in minutes, Monday = 0), `note($weekday)`, `week()`, `maintained()`, `status($now)`, `blocksOn($day)`, `closureOn($day)`, `specialOn($day)`, `holidayOn($day)`, `upcomingClosures($from, $leadDays)`, `upcomingHolidays($from, $days = 365)` and `timezone()`.
+`norenSchedule()` returns a `Sayamaapps\Noren\Schedule`: `blocks($weekday)` (`[[from, to], …]` in minutes, Monday = 0), `note($weekday)`, `week()`, `maintained()`, `status($now)`, `blocksOn($day)`, `closureOn($day)`, `specialOn($day)`, `holidayOn($day)`, `upcomingClosures($from, $leadDays)`, `upcomingHolidays($from, $days = 365)` and `timezone()`.
 
 ## Blueprints
 

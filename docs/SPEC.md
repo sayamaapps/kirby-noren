@@ -129,7 +129,7 @@ everywhere in PHP; translation keys use ISO numbers (`day.1` = Monday).
 Times are **minutes since 0:00** of the block's day (`int`); a block is
 `[from, to]` with `to > from`; `to` may exceed 1440 (overnight, §3.1.4).
 
-### 3.1 `Noren\Schedule` (src/Schedule.php)
+### 3.1 `Sayamaapps\Noren\Schedule` (src/Schedule.php)
 
 Read the file; its docblocks are part of this spec. Public surface:
 
@@ -289,7 +289,7 @@ start day). It is shown as "18:00 – 2:00", in schema.org as Friday opens
 "18:00" closes "02:00". Status at Sat 01:00 is open ("noch bis 2:00 Uhr"),
 Sat 02:00 is closed. The default `overnightUntil` 06:00 keeps treating "18:00–08:00" as a typo.
 
-### 3.2 `Noren\Holidays` (src/Holidays.php)
+### 3.2 `Sayamaapps\Noren\Holidays` (src/Holidays.php)
 
 ```php
 final class Holidays {
@@ -359,7 +359,7 @@ Names are translated on lookup (`checker()` caches untranslated entries per
 year), so a language switch is respected. Extra days: a statutory holiday
 keeps its name on the same date; `MM-DD` recurs every year, `Y-m-d` once.
 
-### 3.3 `Noren\I18n`, `Noren\Options`
+### 3.3 `Sayamaapps\Noren\I18n`, `Sayamaapps\Noren\Options`
 
 - `I18n::setLanguage()`, `language()`, `table()`, `t($key, $values)`,
   `day(int $weekday)`, `dayShort(int $weekday)`,
@@ -379,7 +379,7 @@ site → its default language → first two letters of `locale` → `en`. Every
 code path that produces text in a Kirby context calls
 `Options::applyLanguage($kirby)` first (Locations wrappers, snippets).
 
-### 3.4 `Noren\Grouping`
+### 3.4 `Sayamaapps\Noren\Grouping`
 
 Kirby-free. Signatures and examples are in `src/Grouping.php`. Group:
 
@@ -408,7 +408,7 @@ Kirby-free. Signatures and examples are in `src/Grouping.php`. Group:
   "10–12:30 and 14–18" (`compact.and`, `compact.hours`).
 - `shortTime(600)` "10", `630` "10:30", `1440` "24", `1560` "2", `2880` "24".
 
-### 3.5 `Noren\Presenter`
+### 3.5 `Sayamaapps\Noren\Presenter`
 
 Kirby-free view models; the snippets render exactly these, and
 `$site->norenTable()` / `norenCompact()` return them for own markup.
@@ -469,7 +469,7 @@ options `mode` ('grouped' | 'consecutive', default 'grouped'), `leadDays`
  'notes'  => array_slice(Presenter::closureNotes($s, $today, $leadDays), 0, $closures)]
 ```
 
-### 3.6 `Noren\SchemaOrg`
+### 3.6 `Sayamaapps\Noren\SchemaOrg`
 
 Kirby-free, plain arrays, no JSON.
 
@@ -501,7 +501,7 @@ Monday.
 `$from` default: today in the schedule's timezone. Overnight Fri 18:00–02:00
 → Friday opens "18:00" closes "02:00".
 
-### 3.7 `Noren\Locations`
+### 3.7 `Sayamaapps\Noren\Locations`
 
 Kirby glue, static methods (index.php calls them).
 All of them return `null` / `[]` when `Options::active()` is false.

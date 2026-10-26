@@ -1,6 +1,6 @@
 <?php
 
-namespace Noren;
+namespace Sayamaapps\Noren;
 
 /**
  * The one place where Noren writes to the PHP error log (Kirby-free).

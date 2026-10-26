@@ -1,6 +1,6 @@
 <?php
 
-namespace Noren;
+namespace Sayamaapps\Noren;
 
 /**
  * Day grouping for compact output (SPEC.md §3.4). Kirby-free.

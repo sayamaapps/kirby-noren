@@ -6,18 +6,18 @@
  * with site/snippets/noren/compact.php.
  *
  * Variables (all optional):
- *   $schedule  \Noren\Schedule (default: site()->norenSchedule($area))
+ *   $schedule  \Sayamaapps\Noren\Schedule (default: site()->norenSchedule($area))
  *   $area      area key, used only for the default schedule
  *   $mode      'grouped' | 'consecutive' (default: noren.compact)
  *   $title     heading above the list (no heading without it)
  *   $now       DateTimeImmutable, default now in the schedule's timezone
  */
 
-if (!\Noren\Options::active(kirby())) {
+if (!\Sayamaapps\Noren\Options::active(kirby())) {
 	return;
 }
-\Noren\Options::applyLanguage(kirby());
-$settings = \Noren\Options::settings(kirby());
+\Sayamaapps\Noren\Options::applyLanguage(kirby());
+$settings = \Sayamaapps\Noren\Options::settings(kirby());
 
 $area ??= null;
 $mode ??= null;
@@ -30,7 +30,7 @@ if (!$schedule || !$schedule->maintained()) {
 // The closure notes depend on the date: no page cache.
 kirby()->response()->cache(false);
 
-$compact = \Noren\Presenter::compact($schedule, $now, [
+$compact = \Sayamaapps\Noren\Presenter::compact($schedule, $now, [
 	'mode'     => $mode ?? $settings['compact'],
 	'leadDays' => $settings['leadDays'],
 ]);

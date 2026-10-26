@@ -12,11 +12,11 @@
  *   $now    DateTimeImmutable, default now in each schedule's timezone
  */
 
-if (!\Noren\Options::active(kirby())) {
+if (!\Sayamaapps\Noren\Options::active(kirby())) {
 	return;
 }
-\Noren\Options::applyLanguage(kirby());
-$settings = \Noren\Options::settings(kirby());
+\Sayamaapps\Noren\Options::applyLanguage(kirby());
+$settings = \Sayamaapps\Noren\Options::settings(kirby());
 if ($settings['status'] !== true) {
 	return;
 }
@@ -50,6 +50,6 @@ $labels = count($units) > 1;
   <p class="noren-status-line" data-open="<?= $status['open'] ? 'true' : 'false' ?>" data-state="<?= esc((string)$status['state']) ?>"><?php if ($labels) : ?><span class="noren-status-label"><?= esc((string)$unit['label']) ?></span> <?php endif ?><b class="noren-status-text"><?= esc((string)$status['text']) ?></b><?php if ($status['detail'] !== '') : ?> <span class="noren-status-detail"><?= esc((string)$status['detail']) ?></span><?php endif ?></p>
 <?php endforeach ?>
 <?php if ($link !== null && $link !== '') : ?>
-  <p class="noren-status-more"><a href="<?= esc((string)$link) ?>"><?= esc(\Noren\I18n::t('status.allHours')) ?></a></p>
+  <p class="noren-status-more"><a href="<?= esc((string)$link) ?>"><?= esc(\Sayamaapps\Noren\I18n::t('status.allHours')) ?></a></p>
 <?php endif ?>
 </div>

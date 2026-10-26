@@ -1,6 +1,6 @@
 <?php
 
-namespace Noren;
+namespace Sayamaapps\Noren;
 
 /**
  * Strings of the plugin, Kirby-free.

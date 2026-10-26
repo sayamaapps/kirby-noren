@@ -384,13 +384,13 @@ final class KirbyTest extends TestCase
 
 			$eveOn = noren_kirby($tmp, ['noren.active' => true, 'noren.holidays' => 'BY', 'noren.holidayEve' => true, 'locale' => 'de_DE']);
 			$onStatus = $eveOn->site()->norenSchedule()->status(at('2026-10-02 19:00'));
-			expect(\Noren\Holidays::name('germanUnity'), $onStatus['holiday'], 'holidayEve on: tomorrow\'s holiday is named');
+			expect(\Sayamaapps\Noren\Holidays::name('germanUnity'), $onStatus['holiday'], 'holidayEve on: tomorrow\'s holiday is named');
 
-			expect('de', \Noren\Options::language($defaults), 'language: locale de_DE gives de');
+			expect('de', \Sayamaapps\Noren\Options::language($defaults), 'language: locale de_DE gives de');
 			$forced = noren_kirby($tmp, ['noren.active' => true, 'noren.language' => 'en', 'locale' => 'de_DE']);
-			expect('en', \Noren\Options::language($forced), 'language: noren.language wins over locale');
+			expect('en', \Sayamaapps\Noren\Options::language($forced), 'language: noren.language wins over locale');
 			$unknown = noren_kirby($tmp, ['noren.active' => true, 'locale' => 'fr_FR']);
-			expect('en', \Noren\Options::language($unknown), 'language: an unshipped locale falls back to English');
+			expect('en', \Sayamaapps\Noren\Options::language($unknown), 'language: an unshipped locale falls back to English');
 		});
 
 		// --- 9. schema, status, table, compact --------------------------------------
@@ -447,12 +447,12 @@ final class KirbyTest extends TestCase
 		withSite(function (string $tmp): void {
 			noren_page($tmp, '1_kontakt', 'betrieb', ktStarter());
 			$none = noren_kirby($tmp, ['noren.active' => true]);
-			expect('en', \Noren\Options::language($none), 'language: no locale and no noren.language gives English');
+			expect('en', \Sayamaapps\Noren\Options::language($none), 'language: no locale and no noren.language gives English');
 			$de = noren_kirby($tmp, ['noren.active' => true, 'noren.language' => 'de']);
-			expect('de', \Noren\Options::language($de), 'language: noren.language de without any locale gives German');
+			expect('de', \Sayamaapps\Noren\Options::language($de), 'language: noren.language de without any locale gives German');
 			expect('Jetzt geöffnet', (function () use ($de): string {
-				\Noren\Options::applyLanguage($de);
-				return \Noren\I18n::t('status.openNow');
+				\Sayamaapps\Noren\Options::applyLanguage($de);
+				return \Sayamaapps\Noren\I18n::t('status.openNow');
 			})(), 'language: the status texts follow noren.language de');
 		});
 
@@ -481,7 +481,7 @@ final class KirbyTest extends TestCase
 			noren_page($tmp, '1_kontakt', 'betrieb', ['title' => 'Kontakt', 'zeiten' => 'Mo-Fr 9-18 Uhr']);
 			noren_page($tmp, '2_bar', 'betrieb', ['title' => 'Bar', 'zeiten' => ['Montag', 'Dienstag']]);
 			$kirby = noren_kirby($tmp, ['noren.active' => true, 'locale' => 'de_DE']);
-			\Noren\Log::forget();
+			\Sayamaapps\Noren\Log::forget();
 			$logged = withErrorLog($tmp, function () use ($kirby): void {
 				expect(null, $kirby->site()->norenStatus(), 'text zeiten: norenStatus() is null, no exception');
 				expect(null, $kirby->page('bar')->norenStatus(), 'list of scalars: page norenStatus() is null, no exception');
@@ -506,7 +506,7 @@ final class KirbyTest extends TestCase
 		// A broken option is logged once per process, however often it is read.
 		withSite(function (string $tmp): void {
 			noren_page($tmp, '1_kontakt', 'betrieb', ktStarter());
-			\Noren\Log::forget();
+			\Sayamaapps\Noren\Log::forget();
 			$kirby = noren_kirby($tmp, ['noren.active' => true, 'noren.timezone' => 'Europe/Berln', 'noren.overnightUntil' => '6 Uhr', 'locale' => 'de_DE']);
 			$logged = withErrorLog($tmp, function () use ($kirby): void {
 				for ($i = 0; $i < 3; $i++) {
@@ -561,7 +561,7 @@ final class KirbyTest extends TestCase
 				$kirby = noren_kirby($tmp, ['noren.active' => true, 'noren.timezone' => $zone, 'locale' => 'de_DE']);
 				$logged = withErrorLog($tmp, function () use ($kirby, $zone): void {
 					$resolved = $kirby->site()->norenSchedule()->timezone();
-					$canonical = new DateTimeZone(\Noren\Options::legacyZone($zone) ?? $zone);
+					$canonical = new DateTimeZone(\Sayamaapps\Noren\Options::legacyZone($zone) ?? $zone);
 					foreach (['2026-01-15 12:00', '2026-07-15 12:00'] as $at) {
 						expect(
 							(new DateTimeImmutable($at, $canonical))->getOffset(),
@@ -575,7 +575,7 @@ final class KirbyTest extends TestCase
 		});
 
 		// Every canonical target of the alias table is a zone PHP knows.
-		foreach (\Noren\Options::LEGACY_ZONES as $alias => $canonical) {
+		foreach (\Sayamaapps\Noren\Options::LEGACY_ZONES as $alias => $canonical) {
 			try {
 				new DateTimeZone($canonical);
 				holds(true, "legacy zone $alias maps to a known zone");
@@ -588,9 +588,9 @@ final class KirbyTest extends TestCase
 		withSite(function (string $tmp): void {
 			noren_page($tmp, '1_kontakt', 'betrieb', ktStarter());
 			$strings = noren_kirby($tmp, ['noren.active' => true, 'noren.status' => 'false', 'noren.holidayRow' => '0', 'locale' => 'de_DE']);
-			\Noren\Log::forget();
+			\Sayamaapps\Noren\Log::forget();
 			$logged = withErrorLog($tmp, function () use ($strings): void {
-				$settings = \Noren\Options::settings($strings);
+				$settings = \Sayamaapps\Noren\Options::settings($strings);
 				expect(true, $settings['status'], "'status' => 'false' is not a switch: default true");
 				expect(true, $settings['holidayRow'], "'holidayRow' => '0' is not a switch: default true");
 			});
@@ -619,13 +619,13 @@ final class KirbyTest extends TestCase
 				],
 			]);
 			$kirby = noren_kirby($tmp, ['noren.active' => true, 'locale' => 'de_DE']);
-			$table = \Noren\Locations::table($kirby->site()->norenSchedule(), at('2026-12-01 10:00'));
+			$table = \Sayamaapps\Noren\Locations::table($kirby->site()->norenSchedule(), at('2026-12-01 10:00'));
 			$froms = array_map(static fn (array $note) => $note['from'], $table['notes']);
 			expect(['2026-12-15'], $froms, 'leadDays default 14: closure 14 days ahead shown, 15 days ahead not');
 
 			$holidays = noren_kirby($tmp, ['noren.active' => true, 'noren.holidays' => 'BY', 'locale' => 'de_DE']);
-			$on15 = \Noren\Locations::table($holidays->site()->norenSchedule(), at('2026-09-18 10:00'))['notes'];
-			$on14 = \Noren\Locations::table($holidays->site()->norenSchedule(), at('2026-09-19 10:00'))['notes'];
+			$on15 = \Sayamaapps\Noren\Locations::table($holidays->site()->norenSchedule(), at('2026-09-18 10:00'))['notes'];
+			$on14 = \Sayamaapps\Noren\Locations::table($holidays->site()->norenSchedule(), at('2026-09-19 10:00'))['notes'];
 			expect([], array_values(array_filter($on15, static fn (array $n) => $n['type'] === 'holiday')), 'holidayNoteDays default 14: holiday 15 days ahead not noted');
 			expect(1, count(array_filter($on14, static fn (array $n) => $n['type'] === 'holiday')), 'holidayNoteDays default 14: holiday 14 days ahead noted');
 		});
@@ -758,8 +758,8 @@ final class KirbyTest extends TestCase
 			$units = $kirby->site()->norenUnits();
 			expect(1, count($units), 'mergeAreas with holidays: one unit');
 			$holidayNotes = static fn (array $table) => array_values(array_filter($table['notes'], static fn (array $n) => $n['type'] === 'holiday'));
-			$single = \Noren\Locations::table($kirby->site()->norenSchedule('laden'));
-			$group = \Noren\Locations::table($units[0]['schedule']);
+			$single = \Sayamaapps\Noren\Locations::table($kirby->site()->norenSchedule('laden'));
+			$group = \Sayamaapps\Noren\Locations::table($units[0]['schedule']);
 			expect($holidayNotes($single), $holidayNotes($group), 'mergeAreas with holidays: holiday note of the group equals the single area\'s');
 			holds(count($holidayNotes($group)) <= 1, 'mergeAreas with holidays: at most one holiday note');
 		});

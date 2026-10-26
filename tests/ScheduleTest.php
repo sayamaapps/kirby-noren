@@ -4,7 +4,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for Noren\Schedule — the opening-hours logic, without Kirby (SPEC.md §3.1, §9.1).
+ * Tests for Sayamaapps\Noren\Schedule — the opening-hours logic, without Kirby (SPEC.md §3.1, §9.1).
  *
  * Covers: reading the content fields (rows appended, areas, legacy vm_/nm_
  * row, half-filled rows, notes), blocks, the status order (overnight spill-over,
@@ -21,12 +21,9 @@ use PHPUnit\Framework\TestCase;
  */
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/../src/I18n.php';
-require_once __DIR__ . '/../src/Log.php';
-require_once __DIR__ . '/../src/Schedule.php';
-require_once __DIR__ . '/../src/Holidays.php';
-use Noren\{Holidays, I18n, Schedule};
+use Sayamaapps\Noren\{Holidays, I18n, Schedule};
 
-#[CoversClass(Noren\Schedule::class)]
+#[CoversClass(Sayamaapps\Noren\Schedule::class)]
 final class ScheduleTest extends TestCase
 {
 	public function testSuite(): void
@@ -666,7 +663,7 @@ final class ScheduleTest extends TestCase
 		$logFile = tempnam(sys_get_temp_dir(), 'noren-schedule-log-');
 		$previousLog = (string)ini_get('error_log');
 		ini_set('error_log', $logFile);
-		\Noren\Log::forget();
+		\Sayamaapps\Noren\Log::forget();
 		$badDates = Schedule::fromFields(field([]), field([
 			['von' => '24.12.2026', 'bis' => '31.12.2026'],
 			['von' => '2026-12-31', 'bis' => '2026-12-24'],
