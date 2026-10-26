@@ -699,6 +699,37 @@ withSite(function (string $tmp): void {
     expect('Hofladen, Hofcafé and Werkstatt', $units[0]['name'] ?? null, 'mergeAreas: "A, B and C" in English');
 });
 
+// A café closure beyond the lead time: alike today, apart on that date. The
+// status snippet groups at its $now; $merge false keeps every area.
+withSite(function (string $tmp): void {
+    $rows = [];
+    foreach (['laden', 'cafe'] as $area) {
+        foreach (['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'] as $day) {
+            $rows[] = ['bereich' => $area, 'tag' => $day, 'von1' => '09:00', 'bis1' => '17:00'];
+        }
+    }
+    noren_page($tmp, '1_kontakt', 'betrieb', [
+        'title' => 'Kontakt',
+        'bereiche' => [['schluessel' => 'laden', 'name' => 'Hofladen', 'kurzname' => 'Laden'], ['schluessel' => 'cafe', 'name' => 'Hofcafé']],
+        'zeiten' => $rows,
+        'schliessungen' => [['von' => ktInDays(30), 'bis' => ktInDays(30), 'bereich' => 'cafe', 'anlass' => 'Renovierung']],
+    ]);
+    $kirby = noren_kirby($tmp, ['noren.active' => true, 'noren.mergeAreas' => true, 'locale' => 'de_DE']);
+    $closed = new DateTimeImmutable(ktInDays(30) . ' 12:00', new DateTimeZone('Europe/Berlin'));
+
+    expect(['kontakt#laden+cafe'], ktIds($kirby->site()->norenUnits()), 'mergeAreas: closure beyond the lead time → still one unit today');
+    expect(['kontakt#laden', 'kontakt#cafe'], ktIds($kirby->site()->norenUnits($closed)), 'mergeAreas: norenUnits($now) on the closure day → two units');
+
+    $cafe = (string) $kirby->snippet('noren/status', ['only' => 'cafe', 'now' => $closed], true);
+    holds(str_contains($cafe, 'data-open="false"'), 'mergeAreas: status $only = cafe, $now = closure day → closed');
+    $laden = (string) $kirby->snippet('noren/status', ['only' => 'laden', 'now' => $closed], true);
+    holds(str_contains($laden, 'data-open="true"'), 'mergeAreas: status $only = laden, $now = closure day → open');
+
+    $apart = $kirby->site()->norenUnits(null, false);
+    expect(['kontakt#laden', 'kontakt#cafe'], ktIds($apart), 'mergeAreas: norenUnits(merge: false) → one unit per area');
+    holds(!array_key_exists('areas', $apart[0]), 'mergeAreas: merge false → no areas key, as with the option off');
+});
+
 // Public holidays: the group is one unit, so its holiday note is shown once and equals the single area's.
 withSite(function (string $tmp): void {
     noren_page($tmp, '1_kontakt', 'betrieb', [

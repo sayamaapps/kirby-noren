@@ -6,7 +6,7 @@
  * with site/snippets/noren/status.php.
  *
  * Variables (all optional):
- *   $units  list of units as site()->norenUnits() (default: that call)
+ *   $units  list of units as site()->norenUnits() (default: that call, at $now)
  *   $only   keep only units whose id, area, areas or location id equals this value
  *   $link   URL of a page with all opening hours
  *   $now    DateTimeImmutable, default now in each schedule's timezone
@@ -21,10 +21,11 @@ if ($settings['status'] !== true) {
     return;
 }
 
-$units ??= site()->norenUnits();
+$now ??= null;
+// Grouped at the moment shown: a preview date may split areas that are alike today.
+$units ??= site()->norenUnits($now);
 $only ??= null;
 $link ??= null;
-$now ??= null;
 
 if ($only !== null && $only !== '') {
     $units = array_values(array_filter($units, static function (array $unit) use ($only): bool {

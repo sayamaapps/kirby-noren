@@ -523,7 +523,7 @@ All of them return `null` / `[]` when `Options::active()` is false.
 - **scheduleFor(Page, ?area)**: location page → `schedule($page, $area)`;
   else `schedule(primary, $area ?? (areaRef field value ?: null))`; null
   without primary.
-- **units(App)**: for each location page in order: no areas →
+- **units(App, ?DateTimeImmutable $now = null, bool $merge = true)**: for each location page in order: no areas →
   `schedule($page, null)`, kept if `maintained()`; with areas → one per area
   whose `schedule($page, key)` is maintained (areas without hours are left
   out — "geschlossen" because a field is empty sends people to a door that
@@ -540,7 +540,7 @@ All of them return `null` / `[]` when `Options::active()` is false.
 ```
 
   **`noren.mergeAreas`** (default `false`): the areas of ONE location whose
-  output is identical right now become one unit. Identical means
+  output is identical at `$now` (default: now) become one unit. Identical means
   `status()` and `Presenter::table()` with the settings, so notes, closures
   ahead and the holiday note count; a closure for one area splits them again.
   The group's `id` is the page id plus `'#' . keys joined by '+'`, its `name`
@@ -550,7 +550,10 @@ All of them return `null` / `[]` when `Options::active()` is false.
   for an ungrouped unit). The group's `schedule` is the first area's; its
   output equals each member's. The group sits at the place of its first area.
   `norenSchedule(area)`, `norenSchema()` and the schema.org data stay per area.
-  Off: units exactly as above, no `areas` key.
+  Off, or `$merge` false: units exactly as above, no `areas` key. `$merge`
+  false is for consumers of every area's own data (schema.org, llms.txt): a
+  group only means "alike at `$now`", and an area's closure beyond the lead
+  time does not split it.
 
 - **holidayConfig(App)**: `Holidays::config(Options::get('holidays'))`;
   `InvalidArgumentException` → `error_log('Noren: ' . message . ' — public holidays are off.')`, null.
@@ -571,7 +574,8 @@ snippet first returns silently when `!Options::active(kirby())`, then calls
 `site/snippets/noren/<name>.php`. Data passed in wins over defaults; `$now`
 (DateTimeImmutable) exists for tests and previews.
 
-**noren/status** — variables `$units` (default `site()->norenUnits()`),
+**noren/status** — variables `$units` (default `site()->norenUnits($now)`, so
+a date preview groups the areas as they are on that date),
 `$only` (string: keep units whose `id`, `area` or `location->id()` equals
 it), `$link` (URL of a page with all hours), `$now`. Prints nothing when
 `settings.status` is false or no unit is left. Labels only when more than one
@@ -634,7 +638,7 @@ paragraphs from `notes`, " — " + note when set.)
 | `norenLocation(): ?Page` | first location |
 | `norenAreas(): array` | areas of the first location |
 | `norenSchedule(?string $area = null): ?Schedule` | first location's schedule; null = off / no location |
-| `norenUnits(): array` | §3.7 units |
+| `norenUnits(?DateTimeImmutable $now = null, bool $merge = true): array` | §3.7 units |
 | `norenStatus(?string $area = null): ?array` | §3.1.3 |
 | `norenTable(?string $area = null): ?array` | §3.5 table |
 | `norenCompact(?string $area = null, ?string $mode = null): ?array` | §3.5 compact |

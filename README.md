@@ -113,7 +113,7 @@ Every option is `noren.<name>`, flat or nested. `null` means "not set". Booleans
 | `closureLabel` | `Betriebsferien` / `Closed for holidays` | Name of multi-day closures, for example `'Praxisurlaub'`. Translated by default. |
 | `compact` | `'grouped'` | Default mode of `noren/compact`: `grouped` or `consecutive`. |
 | `status` | `true` | `false` hides the `noren/status` snippet. |
-| `mergeAreas` | `false` | Areas with identical hours become one unit, such as "Hofladen und Hofcafé". |
+| `mergeAreas` | `false` | Areas with identical hours become one unit, such as "Hofladen und Hofcafé". `site()->norenUnits(null, false)` still returns one unit per area. |
 
 ## Public holidays
 
