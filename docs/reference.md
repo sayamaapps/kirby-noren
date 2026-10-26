@@ -24,7 +24,7 @@ Details behind the [README](../README.md): methods, return shapes, markup classe
 | `norenHasHours($area = null)` | Whether the schedule has any hours. |
 | `norenStatus`, `norenTable`, `norenCompact`, `norenSchema` | As the site methods, for this page. |
 
-Status, table, compact and schema methods switch off Kirby's page cache, because they depend on the time. `norenSchedule()` is never cached, since two areas can share one page. In your own snippets, `noren_option('name', $default)` reads a `noren.<name>` option.
+Status, table, compact and schema methods switch off Kirby's page cache, because they depend on the time. `norenSchedule()` is never cached, since two areas can share one page. In your own snippets, `Sayamaapps\Noren\Options::get(kirby(), 'name', $default)` reads a `sayamaapps.noren.<name>` option (the 1.x spelling `noren.<name>` still works). `noren_option()` is deprecated.
 
 ## Return shapes
 
