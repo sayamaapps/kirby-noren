@@ -211,6 +211,21 @@ final class Locations
 		return $units;
 	}
 
+	/** Areas of a location page, or of the first location for any other page (page methods). */
+	public static function pageAreas(Page $page): array
+	{
+		if (self::isLocation($page)) {
+			return self::areas($page);
+		}
+		return self::siteAreas($page->kirby());
+	}
+
+	/** Whether the page has (or points to) maintained hours (page methods). */
+	public static function pageHasHours(Page $page, string|null $area = null): bool
+	{
+		return self::scheduleFor($page, $area)?->maintained() === true;
+	}
+
 	/** All location pages, in order. [] when Noren is off. @return list<Page> */
 	public static function pages(App $kirby): array
 	{
@@ -342,6 +357,20 @@ final class Locations
 		Options::applyLanguage($kirby);
 		self::live($kirby);
 		return SchemaOrg::forSchedule($schedule);
+	}
+
+	/** Areas of the first location (site methods). */
+	public static function siteAreas(App $kirby): array
+	{
+		$location = self::primary($kirby);
+		return $location !== null ? self::areas($location) : [];
+	}
+
+	/** Schedule of the first location for an area, or null (site methods). */
+	public static function siteSchedule(App $kirby, string|null $area = null): Schedule|null
+	{
+		$location = self::primary($kirby);
+		return $location !== null ? self::schedule($location, $area) : null;
 	}
 
 	/**
