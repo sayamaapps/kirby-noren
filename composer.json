@@ -40,9 +40,9 @@
     "scripts": {
         "test": "vendor/bin/phpunit",
         "analyze:psalm": "vendor/bin/psalm",
-        "analyze:phpmd": "vendor/bin/phpmd src,config,index.php,legacy.php,autoload.php,snippets github phpmd.xml.dist",
+        "analyze:phpmd": "vendor/bin/phpmd src,config,index.php,legacy.php,autoload.php github phpmd.xml.dist",
         "analyze:unused": "vendor/bin/composer-unused",
-        "analyze:require-checker": "vendor/bin/composer-require-checker check composer.json",
+        "analyze:require-checker": "vendor/bin/composer-require-checker check --config-file=composer-require-checker.json composer.json",
         "normalize:check": "@composer normalize --dry-run"
     },
     "config": {
