@@ -3,11 +3,16 @@
 namespace Sayamaapps\Noren;
 
 /**
- * The one place where Noren writes to the PHP error log (Kirby-free).
+ * The one place where Noren writes to the PHP error log.
  *
- * Every message is written once per process: a status and a table render
- * read the configuration many times, and a broken option must not fill the
- * log with copies (SPEC.md §4). Tests call forget() to see a message again.
+ * Every message is written once per process: a status and a table render read
+ * the configuration many times, and a broken option must not fill the log with
+ * copies (SPEC.md §4).
+ *
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-noren
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class Log
 {
@@ -20,13 +25,8 @@ final class Log
 		if (isset(self::$seen[$message])) {
 			return;
 		}
+
 		self::$seen[$message] = true;
 		error_log($message);
-	}
-
-	/** Forgets the messages already written (tests only). */
-	public static function forget(): void
-	{
-		self::$seen = [];
 	}
 }

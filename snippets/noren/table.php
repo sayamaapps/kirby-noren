@@ -36,10 +36,17 @@ $closed = esc(\Sayamaapps\Noren\I18n::t('table.closed'));
 ?>
 <div class="noren-table">
 <?php foreach ($table['days'] as $day) : ?>
-  <div class="noren-row" data-today="<?= $day['today'] ? 'true' : 'false' ?>"><div class="noren-day"><?= esc($day['name']) ?></div><div class="noren-hours"><?php foreach ($day['hours'] as $hours) : ?><?= esc($hours) ?><br><?php endforeach ?><?php if ($day['closed']) : ?><span class="noren-closed"><?= $closed ?></span><?php endif ?><?php if ($day['note'] !== null && $day['note'] !== '') : ?><span class="noren-note"><?= esc($day['note']) ?></span><?php endif ?></div></div>
+  <div class="noren-row" data-today="<?= $day['today'] ? 'true' : 'false' ?>"><div class="noren-day"><?= esc($day['name']) ?></div><div class="noren-hours"><?php
+	foreach ($day['hours'] as $hours) : ?><?= esc($hours) ?><br><?php
+	endforeach ?><?php
+	if ($day['closed']) : ?><span class="noren-closed"><?= $closed ?></span><?php
+	endif ?><?php
+	if ($day['note'] !== null && $day['note'] !== '') : ?><span class="noren-note"><?= esc($day['note']) ?></span><?php
+	endif ?></div></div>
 <?php endforeach ?>
-<?php if ($table['holidays'] !== null) : ?>
-  <div class="noren-row noren-row--holidays" data-today="<?= $table['holidays']['today'] ? 'true' : 'false' ?>"><div class="noren-day"><?= esc($table['holidays']['label']) ?></div><div class="noren-hours"><span class="noren-closed"><?= esc($table['holidays']['text']) ?></span></div></div>
+<?php $holidays = $table['holidays']; if ($holidays !== null) : ?>
+  <div class="noren-row noren-row--holidays" data-today="<?= $holidays['today'] ? 'true' : 'false' ?>"><div class="noren-day"><?= esc($holidays['label']) ?></div><?php
+?><div class="noren-hours"><span class="noren-closed"><?= esc($holidays['text']) ?></span></div></div>
 <?php endif ?>
 </div>
 <?php foreach ($table['notes'] as $note) :

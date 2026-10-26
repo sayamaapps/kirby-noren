@@ -9,6 +9,11 @@ namespace Sayamaapps\Noren;
  *   ['days' => [1, 2], 'label' => 'Di – Mi', 'blocks' => [[660, 960]],
  *    'hours' => '11:00 – 16:00', 'note' => null]
  * Day indices: 0 = Monday … 6 = Sunday. Closed days never form a group.
+ *
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-noren
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class Grouping
 {
@@ -142,7 +147,7 @@ final class Grouping
 	{
 		sort($days);
 		$first = (int)$days[0];
-		$last = (int)$days[count($days) - 1];
+		$last = (int)end($days);
 		if ($first === $last) {
 			return I18n::dayShort($first);
 		}

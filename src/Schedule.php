@@ -24,6 +24,11 @@ use DateTimeZone;
  * Times are minutes since 0:00 of the block's day. A block may end after
  * midnight (end > 1440): it belongs to the day it starts on (overnight block,
  * SPEC.md §3.1.4).
+ *
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-noren
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class Schedule
 {
@@ -51,18 +56,22 @@ final class Schedule
 	private DateTimeZone $timezone;
 
 	/**
+	 * Builds the plan from its parts. Missing parts count as closed.
+	 *
+	 * `$days`: index 0 = Monday … 6 = Sunday.
+	 * `$closures`: company holidays and special days, dates as Y-m-d (inclusive).
+	 *   `occasion` names a special day ("Silvester"). With `hours` the day is open
+	 *   with these hours instead of closed.
+	 * `$closureLabel`: what a running closure is called ("Betriebsferien",
+	 *   "Praxisurlaub"). null = the translation `closure.label`.
+	 * `$holiday`: name of the public holiday on a day, or null (Holidays::checker()).
+	 *   null = no public holidays.
+	 * `$settings`: timezone, holidayEve and lookahead.
+	 *
 	 * @param array<int, array{blocks?: list<array{0:int,1:int}>, note?: ?string}> $days
-	 *                                                                                   Index 0 = Monday … 6 = Sunday. Missing days count as closed.
 	 * @param list<array{from: string, to: string, note?: ?string, occasion?: ?string, hours?: ?array{0:int,1:int}, area?: ?string}> $closures
-	 *                                                                                                                                         Company holidays and special days, dates as Y-m-d (inclusive).
-	 *                                                                                                                                         `occasion` names a special day ("Silvester"). With `hours` the
-	 *                                                                                                                                         day is not closed but open with these hours.
-	 * @param $closureLabel What a running closure is called
-	 *                     ("Betriebsferien", "Praxisurlaub"). null = translation `closure.label`.
 	 * @param (Closure(DateTimeImmutable): ?string)|null $holiday
-	 *                                                            Name of the public holiday on a day, or null (Holidays::checker()).
-	 *                                                            null = no public holidays.
-	 * @param array{timezone?: string|DateTimeZone, holidayEve?: bool, lookahead?: int} $settings
+	 * @param array{timezone?: string|DateTimeZone, holidayEve?: bool, lookahead?: int, overnightUntil?: ?int} $settings
 	 */
 	public function __construct(
 		array $days,
@@ -215,16 +224,16 @@ final class Schedule
 	/**
 	 * Reads the Panel structure fields (field contract: SPEC.md §6).
 	 *
-	 * @param $hoursField Structure with tag/von1/bis1/von2/bis2/hinweis
-	 *                   (legacy vm_von/vm_bis/nm_von/nm_bis/nm_hinweis)
-	 *                   and optionally a column `bereich`.
-	 * @param $closuresField Structure with von/bis/bereich/anlass/hinweis/oeffnet/schliesst.
-	 * @param $area Only rows of this area. null = all rows
-	 *             (a business without areas).
+	 * `$hoursField`: structure with tag/von1/bis1/von2/bis2/hinweis, the legacy
+	 *   vm_von/vm_bis/nm_von/nm_bis/nm_hinweis, and optionally a column `bereich`.
+	 * `$closuresField`: structure with von/bis/bereich/anlass/hinweis/oeffnet/schliesst.
+	 * `$area`: only rows of this area. null = all rows (a business without areas).
+	 * `$settings`: timezone, holidayEve, lookahead and overnightUntil. `overnightUntil`
+	 *   is in minutes: a block whose end lies before its start counts as overnight when
+	 *   the end is at most this value. A missing key means DEFAULT_OVERNIGHT_UNTIL, null
+	 *   turns overnight blocks off.
+	 *
 	 * @param array{timezone?: string|DateTimeZone, holidayEve?: bool, lookahead?: int, overnightUntil?: ?int} $settings
-	 *                                                                                                                   `overnightUntil`: minutes; a block whose end is before its start
-	 *                                                                                                                   counts as overnight when the end is <= this value. Key missing =
-	 *                                                                                                                   DEFAULT_OVERNIGHT_UNTIL; null = overnight blocks off.
 	 */
 	public static function fromFields(
 		mixed $hoursField,

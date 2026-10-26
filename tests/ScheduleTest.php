@@ -663,7 +663,7 @@ final class ScheduleTest extends TestCase
 		$logFile = tempnam(sys_get_temp_dir(), 'noren-schedule-log-');
 		$previousLog = (string)ini_get('error_log');
 		ini_set('error_log', $logFile);
-		\Sayamaapps\Noren\Log::forget();
+		norenResetLog();
 		$badDates = Schedule::fromFields(field([]), field([
 			['von' => '24.12.2026', 'bis' => '31.12.2026'],
 			['von' => '2026-12-31', 'bis' => '2026-12-24'],

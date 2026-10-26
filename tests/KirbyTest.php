@@ -481,7 +481,7 @@ final class KirbyTest extends TestCase
 			noren_page($tmp, '1_kontakt', 'betrieb', ['title' => 'Kontakt', 'zeiten' => 'Mo-Fr 9-18 Uhr']);
 			noren_page($tmp, '2_bar', 'betrieb', ['title' => 'Bar', 'zeiten' => ['Montag', 'Dienstag']]);
 			$kirby = noren_kirby($tmp, ['sayamaapps.noren.active' => true, 'locale' => 'de_DE']);
-			\Sayamaapps\Noren\Log::forget();
+			norenResetLog();
 			$logged = withErrorLog($tmp, function () use ($kirby): void {
 				expect(null, $kirby->site()->norenStatus(), 'text zeiten: norenStatus() is null, no exception');
 				expect(null, $kirby->page('bar')->norenStatus(), 'list of scalars: page norenStatus() is null, no exception');
@@ -506,7 +506,7 @@ final class KirbyTest extends TestCase
 		// A broken option is logged once per process, however often it is read.
 		withSite(function (string $tmp): void {
 			noren_page($tmp, '1_kontakt', 'betrieb', ktStarter());
-			\Sayamaapps\Noren\Log::forget();
+			norenResetLog();
 			$kirby = noren_kirby($tmp, ['sayamaapps.noren.active' => true, 'sayamaapps.noren.timezone' => 'Europe/Berln', 'sayamaapps.noren.overnightUntil' => '6 Uhr', 'locale' => 'de_DE']);
 			$logged = withErrorLog($tmp, function () use ($kirby): void {
 				for ($i = 0; $i < 3; $i++) {
@@ -588,7 +588,7 @@ final class KirbyTest extends TestCase
 		withSite(function (string $tmp): void {
 			noren_page($tmp, '1_kontakt', 'betrieb', ktStarter());
 			$strings = noren_kirby($tmp, ['sayamaapps.noren.active' => true, 'sayamaapps.noren.status' => 'false', 'sayamaapps.noren.holidayRow' => '0', 'locale' => 'de_DE']);
-			\Sayamaapps\Noren\Log::forget();
+			norenResetLog();
 			$logged = withErrorLog($tmp, function () use ($strings): void {
 				$settings = \Sayamaapps\Noren\Options::settings($strings);
 				expect(true, $settings['status'], "'status' => 'false' is not a switch: default true");

@@ -10,6 +10,11 @@ use DateTimeImmutable;
  * The snippets render exactly these arrays; `$site->norenTable()` and
  * `norenCompact()` return them for sites with their own markup.
  * `$now` defaults to now in the schedule's timezone; `$today` is `$now` at 0:00.
+ *
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-noren
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class Presenter
 {

@@ -20,6 +20,16 @@ function holds(bool $ok, string $what): void
 	Assert::assertTrue($ok, $what);
 }
 
+/**
+ * Clears the once-per-process message log of Noren\Log, so a test sees a message
+ * again. Log keeps its state in a private static property and offers no test hook,
+ * so the reset goes through reflection.
+ */
+function norenResetLog(): void
+{
+	(new ReflectionProperty(Sayamaapps\Noren\Log::class, 'seen'))->setValue(null, []);
+}
+
 /** Only these keys of an array, in this order (for comparing parts of status()). */
 function only(array $array, array $keys): array
 {

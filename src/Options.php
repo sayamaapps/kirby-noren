@@ -2,6 +2,8 @@
 
 namespace Sayamaapps\Noren;
 
+use DateTimeZone;
+use InvalidArgumentException;
 use Kirby\Cms\App;
 use Kirby\Cms\Helpers;
 
@@ -20,6 +22,11 @@ use Kirby\Cms\Helpers;
  *
  * Defaults are given here and at the call sites. The `options` block of the
  * plugin lists the keys with null: a default there would hide the 1.x spelling.
+ *
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-noren
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class Options
 {
@@ -84,7 +91,7 @@ final class Options
 		$fields = self::FIELDS;
 		$option = self::get($kirby, 'fields');
 		if (is_array($option)) {
-			foreach ($fields as $key => $default) {
+			foreach (array_keys($fields) as $key) {
 				$value = $option[$key] ?? null;
 				if (is_string($value) && trim($value) !== '') {
 					$fields[$key] = trim($value);
@@ -136,7 +143,7 @@ final class Options
 	public static function invalid(App $kirby, string $message): void
 	{
 		if ($kirby->option('debug') === true) {
-			throw new \InvalidArgumentException($message);
+			throw new InvalidArgumentException($message);
 		}
 		Log::error($message);
 	}
@@ -144,7 +151,7 @@ final class Options
 	private static function knowsZone(string $zone): bool
 	{
 		try {
-			new \DateTimeZone($zone);
+			new DateTimeZone($zone);
 			return true;
 		} catch (\Exception) {
 			return false;

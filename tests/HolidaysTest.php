@@ -577,7 +577,7 @@ final class HolidaysTest extends TestCase
 
 		// Invalid extra entries are skipped and logged.
 
-		\Sayamaapps\Noren\Log::forget();
+		norenResetLog();
 		$logFile = tempnam(sys_get_temp_dir(), 'noren-holidays-log-');
 		$previousLog = (string)ini_get('error_log');
 		ini_set('error_log', $logFile);
@@ -712,7 +712,7 @@ final class HolidaysTest extends TestCase
 		$flagLog = tempnam(sys_get_temp_dir(), 'noren-holiday-flags-');
 		$previousFlagLog = (string)ini_get('error_log');
 		ini_set('error_log', $flagLog);
-		\Sayamaapps\Noren\Log::forget();
+		norenResetLog();
 		$flags = Holidays::config(['state' => 'BY', 'assumption' => 'false', 'augsburg' => 1, 'corpusChristi' => 0]);
 		ini_set('error_log', $previousFlagLog);
 		$flagLogged = (string)file_get_contents($flagLog);

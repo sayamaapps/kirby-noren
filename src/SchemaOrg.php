@@ -7,6 +7,11 @@ use DateTimeImmutable;
 /**
  * schema.org opening hours as plain arrays (SPEC.md §3.6), for the site's own
  * JSON-LD snippet or a separate SEO plugin. Kirby-free, no JSON encoding.
+ *
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-noren
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class SchemaOrg
 {

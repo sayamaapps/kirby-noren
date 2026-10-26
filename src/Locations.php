@@ -16,6 +16,11 @@ use Kirby\Cms\Page;
  * methods registered in index.php.
  *
  * NEVER memoise a schedule keyed on the page id (two areas share a page).
+ *
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-noren
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class Locations
 {
@@ -403,6 +408,7 @@ final class Locations
 			return null;
 		}
 		try {
+			/** @psalm-suppress UndefinedMagicMethod Kirby's Field forwards toStructure() through __call(). */
 			$value->toStructure();
 		} catch (\Throwable) {
 			Log::error('Noren: field ' . $field . ' on page ' . $page->id() . ' is not structure data — ignored.');

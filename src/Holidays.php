@@ -28,6 +28,11 @@ use InvalidArgumentException;
  *   Sundays enters special hours to stay open, like on any holiday).
  *
  * Kirby-free; tests/HolidaysTest.php.
+ *
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-noren
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class Holidays
 {
@@ -213,7 +218,7 @@ final class Holidays
 	public static function forYear(int $year, array $config): array
 	{
 		return array_map(
-			static fn (array $entry) => $entry['id'] !== null ? self::name($entry['id']) : $entry['name'],
+			static fn (array $entry) => $entry['id'] !== null ? self::name($entry['id']) : (string)$entry['name'],
 			self::entries($year, $config)
 		);
 	}
