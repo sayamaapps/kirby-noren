@@ -3,7 +3,15 @@
     "description": "Opening hours for Kirby CMS with an open-now status, closures and German public holidays.",
     "type": "kirby-plugin",
     "license": "MIT",
-    "keywords": ["kirby", "kirby-plugin", "kirby-5", "opening-hours", "holidays", "schema-org", "local-business"],
+    "keywords": [
+        "kirby",
+        "kirby-plugin",
+        "kirby-5",
+        "opening-hours",
+        "holidays",
+        "schema-org",
+        "local-business"
+    ],
     "homepage": "https://github.com/sayamaapps/kirby-noren",
     "authors": [
         {
@@ -22,18 +30,30 @@
     },
     "require-dev": {
         "getkirby/cms": "^5.0",
-        "phpunit/phpunit": "11.5.55"
+        "phpunit/phpunit": "11.5.55",
+        "vimeo/psalm": "^6.20",
+        "phpmd/phpmd": "^2.15",
+        "icanhazstring/composer-unused": "^0.9.7",
+        "maglnet/composer-require-checker": "^4.0",
+        "ergebnis/composer-normalize": "^2.54"
     },
     "scripts": {
-        "test": "vendor/bin/phpunit"
+        "test": "vendor/bin/phpunit",
+        "analyze:psalm": "vendor/bin/psalm",
+        "analyze:phpmd": "vendor/bin/phpmd src,config,index.php,legacy.php,autoload.php,snippets github phpmd.xml.dist",
+        "analyze:unused": "vendor/bin/composer-unused",
+        "analyze:require-checker": "vendor/bin/composer-require-checker check composer.json",
+        "normalize:check": "@composer normalize --dry-run"
     },
     "config": {
         "optimize-autoloader": true,
+        "sort-packages": true,
         "allow-plugins": {
-            "getkirby/composer-installer": true
+            "getkirby/composer-installer": true,
+            "ergebnis/composer-normalize": true
         },
         "platform": {
-            "php": "8.2.0"
+            "php": "8.2.27"
         }
     },
     "extra": {
