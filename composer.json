@@ -1,8 +1,8 @@
 {
     "name": "sayamaapps/kirby-noren",
     "description": "Opening hours for Kirby CMS with an open-now status, closures and German public holidays.",
-    "type": "kirby-plugin",
     "license": "MIT",
+    "type": "kirby-plugin",
     "keywords": [
         "kirby",
         "kirby-plugin",
@@ -12,13 +12,13 @@
         "schema-org",
         "local-business"
     ],
-    "homepage": "https://github.com/sayamaapps/kirby-noren",
     "authors": [
         {
             "name": "Simon Räder",
             "homepage": "https://sayamaapps.de"
         }
     ],
+    "homepage": "https://github.com/sayamaapps/kirby-noren",
     "support": {
         "issues": "https://github.com/sayamaapps/kirby-noren/issues",
         "source": "https://github.com/sayamaapps/kirby-noren"
@@ -29,38 +29,38 @@
         "getkirby/composer-installer": "^1.2"
     },
     "require-dev": {
+        "ergebnis/composer-normalize": "^2.54",
         "getkirby/cms": "^5.0",
-        "phpunit/phpunit": "11.5.55",
-        "vimeo/psalm": "^6.20",
-        "phpmd/phpmd": "^2.15",
         "icanhazstring/composer-unused": "^0.9.7",
         "maglnet/composer-require-checker": "^4.0",
-        "ergebnis/composer-normalize": "^2.54"
-    },
-    "scripts": {
-        "test": "vendor/bin/phpunit",
-        "analyze:psalm": "vendor/bin/psalm",
-        "analyze:phpmd": "vendor/bin/phpmd src,config,index.php,legacy.php,autoload.php github phpmd.xml.dist",
-        "analyze:unused": "vendor/bin/composer-unused",
-        "analyze:require-checker": "vendor/bin/composer-require-checker check --config-file=composer-require-checker.json composer.json",
-        "normalize:check": "@composer normalize --dry-run"
+        "phpmd/phpmd": "^2.15",
+        "phpunit/phpunit": "11.5.55",
+        "vimeo/psalm": "^6.20"
     },
     "config": {
-        "optimize-autoloader": true,
-        "sort-packages": true,
         "allow-plugins": {
-            "getkirby/composer-installer": true,
-            "ergebnis/composer-normalize": true
+            "ergebnis/composer-normalize": true,
+            "getkirby/composer-installer": true
         },
+        "optimize-autoloader": true,
         "platform": {
             "php": "8.2.27"
-        }
+        },
+        "sort-packages": true
     },
     "extra": {
         "installer-name": "noren",
-        "kirby-cms-path": false,
         "kirby": {
             "compatible": "^5.0"
-        }
+        },
+        "kirby-cms-path": false
+    },
+    "scripts": {
+        "analyze:phpmd": "vendor/bin/phpmd src,config,index.php,legacy.php,autoload.php github phpmd.xml.dist",
+        "analyze:psalm": "vendor/bin/psalm",
+        "analyze:require-checker": "vendor/bin/composer-require-checker check --config-file=composer-require-checker.json composer.json",
+        "analyze:unused": "vendor/bin/composer-unused",
+        "normalize:check": "@composer normalize --dry-run",
+        "test": "vendor/bin/phpunit"
     }
 }
