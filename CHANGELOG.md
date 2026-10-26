@@ -8,6 +8,23 @@ All notable changes to this project are documented here. Versions follow
   and schema.org show without configuration) is a **major** version: a site
   would show other hours after a routine update.
 
+## [Unreleased]
+
+### Added
+
+- **`norenUnits($now, $merge)`**: `$now` is the moment `noren.mergeAreas`
+  compares the areas at (default now); `$merge = false` returns one unit per
+  area even with `noren.mergeAreas` on, for consumers that need every area's
+  own data, such as schema.org or llms.txt.
+
+### Fixed
+
+- **Date previews with `noren.mergeAreas`.** The status snippet grouped the
+  areas by the real time, also when `$now` named another date. An area with a
+  closure beyond the lead time stayed in the group and showed the group's
+  hours: `only => 'cafe'` on the café's closure day read "open". The snippet
+  now groups at its `$now`.
+
 ## [1.2.2] — 2026-10-21
 
 ### Fixed

@@ -153,9 +153,14 @@ final class Locations
     /**
      * Every (location, area) with maintained hours. [] when off.
      *
+     * $now: the moment `noren.mergeAreas` compares the areas at — the moment
+     * the caller shows (status snippet's `$now`), default now. $merge false:
+     * one unit per area even with `noren.mergeAreas` on, for consumers that
+     * need every area's own data (schema.org, llms.txt), not the display.
+     *
      * @return list<array{id: string, location: Page, area: ?string, name: string, short: string, label: string, schedule: Schedule}>
      */
-    public static function units(App $kirby): array
+    public static function units(App $kirby, ?DateTimeImmutable $now = null, bool $merge = true): array
     {
         if (!Options::active($kirby)) {
             return [];
@@ -205,8 +210,8 @@ final class Locations
                     'schedule' => $schedule,
                 ];
             }
-            $units = array_merge($units, Options::mergeAreas($kirby) && $found !== []
-                ? self::merge($found, $page, $locationShort, $several, $kirby)
+            $units = array_merge($units, $merge && Options::mergeAreas($kirby) && $found !== []
+                ? self::merge($found, $page, $locationShort, $several, $kirby, $now)
                 : $found);
         }
         return $units;
@@ -214,8 +219,8 @@ final class Locations
 
     /**
      * `noren.mergeAreas` (SPEC.md §3.7): the areas of ONE location whose
-     * output is identical right now become one unit, named "Hofladen und
-     * Hofcafé". Identical means status() and Presenter::table() (with notes,
+     * output is identical at $now (default: now) become one unit, named
+     * "Hofladen und Hofcafé". Identical means status() and Presenter::table() (with notes,
      * closures ahead and the holiday note), so a closure for one area splits
      * them again. A group sits where its first area was. The group's schedule
      * is the first area's; schema.org stays per area, see SPEC.md §3.7.
@@ -223,10 +228,10 @@ final class Locations
      * @param list<array> $found units of one location, in area order
      * @return list<array>
      */
-    private static function merge(array $found, Page $page, string $locationShort, bool $several, App $kirby): array
+    private static function merge(array $found, Page $page, string $locationShort, bool $several, App $kirby, ?DateTimeImmutable $now): array
     {
         $settings = Options::settings($kirby);
-        $now = new DateTimeImmutable('now', $found[0]['schedule']->timezone());
+        $now ??= new DateTimeImmutable('now', $found[0]['schedule']->timezone());
 
         $groups = [];
         foreach ($found as $unit) {

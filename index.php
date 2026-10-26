@@ -107,9 +107,13 @@ App::plugin('sayamaapps/noren', [
             return $location !== null ? Locations::schedule($location, $area) : null;
         },
 
-        /** Every (location, area) with maintained hours — the status band's lines. */
-        'norenUnits' => function (): array {
-            return Locations::units($this->kirby());
+        /**
+         * Every (location, area) with maintained hours — the status band's lines.
+         * $now: the moment noren.mergeAreas compares the areas at (default now).
+         * $merge false: one unit per area even with noren.mergeAreas on.
+         */
+        'norenUnits' => function (?DateTimeImmutable $now = null, bool $merge = true): array {
+            return Locations::units($this->kirby(), $now, $merge);
         },
 
         /** Status array of the first location (SPEC.md §3.1.3), or null (no location, Noren off, or no weekly plan). */
