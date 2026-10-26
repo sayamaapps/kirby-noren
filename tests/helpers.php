@@ -2,41 +2,22 @@
 /**
  * Shared test helpers.
  *
- *   require_once __DIR__ . '/helpers.php';
- *
- * Loads NO src file: Kirby-free tests require the classes they need
- * themselves (src/I18n.php first), Kirby tests load the plugin through
- * Kirby (noren_site()). That way a class is never declared twice.
- *
- * Every test file: call expect()/holds() as often as needed, then
- * finish('Suite name') at the end — it prints all failures and exits 1, or
- * prints the count and exits 0. A failing check does not stop the file, so
- * one run shows every problem.
+ * Loaded by every test file with require_once. The checks use PHPUnit's
+ * assertions, so a failing check ends the test method and is reported by
+ * PHPUnit with its label.
  */
 
-$GLOBALS['norenChecks'] = 0;
-$GLOBALS['norenFailures'] = [];
+use PHPUnit\Framework\Assert;
 
 /** Strict comparison ($expected === $actual). */
 function expect(mixed $expected, mixed $actual, string $what): void
 {
-    $GLOBALS['norenChecks']++;
-    if ($expected !== $actual) {
-        $GLOBALS['norenFailures'][] = sprintf(
-            "  ✗ %s\n      expected: %s\n      actual:   %s",
-            $what,
-            var_export($expected, true),
-            var_export($actual, true)
-        );
-    }
+    Assert::assertSame($expected, $actual, $what);
 }
 
 function holds(bool $ok, string $what): void
 {
-    $GLOBALS['norenChecks']++;
-    if (!$ok) {
-        $GLOBALS['norenFailures'][] = '  ✗ ' . $what;
-    }
+    Assert::assertTrue($ok, $what);
 }
 
 /** Only these keys of an array, in this order (for comparing parts of status()). */
@@ -53,19 +34,6 @@ function only(array $array, array $keys): array
 function at(string $when, string $zone = 'Europe/Berlin'): DateTimeImmutable
 {
     return new DateTimeImmutable($when, new DateTimeZone($zone));
-}
-
-/** Prints the result and exits: 0 when every check passed, 1 otherwise. */
-function finish(string $suite): never
-{
-    $failures = $GLOBALS['norenFailures'];
-    $checks = $GLOBALS['norenChecks'];
-    if ($failures !== []) {
-        fwrite(STDERR, "$suite: " . count($failures) . " of $checks checks failed\n" . implode("\n", $failures) . "\n");
-        exit(1);
-    }
-    echo "$suite: all $checks checks passed\n";
-    exit(0);
 }
 
 /* --------------------------------------------------------------------------
@@ -133,14 +101,13 @@ function field(array $rows): TestField
 /**
  * A throwaway site directory with the package symlinked as
  * site/plugins/noren, a default template and a home page. Returns its path;
- * remove it with noren_remove_tree() in a finally block.
+ * remove it with Dir::remove() in a finally block.
  */
 function noren_site(): string
 {
     $base = dirname(__DIR__);
     if (!is_file($base . '/vendor/autoload.php')) {
-        fwrite(STDERR, "Composer dependencies missing; run composer install first\n");
-        exit(1);
+        throw new RuntimeException('Composer dependencies missing; run composer install first');
     }
     require_once $base . '/vendor/autoload.php';
 
@@ -188,16 +155,4 @@ function noren_page(string $tmp, string $dir, string $template, array $fields): 
     }
     @mkdir($tmp . '/content/' . $dir, 0700, true);
     file_put_contents($tmp . '/content/' . $dir . '/' . $template . '.txt', implode("\n\n----\n\n", $lines) . "\n");
-}
-
-function noren_remove_tree(string $path): void
-{
-    if (!is_dir($path) || is_link($path)) {
-        return;
-    }
-    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
-    foreach ($it as $file) {
-        $file->isDir() && !$file->isLink() ? rmdir($file->getPathname()) : unlink($file->getPathname());
-    }
-    rmdir($path);
 }
