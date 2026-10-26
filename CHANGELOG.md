@@ -8,6 +8,18 @@ All notable changes to this project are documented here. Versions follow
   and schema.org show without configuration) is a **major** version: a site
   would show other hours after a routine update.
 
+## [Unreleased]
+
+### Fixed
+
+- **schema.org hours past midnight.** A block that starts at 00:00 and runs past
+  midnight lost its end: two rows that touch at midnight (00:00–18:00 and
+  18:00–02:00) gave Monday "00:00" to "23:59" and nothing for the two hours
+  after. The schema now carries the overhang on the next weekday: Monday
+  00:00–23:59 and Tuesday 00:00–02:00. Sites with such a row get one more
+  `OpeningHoursSpecification` entry; the status and the table already showed the
+  right hours.
+
 ## [1.3.0] — 2026-10-26
 
 ### Added
