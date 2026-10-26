@@ -12,7 +12,7 @@
  */
 
 if (!\Noren\Options::active(kirby())) {
-    return;
+	return;
 }
 \Noren\Options::applyLanguage(kirby());
 $settings = \Noren\Options::settings(kirby());
@@ -21,16 +21,16 @@ $area ??= null;
 $now ??= null;
 $schedule ??= site()->norenSchedule($area);
 if (!$schedule || !$schedule->maintained()) {
-    return;
+	return;
 }
 // Holidays, notes and the "today" marker change with the clock: no page cache.
 kirby()->response()->cache(false);
 
 $table = \Noren\Presenter::table($schedule, $now, [
-    'holidayRow'      => $settings['holidayRow'],
-    'holidayNote'     => $settings['holidayNote'],
-    'holidayNoteDays' => $settings['holidayNoteDays'],
-    'leadDays'        => $settings['leadDays'],
+	'holidayRow'      => $settings['holidayRow'],
+	'holidayNote'     => $settings['holidayNote'],
+	'holidayNoteDays' => $settings['holidayNoteDays'],
+	'leadDays'        => $settings['leadDays'],
 ]);
 $closed = esc(\Noren\I18n::t('table.closed'));
 ?>
@@ -43,9 +43,9 @@ $closed = esc(\Noren\I18n::t('table.closed'));
 <?php endif ?>
 </div>
 <?php foreach ($table['notes'] as $note) :
-    $text = esc($note['text']);
-    $extra = $note['note'] !== null && $note['note'] !== '' ? esc($note['note']) : null;
-    if ($note['type'] === 'closure') : ?>
+	$text = esc($note['text']);
+	$extra = $note['note'] !== null && $note['note'] !== '' ? esc($note['note']) : null;
+	if ($note['type'] === 'closure') : ?>
 <p class="noren-closure"><strong><?= $text ?></strong><?php if ($extra !== null) : ?><br><?= $extra ?><?php endif ?></p>
     <?php elseif ($note['type'] === 'holiday') : ?>
 <p class="noren-extra" data-holiday><?= $text ?><?php if ($extra !== null) : ?><?= esc(\Noren\I18n::t('detail.separator')) ?><?= $extra ?><?php endif ?></p>

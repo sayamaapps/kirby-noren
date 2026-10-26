@@ -13,12 +13,12 @@
  */
 
 if (!\Noren\Options::active(kirby())) {
-    return;
+	return;
 }
 \Noren\Options::applyLanguage(kirby());
 $settings = \Noren\Options::settings(kirby());
 if ($settings['status'] !== true) {
-    return;
+	return;
 }
 
 $now ??= null;
@@ -28,15 +28,15 @@ $only ??= null;
 $link ??= null;
 
 if ($only !== null && $only !== '') {
-    $units = array_values(array_filter($units, static function (array $unit) use ($only): bool {
-        return ($unit['id'] ?? null) === $only
-            || ($unit['area'] ?? null) === $only
-            || in_array($only, $unit['areas'] ?? [], true)
-            || (string) ($unit['location']?->id() ?? '') === $only;
-    }));
+	$units = array_values(array_filter($units, static function (array $unit) use ($only): bool {
+		return ($unit['id'] ?? null) === $only ||
+			($unit['area'] ?? null) === $only ||
+			in_array($only, $unit['areas'] ?? [], true) ||
+			(string)($unit['location']?->id() ?? '') === $only;
+	}));
 }
 if ($units === []) {
-    return;
+	return;
 }
 // The status changes with the clock: Kirby's page cache must not keep this page.
 kirby()->response()->cache(false);
@@ -45,11 +45,11 @@ $labels = count($units) > 1;
 ?>
 <div class="noren-status">
 <?php foreach ($units as $unit) :
-    $status = $unit['schedule']->status($now);
-    ?>
-  <p class="noren-status-line" data-open="<?= $status['open'] ? 'true' : 'false' ?>" data-state="<?= esc((string) $status['state']) ?>"><?php if ($labels) : ?><span class="noren-status-label"><?= esc((string) $unit['label']) ?></span> <?php endif ?><b class="noren-status-text"><?= esc((string) $status['text']) ?></b><?php if ($status['detail'] !== '') : ?> <span class="noren-status-detail"><?= esc((string) $status['detail']) ?></span><?php endif ?></p>
+	$status = $unit['schedule']->status($now);
+	?>
+  <p class="noren-status-line" data-open="<?= $status['open'] ? 'true' : 'false' ?>" data-state="<?= esc((string)$status['state']) ?>"><?php if ($labels) : ?><span class="noren-status-label"><?= esc((string)$unit['label']) ?></span> <?php endif ?><b class="noren-status-text"><?= esc((string)$status['text']) ?></b><?php if ($status['detail'] !== '') : ?> <span class="noren-status-detail"><?= esc((string)$status['detail']) ?></span><?php endif ?></p>
 <?php endforeach ?>
 <?php if ($link !== null && $link !== '') : ?>
-  <p class="noren-status-more"><a href="<?= esc((string) $link) ?>"><?= esc(\Noren\I18n::t('status.allHours')) ?></a></p>
+  <p class="noren-status-more"><a href="<?= esc((string)$link) ?>"><?= esc(\Noren\I18n::t('status.allHours')) ?></a></p>
 <?php endif ?>
 </div>

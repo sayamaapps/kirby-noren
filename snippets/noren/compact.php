@@ -14,7 +14,7 @@
  */
 
 if (!\Noren\Options::active(kirby())) {
-    return;
+	return;
 }
 \Noren\Options::applyLanguage(kirby());
 $settings = \Noren\Options::settings(kirby());
@@ -25,19 +25,19 @@ $title ??= null;
 $now ??= null;
 $schedule ??= site()->norenSchedule($area);
 if (!$schedule || !$schedule->maintained()) {
-    return;
+	return;
 }
 // The closure notes depend on the date: no page cache.
 kirby()->response()->cache(false);
 
 $compact = \Noren\Presenter::compact($schedule, $now, [
-    'mode'     => $mode ?? $settings['compact'],
-    'leadDays' => $settings['leadDays'],
+	'mode'     => $mode ?? $settings['compact'],
+	'leadDays' => $settings['leadDays'],
 ]);
 ?>
 <div class="noren-compact">
 <?php if ($title !== null && $title !== '') : ?>
-  <p class="noren-compact-title"><?= esc((string) $title) ?></p>
+  <p class="noren-compact-title"><?= esc((string)$title) ?></p>
 <?php endif ?>
   <ul class="noren-compact-list">
 <?php foreach ($compact['groups'] as $group) : ?>
