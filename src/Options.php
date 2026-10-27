@@ -113,7 +113,7 @@ class Options
 		if (is_bool($value)) {
 			return $value;
 		}
-		self::invalid($kirby, 'Noren: noren.' . $key . ' must be true or false — using ' . var_export($default, true) . '.');
+		self::invalid($kirby, 'Noren: ' . self::PREFIX . $key . ' must be true or false — using ' . var_export($default, true) . '.');
 		return $default;
 	}
 
@@ -227,7 +227,7 @@ class Options
 		}
 		$minutes = is_string($value) ? Schedule::parseTime($value) : null;
 		if ($minutes === null) {
-			self::invalid($kirby, 'Noren: noren.overnightUntil must be "HH:MM" or false — using 06:00.');
+			self::invalid($kirby, 'Noren: sayamaapps.noren.overnightUntil must be "HH:MM" or false — using 06:00.');
 			return Schedule::DEFAULT_OVERNIGHT_UNTIL;
 		}
 		return $minutes;
@@ -300,7 +300,7 @@ class Options
 				return $canonical;
 			}
 		}
-		self::invalid($kirby, 'Noren: unknown noren.timezone ' . var_export($zone, true) . ' — using ' . Schedule::DEFAULT_TIMEZONE . '.');
+		self::invalid($kirby, 'Noren: unknown sayamaapps.noren.timezone ' . var_export($zone, true) . ' — using ' . Schedule::DEFAULT_TIMEZONE . '.');
 		return Schedule::DEFAULT_TIMEZONE;
 	}
 }

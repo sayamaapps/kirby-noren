@@ -598,7 +598,7 @@ final class HolidaysTest extends TestCase
 		expect(['07-02' => 'Gültig'], $skipped['extra'], 'ungültige Extras werden übersprungen, gültige bleiben');
 		expect(
 			4,
-			substr_count($logged, 'Noren: noren.holidays extra entry'),
+			substr_count($logged, 'Noren: sayamaapps.noren.holidays extra entry'),
 			'ungültige Extras werden protokolliert (4 Einträge)'
 		);
 		holds(str_contains($logged, "'13-45'") && str_contains($logged, "'2027-02-30'"), 'Protokoll nennt die verworfenen Schlüssel');
@@ -720,6 +720,6 @@ final class HolidaysTest extends TestCase
 		expect(true, $flags['assumption'], "assumption 'false' (a string) keeps the default true");
 		expect(true, $flags['augsburg'], 'augsburg 1 (an int) switches on');
 		expect(false, $flags['corpusChristi'], 'corpusChristi 0 (an int) stays off');
-		holds(str_contains($flagLogged, 'noren.holidays.assumption must be true or false'), 'a non-boolean switch is logged');
+		holds(str_contains($flagLogged, 'sayamaapps.noren.holidays.assumption must be true or false'), 'a non-boolean switch is logged');
 	}
 }

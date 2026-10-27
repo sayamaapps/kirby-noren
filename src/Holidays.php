@@ -112,7 +112,7 @@ class Holidays
 			$option = ['state' => $option];
 		}
 		if (!is_array($option)) {
-			throw new InvalidArgumentException('noren.holidays must be false, a state code such as "BY", or an array with "state".');
+			throw new InvalidArgumentException('sayamaapps.noren.holidays must be false, a state code such as "BY", or an array with "state".');
 		}
 
 		$state = $option['state'] ?? $option['land'] ?? null;
@@ -121,7 +121,7 @@ class Holidays
 			$state = 'BY';
 		}
 		if (!is_string($state)) {
-			throw new InvalidArgumentException('noren.holidays needs a "state" such as "BY".');
+			throw new InvalidArgumentException('sayamaapps.noren.holidays needs a "state" such as "BY".');
 		}
 
 		$config = ['state' => self::state($state)];
@@ -137,7 +137,7 @@ class Holidays
 			$valid = (preg_match('/^\d{2}-\d{2}$/', $key) && checkdate((int)substr($key, 0, 2), (int)substr($key, 3, 2), 2024)) ||
 				(preg_match('/^\d{4}-\d{2}-\d{2}$/', $key) && checkdate((int)substr($key, 5, 2), (int)substr($key, 8, 2), (int)substr($key, 0, 4)));
 			if (!$valid || !is_string($name) || trim($name) === '') {
-				Log::error('Noren: noren.holidays extra entry ' . var_export($key, true) . ' skipped — use "MM-DD" or "Y-m-d" => "Name".');
+				Log::error('Noren: sayamaapps.noren.holidays extra entry ' . var_export($key, true) . ' skipped — use "MM-DD" or "Y-m-d" => "Name".');
 				continue;
 			}
 			$config['extra'][$key] = trim($name);
@@ -209,7 +209,7 @@ class Holidays
 		if ($value === 0 || $value === 1) {
 			return $value === 1;
 		}
-		Log::error('Noren: noren.holidays.' . $name . ' must be true or false — using ' . var_export($default, true) . '.');
+		Log::error('Noren: sayamaapps.noren.holidays.' . $name . ' must be true or false — using ' . var_export($default, true) . '.');
 		return $default;
 	}
 

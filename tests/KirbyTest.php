@@ -517,7 +517,7 @@ final class KirbyTest extends TestCase
 					$kirby->snippet('noren/table', [], true);
 				}
 			});
-			expect(1, substr_count($logged, 'unknown noren.timezone'), 'timezone error logged once for 15 reads');
+			expect(1, substr_count($logged, 'unknown sayamaapps.noren.timezone'), 'timezone error logged once for 15 reads');
 			expect(1, substr_count($logged, 'overnightUntil must be'), 'overnightUntil error logged once for 15 reads');
 			expect('Europe/Berlin', $kirby->site()->norenSchedule()->timezone()->getName(), 'the broken timezone falls back to Europe/Berlin');
 		});
@@ -549,7 +549,7 @@ final class KirbyTest extends TestCase
 			$logged = withErrorLog($tmp, function () use ($quiet): void {
 				expect('Europe/Berlin', $quiet->site()->norenSchedule()->timezone()->getName(), 'debug off: the default time zone is used');
 			});
-			holds(str_contains($logged, 'unknown noren.timezone'), 'debug off: the problem is logged');
+			holds(str_contains($logged, 'unknown sayamaapps.noren.timezone'), 'debug off: the problem is logged');
 		});
 
 		// Every zone PHP accepts is valid, including those missing from listIdentifiers().
