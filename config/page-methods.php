@@ -22,18 +22,18 @@ return [
 	},
 
 	'norenStatus' => function (string|null $area = null): array|null {
-		return Locations::status(Locations::scheduleFor($this, $area));
+		return Locations::status(Locations::scheduleFor($this, $area), null, $this->kirby());
 	},
 
 	'norenTable' => function (string|null $area = null): array|null {
-		return Locations::table(Locations::scheduleFor($this, $area));
+		return Locations::table(Locations::scheduleFor($this, $area), null, $this->kirby());
 	},
 
 	'norenCompact' => function (string|null $area = null, string|null $mode = null): array|null {
-		return Locations::compact(Locations::scheduleFor($this, $area), $mode);
+		return Locations::compact(Locations::scheduleFor($this, $area), $mode, null, $this->kirby());
 	},
 
 	'norenSchema' => function (string|null $area = null): array|null {
-		return Locations::schema(Locations::scheduleFor($this, $area));
+		return Locations::schema(Locations::scheduleFor($this, $area), $this->kirby());
 	},
 ];

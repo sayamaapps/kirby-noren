@@ -32,10 +32,10 @@ class Log
 	}
 
 	/**
-	 * Forgets the messages already written. Kept for 1.x callers and tests;
-	 * removed in 2.0 (README, Deprecations).
+	 * Forgets the messages already written. A test hook, kept for 1.x callers.
 	 *
-	 * @deprecated 1.4.0, no replacement; removal planned for 2.0
+	 * @deprecated 1.4 no replacement; removal planned for 2.0
+	 * @internal
 	 */
 	public static function forget(): void
 	{

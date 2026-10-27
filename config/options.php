@@ -1,6 +1,6 @@
 <?php
 
-// Options Noren reads, relative to the plugin: `sayamaapps.noren.<key>` (OPT-1).
+// Options Noren reads, relative to the plugin: `sayamaapps.noren.<key>`.
 // Each value is null on purpose. Options::get() gives the default at every read,
 // and a default here would hide the 1.x spelling `noren.<key>` (fallback).
 return [

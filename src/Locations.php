@@ -26,10 +26,16 @@ use Kirby\Content\Field;
  */
 class Locations
 {
+	/** The app for a schedule-based helper: the one passed in, else the current one (1.x behaviour). */
+	private static function appOf(App|null $kirby): App
+	{
+		return $kirby ?? App::instance();
+	}
+
 	/** Areas of a location page. @return list<array{key: string, name: string, short: string}> */
 	public static function areas(Page $page): array
 	{
-		$kirby = App::instance();
+		$kirby = $page->kirby();
 		if (!Options::active($kirby)) {
 			return [];
 		}
@@ -75,13 +81,16 @@ class Locations
 		return $list;
 	}
 
-	/** Presenter::compact() with mode ($mode ?? noren.compact) and leadDays; null for no plan (see status()). */
-	public static function compact(Schedule|null $schedule, string|null $mode = null, DateTimeImmutable|null $now = null): array|null
+	/**
+	 * Presenter::compact() with mode ($mode ?? noren.compact) and leadDays; null for no plan (see status()).
+	 * $kirby defaults to the current app.
+	 */
+	public static function compact(Schedule|null $schedule, string|null $mode = null, DateTimeImmutable|null $now = null, App|null $kirby = null): array|null
 	{
 		if ($schedule === null || !$schedule->maintained()) {
 			return null;
 		}
-		$kirby = App::instance();
+		$kirby = self::appOf($kirby);
 		Options::applyLanguage($kirby);
 		self::live($kirby);
 		$settings = Options::settings($kirby);
@@ -107,7 +116,7 @@ class Locations
 	public static function holidayConfig(App $kirby): array|null
 	{
 		try {
-			return Holidays::config(Options::get($kirby, 'holidays', false));
+			return Holidays::config(Options::get($kirby, 'holidays', false), Options::setKey($kirby, 'holidays'));
 		} catch (InvalidArgumentException $e) {
 			if ($kirby->option('debug') === true) {
 				throw $e;
@@ -135,7 +144,7 @@ class Locations
 	/** Is this page one of pages()? */
 	public static function isLocation(Page $page): bool
 	{
-		$kirby = App::instance();
+		$kirby = $page->kirby();
 		foreach (self::pages($kirby) as $location) {
 			if ($location->id() === $page->id()) {
 				return true;
@@ -290,7 +299,7 @@ class Locations
 	/** Schedule from THIS page's own fields (area filter applied). null when Noren is off. */
 	public static function schedule(Page $page, string|null $area = null): Schedule|null
 	{
-		$kirby = App::instance();
+		$kirby = $page->kirby();
 		if (!Options::active($kirby)) {
 			return null;
 		}
@@ -317,7 +326,7 @@ class Locations
 	 */
 	public static function scheduleFor(Page $page, string|null $area = null): Schedule|null
 	{
-		$kirby = App::instance();
+		$kirby = $page->kirby();
 		if (!Options::active($kirby)) {
 			return null;
 		}
@@ -356,12 +365,12 @@ class Locations
 	}
 
 	/** SchemaOrg::forSchedule(); null for no plan (see status()). */
-	public static function schema(Schedule|null $schedule): array|null
+	public static function schema(Schedule|null $schedule, App|null $kirby = null): array|null
 	{
 		if ($schedule === null || !$schedule->maintained()) {
 			return null;
 		}
-		$kirby = App::instance();
+		$kirby = self::appOf($kirby);
 		Options::applyLanguage($kirby);
 		self::live($kirby);
 		return SchemaOrg::forSchedule($schedule);
@@ -386,12 +395,12 @@ class Locations
 	 * schedule or no weekly plan: Noren does not claim "closed" for a plan it
 	 * does not have.
 	 */
-	public static function status(Schedule|null $schedule, DateTimeImmutable|null $now = null): array|null
+	public static function status(Schedule|null $schedule, DateTimeImmutable|null $now = null, App|null $kirby = null): array|null
 	{
 		if ($schedule === null || !$schedule->maintained()) {
 			return null;
 		}
-		$kirby = App::instance();
+		$kirby = self::appOf($kirby);
 		Options::applyLanguage($kirby);
 		self::live($kirby);
 		return $schedule->status($now);
@@ -421,12 +430,12 @@ class Locations
 	}
 
 	/** Presenter::table() with the options of Options::settings(); null for no plan (see status()). */
-	public static function table(Schedule|null $schedule, DateTimeImmutable|null $now = null): array|null
+	public static function table(Schedule|null $schedule, DateTimeImmutable|null $now = null, App|null $kirby = null): array|null
 	{
 		if ($schedule === null || !$schedule->maintained()) {
 			return null;
 		}
-		$kirby = App::instance();
+		$kirby = self::appOf($kirby);
 		Options::applyLanguage($kirby);
 		self::live($kirby);
 		$settings = Options::settings($kirby);

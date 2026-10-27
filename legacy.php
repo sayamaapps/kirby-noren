@@ -18,14 +18,13 @@ class_alias(\Sayamaapps\Noren\Schedule::class, 'Noren\\Schedule');
 class_alias(\Sayamaapps\Noren\SchemaOrg::class, 'Noren\\SchemaOrg');
 
 if (Kirby\Cms\Helpers::hasOverride('noren_option') === false) {
-	/** Reads `noren.<key>`. Deprecated: use Sayamaapps\Noren\Options::get(). */
+	/**
+	 * Reads `noren.<key>` and `sayamaapps.noren.<key>`.
+	 *
+	 * @deprecated 1.4 use Sayamaapps\Noren\Options::get(); removal planned for 2.0
+	 */
 	function noren_option(string $key, mixed $default = null): mixed
 	{
-		Kirby\Cms\Helpers::deprecated(
-			'noren_option() is deprecated, use Sayamaapps\Noren\Options::get()',
-			'noren-function'
-		);
-
 		return Sayamaapps\Noren\Options::get(Kirby\Cms\App::instance(), $key, $default);
 	}
 }

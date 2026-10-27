@@ -5,7 +5,6 @@ namespace Sayamaapps\Noren;
 use DateTimeZone;
 use InvalidArgumentException;
 use Kirby\Cms\App;
-use Kirby\Cms\Helpers;
 
 /**
  * Reads Noren's options: `sayamaapps.noren.<key>`, falling back to the 1.x name `noren.<key>`.
@@ -58,10 +57,14 @@ class Options
 		'US/Pacific'     => 'America/Los_Angeles',
 	];
 
-	/** Option prefix since 1.4 (OPT-1). */
+	/** Option prefix since 1.4. */
 	public const OPTION_PREFIX = 'sayamaapps.noren.';
 
-	/** Option prefix of 1.x (`noren.<key>`), read as a fallback until 2.0. */
+	/**
+	 * Option prefix of 1.x (`noren.<key>`). Still read as a fallback until 2.0.
+	 *
+	 * @deprecated 1.4 use OPTION_PREFIX; removal planned for 2.0
+	 */
 	public const PREFIX = 'noren.';
 
 	/** Master switch: only a real `true` switches Noren on. */
@@ -121,7 +124,8 @@ class Options
 
 	/**
 	 * Reads an option under the sayamaapps.noren.* spelling, then under the
-	 * 1.x noren.* spelling (deprecated). Returns $default when neither is set.
+	 * 1.x noren.* spelling, which is read silently (README, Deprecations).
+	 * Returns $default when neither is set.
 	 */
 	public static function get(App $kirby, string $key, mixed $default = null): mixed
 	{
@@ -130,16 +134,7 @@ class Options
 			return $value;
 		}
 
-		// The 1.x spelling still works, with a deprecation (README, Deprecations).
-		$legacy = $kirby->option(self::PREFIX . $key);
-		if ($legacy !== null) {
-			Helpers::deprecated(
-				'Noren: noren.' . $key . ' is deprecated, use ' . self::OPTION_PREFIX . $key,
-				'option-prefix'
-			);
-		}
-
-		return $legacy ?? $default;
+		return $kirby->option(self::PREFIX . $key) ?? $default;
 	}
 
 	/**
@@ -243,7 +238,7 @@ class Options
 	 * The option name as the site spelled it, for messages: the 1.x noren.*
 	 * name only when the site sets no sayamaapps.noren.* value for it.
 	 */
-	private static function setKey(App $kirby, string $key): string
+	public static function setKey(App $kirby, string $key): string
 	{
 		if ($kirby->option(self::OPTION_PREFIX . $key) === null && $kirby->option(self::PREFIX . $key) !== null) {
 			return self::PREFIX . $key;

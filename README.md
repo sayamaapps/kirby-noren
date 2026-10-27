@@ -54,7 +54,7 @@ return [
 ];
 ```
 
-Texts are English unless `sayamaapps.noren.language`, the site language or Kirby's `locale` says otherwise. A German single-language site without a `locale` must set `sayamaapps.noren.language`.
+Texts are English unless `sayamaapps.noren.language`, the site language or Kirby's `locale` says otherwise. A German single-language site without a `locale` must set `sayamaapps.noren.language`. Noren keeps its texts in its own tables (`translations/`), registered with Kirby as `noren.*` keys, so `Sayamaapps\Noren\I18n::t()` returns them without a Kirby app too.
 
 Give the location pages this blueprint, for example `site/blueprints/pages/betrieb.yml`:
 
@@ -108,7 +108,7 @@ The German field names are the defaults; rename them with `sayamaapps.noren.fiel
 
 Every option is `sayamaapps.noren.<name>`, written flat: `'sayamaapps.noren.active' => true`. The nested form `'noren' => ['active' => true]` works for the 1.x name only (see below). `null` means "not set". Booleans must be real `true` or `false`. A broken value is logged once and the default is used; with Kirby's `debug` option on, it throws instead.
 
-The 1.x name `noren.<name>` still works as a fallback until 2.0, flat or nested, and reading it shows a deprecation in debug mode. If both names are set, the new one wins. See [Deprecations](#deprecations).
+The 1.x name `noren.<name>` still works as a fallback until 2.0, flat or nested, and is read without a warning. If both names are set, the new one wins. See [Deprecations](#deprecations).
 
 | Option | Default | Description |
 |---|---|---|
@@ -149,21 +149,25 @@ return [
 
 ## Deprecations
 
-Changes in 1.4, removed in 2.0 (planned):
+Deprecated in 1.4, removal planned for 2.0. Nothing changes in 1.x: the old names keep working, without a warning.
 
 | 1.x | Now | Notes |
 |---|---|---|
-| `noren.<option>` in `config.php` | `sayamaapps.noren.<option>` | Still read as fallback. Reading it shows a deprecation in debug mode. Rename the keys in your site config. |
+| `noren.<option>` in `config.php` | `sayamaapps.noren.<option>` | Still read as fallback. Rename the keys in your site config. |
 | `noren.<name>` translation keys | `sayamaapps.noren.<name>` | Both are registered in 1.4. |
 | `noren_option('name', $default)` | `Sayamaapps\Noren\Options::get(kirby(), 'name', $default)` | Global function, kept as a guarded wrapper. |
 | `Noren\Schedule`, `Noren\I18n`, … (all classes) | `Sayamaapps\Noren\Schedule`, `Sayamaapps\Noren\I18n`, … | Class aliases. `instanceof` and type hints keep working. |
-| `Noren\Log::forget()` | none | Deprecated since 1.4, kept for existing callers. Removed in 2.0. |
+| `Noren\Log::forget()` | none | Test hook, kept for existing callers. |
 
 In warnings and logs, a broken option is named as the site wrote it: `noren.timezone` for the 1.x name, `sayamaapps.noren.timezone` otherwise. Log searches for `noren.` keep matching.
 
-In debug mode, reading a 1.x key raises a deprecation, which Kirby shows as an error page. Rename the keys before you turn debug on.
-
 The site and page methods (`norenStatus()`, `norenTable()` and so on) and the snippet names keep their names. Their return values do not change.
+
+### Planned for 2.0
+
+- Runtime deprecation notices for the 1.x option names and `noren_option()`. In debug mode, Kirby shows them as an error page.
+- Invalid options throw `Kirby\Exception\InvalidArgumentException` in debug mode instead of `\InvalidArgumentException`. A `catch (\InvalidArgumentException)` does not catch it.
+- Removal of the 1.x option names, `noren_option()`, the `Noren\` class aliases and `Log::forget()`.
 
 ## Public holidays
 

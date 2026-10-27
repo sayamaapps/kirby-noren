@@ -3,11 +3,12 @@
 use Kirby\Filesystem\Dir;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Sayamaapps\Noren\Locations;
 use Sayamaapps\Noren\Options;
 
 /**
  * Options are read as sayamaapps.noren.<key>, with the 1.x spelling noren.<key>
- * as fallback (OPT-1). The fallback is reported as a deprecation.
+ * as fallback. The fallback is read silently (README, Deprecations).
  */
 #[CoversClass(Options::class)]
 final class OptionsPrefixTest extends TestCase
@@ -33,7 +34,23 @@ final class OptionsPrefixTest extends TestCase
 		}
 	}
 
-	public function testLegacyFunctionReadsTheNewOptionAndIsDeprecated(): void
+	public function testHolidaysErrorNamesTheKeyAsSpelled(): void
+	{
+		foreach (['noren.holidays', 'sayamaapps.noren.holidays'] as $setting) {
+			$message = null;
+			$this->withApp(['debug' => true, $setting => ['foo' => 1]], function ($kirby) use (&$message): void {
+				try {
+					Locations::holidayConfig($kirby);
+				} catch (\InvalidArgumentException $e) {
+					$message = $e->getMessage();
+				}
+			});
+			$this->assertIsString($message, $setting . ': the broken value throws in debug mode');
+			$this->assertStringContainsString($setting . ' needs a', $message, $setting . ': message names the key as set');
+		}
+	}
+
+	public function testLegacyFunctionReadsTheNewOptionWithoutDeprecation(): void
 	{
 		$deprecations = [];
 		set_error_handler(function (int $level, string $message) use (&$deprecations): bool {
@@ -50,7 +67,7 @@ final class OptionsPrefixTest extends TestCase
 			restore_error_handler();
 		}
 
-		$this->assertSame(['noren_option() is deprecated, use Sayamaapps\\Noren\\Options::get()'], $deprecations);
+		$this->assertSame([], $deprecations, 'noren_option() raises no runtime deprecation');
 	}
 
 	public function testNewSpellingSwitchesNorenOn(): void
@@ -75,7 +92,7 @@ final class OptionsPrefixTest extends TestCase
 		});
 	}
 
-	public function testOldSpellingStillWorksAndIsDeprecated(): void
+	public function testOldSpellingStillWorksWithoutDeprecation(): void
 	{
 		$deprecations = [];
 		set_error_handler(function (int $level, string $message) use (&$deprecations): bool {
@@ -84,7 +101,7 @@ final class OptionsPrefixTest extends TestCase
 		}, E_USER_DEPRECATED);
 
 		try {
-			// Kirby reports deprecations in debug mode only.
+			// Kirby reports deprecations in debug mode only, so debug is on here.
 			$this->withApp(['debug' => true, 'noren.active' => true], function ($kirby): void {
 				$this->assertTrue(Options::active($kirby), 'noren.active is read as fallback');
 			});
@@ -92,7 +109,7 @@ final class OptionsPrefixTest extends TestCase
 			restore_error_handler();
 		}
 
-		$this->assertSame(['Noren: noren.active is deprecated, use sayamaapps.noren.active'], $deprecations);
+		$this->assertSame([], $deprecations, 'noren.active is read without a runtime deprecation');
 	}
 
 	/** Runs $fn with a Kirby app on a throwaway site, removes the site afterwards. */

@@ -100,10 +100,13 @@ class Holidays
 	 * skipped and logged. A flag that is not a real boolean (for example the
 	 * string 'false') is logged and the default is used.
 	 *
+	 * $optionName is the option as the site spelled it (`noren.holidays` or
+	 * `sayamaapps.noren.holidays`); it only names the key in messages.
+	 *
 	 * @return array{state: string, assumption: bool, augsburg: bool, corpusChristi: bool, sundays: bool, extra: array<string,string>}|null
 	 * @throws InvalidArgumentException unknown state, `true`, or any other type
 	 */
-	public static function config(mixed $option): array|null
+	public static function config(mixed $option, string $optionName = 'sayamaapps.noren.holidays'): array|null
 	{
 		if ($option === null || $option === false) {
 			return null;
@@ -112,7 +115,7 @@ class Holidays
 			$option = ['state' => $option];
 		}
 		if (!is_array($option)) {
-			throw new InvalidArgumentException('sayamaapps.noren.holidays must be false, a state code such as "BY", or an array with "state".');
+			throw new InvalidArgumentException($optionName . ' must be false, a state code such as "BY", or an array with "state".');
 		}
 
 		$state = $option['state'] ?? $option['land'] ?? null;
@@ -121,14 +124,14 @@ class Holidays
 			$state = 'BY';
 		}
 		if (!is_string($state)) {
-			throw new InvalidArgumentException('sayamaapps.noren.holidays needs a "state" such as "BY".');
+			throw new InvalidArgumentException($optionName . ' needs a "state" such as "BY".');
 		}
 
 		$config = ['state' => self::state($state)];
 		$legacy = ['assumption' => 'mariaeHimmelfahrt', 'augsburg' => 'friedensfest'];
 		foreach (self::FLAGS as $flag => $default) {
 			$value = $option[$flag] ?? (isset($legacy[$flag]) ? ($option[$legacy[$flag]] ?? null) : null);
-			$config[$flag] = self::flag($flag, $value, $default);
+			$config[$flag] = self::flag($flag, $value, $default, $optionName);
 		}
 
 		$config['extra'] = [];
@@ -137,7 +140,7 @@ class Holidays
 			$valid = (preg_match('/^\d{2}-\d{2}$/', $key) && checkdate((int)substr($key, 0, 2), (int)substr($key, 3, 2), 2024)) ||
 				(preg_match('/^\d{4}-\d{2}-\d{2}$/', $key) && checkdate((int)substr($key, 5, 2), (int)substr($key, 8, 2), (int)substr($key, 0, 4)));
 			if (!$valid || !is_string($name) || trim($name) === '') {
-				Log::error('Noren: sayamaapps.noren.holidays extra entry ' . var_export($key, true) . ' skipped — use "MM-DD" or "Y-m-d" => "Name".');
+				Log::error('Noren: ' . $optionName . ' extra entry ' . var_export($key, true) . ' skipped — use "MM-DD" or "Y-m-d" => "Name".');
 				continue;
 			}
 			$config['extra'][$key] = trim($name);
@@ -198,7 +201,7 @@ class Holidays
 	 * A switch of config(): null → default; a real boolean, or 0/1, is used.
 	 * Anything else (such as the string 'false') is logged and the default wins.
 	 */
-	private static function flag(string $name, mixed $value, bool $default): bool
+	private static function flag(string $name, mixed $value, bool $default, string $optionName): bool
 	{
 		if ($value === null) {
 			return $default;
@@ -209,7 +212,7 @@ class Holidays
 		if ($value === 0 || $value === 1) {
 			return $value === 1;
 		}
-		Log::error('Noren: sayamaapps.noren.holidays.' . $name . ' must be true or false — using ' . var_export($default, true) . '.');
+		Log::error('Noren: ' . $optionName . '.' . $name . ' must be true or false — using ' . var_export($default, true) . '.');
 		return $default;
 	}
 

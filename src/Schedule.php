@@ -854,8 +854,9 @@ class Schedule
 	 * site shows notices only 14 days before (otherwise "New Year's Eve:
 	 * closed" would be visible in October); schema.org gets all.
 	 *
+	 * Ascending by start.
+	 *
 	 * @return list<array{from: string, to: string, note: ?string, occasion: ?string, hours: ?array{0:int,1:int}, area: ?string}>
-	 *                                                                                                                            Ascending by start.
 	 */
 	public function upcomingClosures(DateTimeImmutable|null $from = null, int|null $leadDays = null): array
 	{
