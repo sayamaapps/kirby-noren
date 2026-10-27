@@ -115,10 +115,14 @@ class Options
 		if (is_bool($value)) {
 			return $value;
 		}
-		self::invalid($kirby, 'Noren: ' . self::OPTION_PREFIX . $key . ' must be true or false — using ' . var_export($default, true) . '.');
+		self::invalid($kirby, 'Noren: ' . self::setKey($kirby, $key) . ' must be true or false — using ' . var_export($default, true) . '.');
 		return $default;
 	}
 
+	/**
+	 * Reads an option under the sayamaapps.noren.* spelling, then under the
+	 * 1.x noren.* spelling (deprecated). Returns $default when neither is set.
+	 */
 	public static function get(App $kirby, string $key, mixed $default = null): mixed
 	{
 		$value = $kirby->option(self::OPTION_PREFIX . $key);
@@ -149,6 +153,18 @@ class Options
 			throw new InvalidArgumentException($message);
 		}
 		Log::error($message);
+	}
+
+	/**
+	 * The option name as the site spelled it, for messages: the 1.x noren.*
+	 * name only when the site sets no sayamaapps.noren.* value for it.
+	 */
+	private static function setKey(App $kirby, string $key): string
+	{
+		if ($kirby->option(self::OPTION_PREFIX . $key) === null && $kirby->option(self::PREFIX . $key) !== null) {
+			return self::PREFIX . $key;
+		}
+		return self::OPTION_PREFIX . $key;
 	}
 
 	private static function knowsZone(string $zone): bool
@@ -229,7 +245,7 @@ class Options
 		}
 		$minutes = is_string($value) ? Schedule::parseTime($value) : null;
 		if ($minutes === null) {
-			self::invalid($kirby, 'Noren: sayamaapps.noren.overnightUntil must be "HH:MM" or false — using 06:00.');
+			self::invalid($kirby, 'Noren: ' . self::setKey($kirby, 'overnightUntil') . ' must be "HH:MM" or false — using 06:00.');
 			return Schedule::DEFAULT_OVERNIGHT_UNTIL;
 		}
 		return $minutes;
@@ -302,7 +318,7 @@ class Options
 				return $canonical;
 			}
 		}
-		self::invalid($kirby, 'Noren: unknown sayamaapps.noren.timezone ' . var_export($zone, true) . ' — using ' . Schedule::DEFAULT_TIMEZONE . '.');
+		self::invalid($kirby, 'Noren: unknown ' . self::setKey($kirby, 'timezone') . ' ' . var_export($zone, true) . ' — using ' . Schedule::DEFAULT_TIMEZONE . '.');
 		return Schedule::DEFAULT_TIMEZONE;
 	}
 }

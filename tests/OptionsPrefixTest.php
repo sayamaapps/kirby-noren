@@ -74,6 +74,27 @@ final class OptionsPrefixTest extends TestCase
 		$this->assertSame(['Noren: noren.active is deprecated, use sayamaapps.noren.active'], $deprecations);
 	}
 
+	public function testBrokenOptionIsNamedAsTheSiteSpelledIt(): void
+	{
+		foreach (['noren.timezone', 'sayamaapps.noren.timezone'] as $setting) {
+			$message = null;
+			set_error_handler(static fn (): bool => true, E_USER_DEPRECATED);
+			try {
+				$this->withApp(['debug' => true, $setting => 'Mars/Base'], function ($kirby) use (&$message): void {
+					try {
+						Options::timezone($kirby);
+					} catch (\InvalidArgumentException $e) {
+						$message = $e->getMessage();
+					}
+				});
+			} finally {
+				restore_error_handler();
+			}
+			$this->assertIsString($message, $setting . ': the broken value throws in debug mode');
+			$this->assertStringContainsString('unknown ' . $setting . ' ', $message, $setting . ': message names the key as set');
+		}
+	}
+
 	/** Runs $fn with a Kirby app on a throwaway site, removes the site afterwards. */
 	private function withApp(array $options, callable $fn): void
 	{
