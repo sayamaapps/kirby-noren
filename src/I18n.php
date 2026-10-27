@@ -6,7 +6,7 @@ namespace Sayamaapps\Noren;
  * Strings of the plugin, Kirby-free.
  *
  * The tables live in translations/<language>.php and are also registered as
- * Kirby plugin translations under `noren.<key>` (index.php), so site snippets
+ * Kirby plugin translations under `noren.<key>` (config/translations.php), so site snippets
  * can use t('noren.status.openNow') and blueprints can use `noren.panel.*`
  * keys as labels. Noren itself reads its own tables: a missing Kirby
  * translation must never silently turn a German status English.
