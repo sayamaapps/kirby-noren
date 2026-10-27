@@ -17,7 +17,7 @@ use DateTimeImmutable;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class Presenter
+class Presenter
 {
 	/**
 	 * One note per upcoming closure or special day (SPEC.md §3.5); $today is 0:00.

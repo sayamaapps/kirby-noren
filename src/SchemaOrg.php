@@ -14,7 +14,7 @@ use DateTimeImmutable;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class SchemaOrg
+class SchemaOrg
 {
 	public const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 

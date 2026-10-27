@@ -35,7 +35,7 @@ use InvalidArgumentException;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class Holidays
+class Holidays
 {
 	/** Lower-case state names accepted instead of the code (the legacy `land` => 'bayern'). */
 	public const ALIASES = [

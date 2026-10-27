@@ -15,7 +15,7 @@ namespace Sayamaapps\Noren;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class Log
+class Log
 {
 	/** @var array<string, true> */
 	private static array $seen = [];

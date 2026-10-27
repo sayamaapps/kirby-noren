@@ -29,7 +29,7 @@ use Kirby\Cms\Helpers;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class Options
+class Options
 {
 	/** Content field names on a location page (SPEC.md §6). Each key can be overridden in `noren.fields`. */
 	public const FIELDS = [

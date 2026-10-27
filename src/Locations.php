@@ -24,7 +24,7 @@ use Kirby\Content\Field;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class Locations
+class Locations
 {
 	/** Areas of a location page. @return list<array{key: string, name: string, short: string}> */
 	public static function areas(Page $page): array

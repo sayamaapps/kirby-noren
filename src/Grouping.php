@@ -16,7 +16,7 @@ namespace Sayamaapps\Noren;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class Grouping
+class Grouping
 {
 	/** [[660, 960], [1020, 1260]] → "11:00 – 16:00 · 17:00 – 21:00" (Schedule::formatTime). */
 	public static function blocksLabel(array $blocks): string

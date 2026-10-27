@@ -31,7 +31,7 @@ use DateTimeZone;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class Schedule
+class Schedule
 {
 	/** Weekday names as stored in content (the field contract), index 0 = Monday. */
 	public const DAYS_DE = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
