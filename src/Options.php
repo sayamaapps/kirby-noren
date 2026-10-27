@@ -150,6 +150,9 @@ final class Options
 
 	private static function knowsZone(string $zone): bool
 	{
+		if ($zone === '') {
+			return false;
+		}
 		try {
 			new DateTimeZone($zone);
 			return true;
@@ -187,7 +190,11 @@ final class Options
 		return 'en';
 	}
 
-	/** The canonical zone of a legacy name (`Europe/Kiev` gives `Europe/Kyiv`), or null. */
+	/**
+	 * The canonical zone of a legacy name (`Europe/Kiev` gives `Europe/Kyiv`), or null.
+	 *
+	 * @return non-empty-string|null
+	 */
 	public static function legacyZone(string $zone): string|null
 	{
 		return self::LEGACY_ZONES[$zone] ?? null;
@@ -231,7 +238,7 @@ final class Options
 	 * receive this array or parts of it.
 	 *
 	 * @return array{
-	 *   timezone: string, holidayEve: bool, lookahead: int, overnightUntil: ?int,
+	 *   timezone: non-empty-string, holidayEve: bool, lookahead: int, overnightUntil: ?int,
 	 *   leadDays: int, holidayRow: bool, holidayNote: bool, holidayNoteDays: int,
 	 *   closureLabel: ?string, compact: string, status: bool
 	 * }
@@ -277,11 +284,13 @@ final class Options
 	 * including the ones missing from DateTimeZone::listIdentifiers() (Etc/UTC,
 	 * GMT). A legacy name PHP does not know resolves to its canonical zone
 	 * (Europe/Kiev gives Europe/Kyiv). An invalid zone is logged and replaced by the default.
+	 *
+	 * @return non-empty-string
 	 */
 	public static function timezone(App $kirby): string
 	{
 		$zone = self::get($kirby, 'timezone', Schedule::DEFAULT_TIMEZONE);
-		if (is_string($zone)) {
+		if (is_string($zone) && $zone !== '') {
 			if (self::knowsZone($zone)) {
 				return $zone;
 			}

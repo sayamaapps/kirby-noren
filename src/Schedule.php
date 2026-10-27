@@ -71,7 +71,7 @@ final class Schedule
 	 * @param array<int, array{blocks?: list<array{0:int,1:int}>, note?: ?string}> $days
 	 * @param list<array{from: string, to: string, note?: ?string, occasion?: ?string, hours?: ?array{0:int,1:int}, area?: ?string}> $closures
 	 * @param (Closure(DateTimeImmutable): ?string)|null $holiday
-	 * @param array{timezone?: string|DateTimeZone, holidayEve?: bool, lookahead?: int, overnightUntil?: ?int} $settings
+	 * @param array{timezone?: non-empty-string|DateTimeZone, holidayEve?: bool, lookahead?: int, overnightUntil?: ?int} $settings
 	 */
 	public function __construct(
 		array $days,
@@ -136,7 +136,11 @@ final class Schedule
 		return null;
 	}
 
-	/** The blocks of a weekday (0 = Monday), sorted by start. */
+	/**
+	 * The blocks of a weekday (0 = Monday), sorted by start.
+	 *
+	 * @return list<array{0:int,1:int}>
+	 */
 	public function blocks(int $weekday): array
 	{
 		return $this->days[$weekday]['blocks'] ?? [];
@@ -233,7 +237,7 @@ final class Schedule
 	 *   the end is at most this value. A missing key means DEFAULT_OVERNIGHT_UNTIL, null
 	 *   turns overnight blocks off.
 	 *
-	 * @param array{timezone?: string|DateTimeZone, holidayEve?: bool, lookahead?: int, overnightUntil?: ?int} $settings
+	 * @param array{timezone?: non-empty-string|DateTimeZone, holidayEve?: bool, lookahead?: int, overnightUntil?: ?int} $settings
 	 */
 	public static function fromFields(
 		mixed $hoursField,
@@ -379,6 +383,7 @@ final class Schedule
 	public static function mergeBlocks(array $blocks): array
 	{
 		usort($blocks, static fn (array $x, array $y) => $x[0] <=> $y[0]);
+		/** @var list<array{0:int,1:int}> $merged */
 		$merged = [];
 		foreach ($blocks as [$from, $to]) {
 			$last = array_key_last($merged);
@@ -388,7 +393,7 @@ final class Schedule
 				$merged[] = [$from, $to];
 			}
 		}
-		return $merged;
+		return array_values($merged);
 	}
 
 	private function nextIso(DateTimeImmutable|null $day): string|null

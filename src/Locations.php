@@ -8,6 +8,7 @@ use DateTimeZone;
 use InvalidArgumentException;
 use Kirby\Cms\App;
 use Kirby\Cms\Page;
+use Kirby\Content\Field;
 
 /**
  * The Kirby side (SPEC.md §3.7): which pages are locations, their areas,
@@ -330,7 +331,8 @@ final class Locations
 		}
 
 		if ($area === null) {
-			$reference = trim((string)$page->content()->get(Options::fields($kirby)['areaRef']));
+			$value = $page->content()->get(Options::fields($kirby)['areaRef']);
+			$reference = $value instanceof Field ? trim($value->toString()) : '';
 			$area = $reference !== '' ? $reference : null;
 		}
 		return self::schedule($location, $area);
@@ -339,7 +341,7 @@ final class Locations
 	/**
 	 * Settings for Schedule::fromFields(), a subset of Options::settings().
 	 *
-	 * @return array{timezone: string, holidayEve: bool, lookahead: int, overnightUntil: ?int}
+	 * @return array{timezone: non-empty-string, holidayEve: bool, lookahead: int, overnightUntil: ?int}
 	 */
 	private static function scheduleSettings(App $kirby): array
 	{

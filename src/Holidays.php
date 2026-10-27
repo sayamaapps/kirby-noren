@@ -145,7 +145,11 @@ final class Holidays
 		return $config;
 	}
 
-	/** Easter Sunday by the anonymous Gregorian algorithm (Meeus/Jones/Butcher). */
+	/**
+	 * Easter Sunday by the anonymous Gregorian algorithm (Meeus/Jones/Butcher).
+	 *
+	 * @param non-empty-string $timezone
+	 */
 	public static function easterSunday(int $year, string $timezone = Schedule::DEFAULT_TIMEZONE): DateTimeImmutable
 	{
 		$a = $year % 19;

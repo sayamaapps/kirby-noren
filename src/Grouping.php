@@ -68,6 +68,7 @@ final class Grouping
 	 */
 	public static function consecutive(Schedule $schedule, bool $withNote = false): array
 	{
+		/** @var list<array{days: list<int>, blocks: list<array{0:int,1:int}>, note: string|null}> $runs */
 		$runs = [];
 		$current = null;
 		for ($day = 0; $day < 7; $day++) {
@@ -101,11 +102,15 @@ final class Grouping
 		return $groups;
 	}
 
-	/** @return array{days: list<int>, label: string, blocks: list<array{0:int,1:int}>, hours: string, note: ?string} */
+	/**
+	 * @param list<int> $days
+	 * @param list<array{0:int,1:int}> $blocks
+	 * @return array{days: list<int>, label: string, blocks: list<array{0:int,1:int}>, hours: string, note: ?string}
+	 */
 	private static function group(array $days, array $blocks, string|null $note, string $label, bool $shortHours = false): array
 	{
 		return [
-			'days'   => array_values($days),
+			'days'   => $days,
 			'label'  => $label,
 			'blocks' => $blocks,
 			'hours'  => $shortHours ? self::shortHoursLabel($blocks) : self::blocksLabel($blocks),
@@ -121,6 +126,7 @@ final class Grouping
 	public static function listLabel(array $days): string
 	{
 		sort($days);
+		/** @var list<array{int, int}> $runs */
 		$runs = [];
 		foreach ($days as $day) {
 			$last = count($runs) - 1;

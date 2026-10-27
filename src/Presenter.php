@@ -18,7 +18,11 @@ use DateTimeImmutable;
  */
 final class Presenter
 {
-	/** One note per upcoming closure or special day (SPEC.md §3.5); $today is 0:00. */
+	/**
+	 * One note per upcoming closure or special day (SPEC.md §3.5); $today is 0:00.
+	 *
+	 * @return list<array{type: string, from: string, to: string, text: string, note: string|null}>
+	 */
 	public static function closureNotes(Schedule $schedule, DateTimeImmutable $today, int $leadDays): array
 	{
 		$notes = [];
@@ -66,7 +70,7 @@ final class Presenter
 	 * Options: mode ('grouped' | 'consecutive', default 'grouped'; anything
 	 * else counts as 'grouped'), leadDays (14), closures (max notes, 1).
 	 *
-	 * @return array{mode: string, groups: list<array>, notes: list<array>}
+	 * @return array{mode: 'consecutive'|'grouped', groups: list<array{days: list<int>, label: string, blocks: list<array{0:int,1:int}>, hours: string, note: string|null}>, notes: list<array{type: string, from: string, to: string, text: string, note: string|null}>}
 	 */
 	public static function compact(Schedule $schedule, DateTimeImmutable|null $now = null, array $options = []): array
 	{
