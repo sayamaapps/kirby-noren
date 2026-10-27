@@ -11,6 +11,7 @@
 		"Kirby\\Cms\\App",
 		"Kirby\\Cms\\Helpers",
 		"Kirby\\Cms\\Page",
+		"Kirby\\Content\\Field",
 		"Kirby\\Filesystem\\F"
 	]
 }
