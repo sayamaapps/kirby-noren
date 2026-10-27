@@ -590,7 +590,7 @@ final class HolidaysTest extends TestCase
 				'Stadtfest' => 'Kein Datum',
 				'07-02' => 'Gültig',
 			],
-		]);
+		], 'sayamaapps.noren.holidays');
 		ini_set('error_log', $previousLog);
 		$logged = (string)file_get_contents($logFile);
 		unlink($logFile);
@@ -713,7 +713,7 @@ final class HolidaysTest extends TestCase
 		$previousFlagLog = (string)ini_get('error_log');
 		ini_set('error_log', $flagLog);
 		norenResetLog();
-		$flags = Holidays::config(['state' => 'BY', 'assumption' => 'false', 'augsburg' => 1, 'corpusChristi' => 0]);
+		$flags = Holidays::config(['state' => 'BY', 'assumption' => 'false', 'augsburg' => 1, 'corpusChristi' => 0], 'sayamaapps.noren.holidays');
 		ini_set('error_log', $previousFlagLog);
 		$flagLogged = (string)file_get_contents($flagLog);
 		unlink($flagLog);
@@ -721,5 +721,8 @@ final class HolidaysTest extends TestCase
 		expect(true, $flags['augsburg'], 'augsburg 1 (an int) switches on');
 		expect(false, $flags['corpusChristi'], 'corpusChristi 0 (an int) stays off');
 		holds(str_contains($flagLogged, 'sayamaapps.noren.holidays.assumption must be true or false'), 'a non-boolean switch is logged');
+
+		// Without a name, a direct call words its messages with the 1.x key.
+		holds(str_starts_with((string)holidaysThrows(fn () => Holidays::config(['foo' => 1])), 'noren.holidays needs a'), 'default name is the 1.x key');
 	}
 }

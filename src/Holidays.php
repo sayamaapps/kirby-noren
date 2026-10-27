@@ -101,12 +101,13 @@ class Holidays
 	 * string 'false') is logged and the default is used.
 	 *
 	 * $optionName is the option as the site spelled it (`noren.holidays` or
-	 * `sayamaapps.noren.holidays`); it only names the key in messages.
+	 * `sayamaapps.noren.holidays`); it only names the key in messages. The
+	 * default is the 1.x name, so messages of a direct call are unchanged.
 	 *
 	 * @return array{state: string, assumption: bool, augsburg: bool, corpusChristi: bool, sundays: bool, extra: array<string,string>}|null
 	 * @throws InvalidArgumentException unknown state, `true`, or any other type
 	 */
-	public static function config(mixed $option, string $optionName = 'sayamaapps.noren.holidays'): array|null
+	public static function config(mixed $option, string $optionName = 'noren.holidays'): array|null
 	{
 		if ($option === null || $option === false) {
 			return null;
