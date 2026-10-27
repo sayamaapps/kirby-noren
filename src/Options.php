@@ -42,9 +42,6 @@ class Options
 		'short'    => 'kurzname',
 	];
 
-	/** Option prefix of 1.x (`noren.<key>`), read as a fallback until 2.0. */
-	public const PREFIX = 'noren.';
-
 	/**
 	 * Legacy zone names (tzdata "backward" links) mapped to the canonical zone
 	 * with the same rules. Some tzdata builds, e.g. a new CI runner image, lack
@@ -63,6 +60,9 @@ class Options
 
 	/** Option prefix since 1.4 (OPT-1). */
 	public const OPTION_PREFIX = 'sayamaapps.noren.';
+
+	/** Option prefix of 1.x (`noren.<key>`), read as a fallback until 2.0. */
+	public const PREFIX = 'noren.';
 
 	/** Master switch: only a real `true` switches Noren on. */
 	public static function active(App $kirby): bool
