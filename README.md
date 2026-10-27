@@ -54,7 +54,7 @@ return [
 ];
 ```
 
-Texts are English unless `sayamaapps.noren.language`, the site language or Kirby's `locale` says otherwise. A German single-language site without a `locale` must set `sayamaapps.noren.language`. Noren keeps its texts in its own tables (`translations/`), registered with Kirby as `noren.*` keys, so `Sayamaapps\Noren\I18n::t()` returns them without a Kirby app too.
+Texts are English unless `sayamaapps.noren.language`, the site language or Kirby's `locale` says otherwise. A German single-language site without a `locale` must set `sayamaapps.noren.language`. Noren keeps its texts in its own tables (`translations/`), registered with Kirby as `noren.*` keys, so `Sayamaapps\Noren\I18n::t()` returns them without a Kirby app too. The class name `I18n` is also used by Kirby (`Kirby\Toolkit\I18n`). The two are unrelated; refer to Noren's class by its full name.
 
 Give the location pages this blueprint, for example `site/blueprints/pages/betrieb.yml`:
 

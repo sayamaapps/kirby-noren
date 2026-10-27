@@ -21,6 +21,8 @@ No breaking changes in 1.x. The items under "Planned for 2.0" come with the next
 - `Options::OPTION_PREFIX` is new. `Options::PREFIX` keeps its 1.x value.
 - `Locations::status()`, `table()`, `compact()` and `schema()` take an optional `$kirby` argument. `Holidays::config()` takes an optional `$optionName`. Without them, the behaviour is the same as before.
 - Tests run on PHPUnit. CI runs on PHP 8.2 to 8.5 with the lowest and the locked dependencies.
+- New public methods only: `Options::setKey()`, `Locations::pageAreas()`, `Locations::pageHasHours()`, `Locations::siteAreas()`, `Locations::siteSchedule()`.
+- `Grouping::rangeLabel([])` raises no PHP warning any more. The return value is unchanged.
 
 ### Planned for 2.0
 
