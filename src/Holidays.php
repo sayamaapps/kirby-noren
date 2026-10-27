@@ -29,6 +29,7 @@ use InvalidArgumentException;
  *
  * Kirby-free; tests/HolidaysTest.php.
  *
+ * @package   Kirby Noren
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-noren
  * @copyright Simon Räder

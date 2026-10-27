@@ -9,6 +9,7 @@ namespace Sayamaapps\Noren;
  * the configuration many times, and a broken option must not fill the log with
  * copies (SPEC.md §4).
  *
+ * @package   Kirby Noren
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-noren
  * @copyright Simon Räder

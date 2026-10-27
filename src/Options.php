@@ -23,6 +23,7 @@ use Kirby\Cms\Helpers;
  * Defaults are given here and at the call sites. The `options` block of the
  * plugin lists the keys with null: a default there would hide the 1.x spelling.
  *
+ * @package   Kirby Noren
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-noren
  * @copyright Simon Räder

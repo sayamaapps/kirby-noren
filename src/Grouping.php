@@ -10,6 +10,7 @@ namespace Sayamaapps\Noren;
  *    'hours' => '11:00 – 16:00', 'note' => null]
  * Day indices: 0 = Monday … 6 = Sunday. Closed days never form a group.
  *
+ * @package   Kirby Noren
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-noren
  * @copyright Simon Räder

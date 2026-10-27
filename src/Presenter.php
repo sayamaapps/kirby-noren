@@ -11,6 +11,7 @@ use DateTimeImmutable;
  * `norenCompact()` return them for sites with their own markup.
  * `$now` defaults to now in the schedule's timezone; `$today` is `$now` at 0:00.
  *
+ * @package   Kirby Noren
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-noren
  * @copyright Simon Räder

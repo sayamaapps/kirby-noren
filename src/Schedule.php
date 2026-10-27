@@ -25,6 +25,7 @@ use DateTimeZone;
  * midnight (end > 1440): it belongs to the day it starts on (overnight block,
  * SPEC.md §3.1.4).
  *
+ * @package   Kirby Noren
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-noren
  * @copyright Simon Räder

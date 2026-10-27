@@ -18,6 +18,7 @@ use Kirby\Content\Field;
  *
  * NEVER memoise a schedule keyed on the page id (two areas share a page).
  *
+ * @package   Kirby Noren
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-noren
  * @copyright Simon Räder
