@@ -157,6 +157,11 @@ Changes in 1.4, removed in 2.0 (planned):
 | `noren.<name>` translation keys | `sayamaapps.noren.<name>` | Both are registered in 1.4. |
 | `noren_option('name', $default)` | `Sayamaapps\Noren\Options::get(kirby(), 'name', $default)` | Global function, kept as a guarded wrapper. |
 | `Noren\Schedule`, `Noren\I18n`, … (all classes) | `Sayamaapps\Noren\Schedule`, `Sayamaapps\Noren\I18n`, … | Class aliases. `instanceof` and type hints keep working. |
+| `Noren\Log::forget()` | none | Deprecated since 1.4, kept for existing callers. Removed in 2.0. |
+
+In warnings and logs, a broken option is named as the site wrote it: `noren.timezone` for the 1.x name, `sayamaapps.noren.timezone` otherwise. Log searches for `noren.` keep matching.
+
+In debug mode, reading a 1.x key raises a deprecation, which Kirby shows as an error page. Rename the keys before you turn debug on.
 
 The site and page methods (`norenStatus()`, `norenTable()` and so on) and the snippet names keep their names. Their return values do not change.
 
