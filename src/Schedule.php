@@ -151,6 +151,8 @@ class Schedule
 	 * The blocks of a concrete date: special hours before the weekly plan.
 	 * Use this wherever a date is known, otherwise Christmas Eve would say
 	 * "open until 18:00" instead of 12:00.
+	 *
+	 * @return list<array{0:int,1:int}>
 	 */
 	public function blocksOn(DateTimeImmutable $day): array
 	{
@@ -619,87 +621,163 @@ class Schedule
 		$today = $now->setTime(0, 0);
 		$minutes = (int)$now->format('G') * 60 + (int)$now->format('i');
 
-		// 0. An overnight block of yesterday that is still running. It belongs
-		//    to yesterday, so today's closure or holiday does not end it. Its
-		//    end is the end of the run: today's blocks that follow directly
-		//    extend it, unless today is closed.
-		$yesterday = $today->modify('-1 day');
-		if (!$this->exceptionOn($yesterday)) {
-			foreach ($this->blocksOn($yesterday) as [$from, $to]) {
-				if ($to > self::MINUTES_PER_DAY) {
-					$end = $to - self::MINUTES_PER_DAY;
-					if (!$this->exceptionOn($today)) {
-						$end = $this->runEnd($today, $end);
-					}
-					if ($end === null || $minutes < $end) {
-						return $this->openResult($end, $this->specialOn($yesterday)['occasion'] ?? null, $today);
-					}
-				}
-			}
-		}
-
-		// 1. Closure today.
-		if ($closure = $this->closureOn($now)) {
-			// A single day (New Year's Eve) reads like a holiday:
-			// "Silvester: geschlossen — öffnet am 2.1. um 8:30 Uhr".
-			if ($closure['from'] === $closure['to']) {
-				$next = $this->nextOpenDay($today);
-				return $this->result(
-					false,
-					match (true) {
-						$closure['occasion'] === null => I18n::t('status.closedToday'),
-						I18n::namesClosed($closure['occasion']) => $closure['occasion'],
-						default => I18n::t('status.occasionClosed', ['occasion' => $closure['occasion']]),
-					},
-					$closure['note'] ?? ($next !== null ? $this->opens($today, $next) : ''),
-					'closure',
-					next: $this->nextIso($next),
-					occasion: $closure['occasion'],
-				);
-			}
-			// Not simply "end + 1 day": if the closure ends on Saturday and
-			// Sunday is a rest day, the business opens on Monday. Another
-			// closure may follow directly. Without a known opening day (no
-			// plan) no date rather than a wrong one.
-			$end = DateTimeImmutable::createFromFormat('!Y-m-d', $closure['to'], $this->timezone);
-			$next = $end ? $this->nextOpenDay($end) : null;
-			return $this->result(
-				false,
-				$this->label($closure),
-				$closure['note'] ?? ($next !== null ? I18n::t('detail.backOn', ['date' => I18n::date($next)]) : ''),
-				'closure',
-				next: $this->nextIso($next),
-				occasion: $closure['occasion'],
-			);
-		}
-
-		// 2. Public holiday: like a single-day closure. Only when the plan
-		//    would be open today; on a rest day it stays "Heute geschlossen".
-		$holiday = $this->specialOn($now) === null ? $this->holidayOn($now) : null;
-		if ($holiday !== null && $this->blocks($this->weekday($now)) !== []) {
-			$next = $this->nextOpenDay($today);
-			return $this->result(
-				false,
-				I18n::t('status.holidayToday'),
-				$next !== null ? $this->opens($today, $next) : $holiday,
-				'holiday',
-				next: $this->nextIso($next),
-				holiday: $holiday,
-			);
+		$result = $this->overnightResult($today, $minutes)
+			?? $this->closureResult($now, $today)
+			?? $this->holidayResult($now, $today);
+		if ($result !== null) {
+			return $result;
 		}
 
 		$todayBlocks = $this->blocksOn($now);
 		$special = $this->specialOn($now);
 
-		// 3. Inside a block: until the end of the run, which may continue
-		//    after midnight (Friday 18:00–00:00 and Saturday 00:00–02:00).
+		return $this->insideBlockResult($today, $minutes, $todayBlocks, $special)
+			?? $this->laterTodayResult($today, $minutes, $todayBlocks)
+			?? $this->nextOpeningResult($today, $todayBlocks);
+	}
+
+	/**
+	 * Step 0: an overnight block of yesterday that is still running. It belongs
+	 * to yesterday, so today's closure or holiday does not end it. Its end is
+	 * the end of the run: today's blocks that follow directly extend it, unless
+	 * today is closed.
+	 *
+	 * @return array{
+	 *   open: bool, text: string, detail: string,
+	 *   state: 'open'|'closed'|'holiday'|'closure',
+	 *   until: ?string, next: ?string, occasion: ?string, holiday: ?string
+	 * }|null
+	 */
+	private function overnightResult(DateTimeImmutable $today, int $minutes): array|null
+	{
+		$yesterday = $today->modify('-1 day');
+		if ($this->exceptionOn($yesterday)) {
+			return null;
+		}
+		foreach ($this->blocksOn($yesterday) as [, $to]) {
+			if ($to > self::MINUTES_PER_DAY) {
+				$end = $to - self::MINUTES_PER_DAY;
+				if (!$this->exceptionOn($today)) {
+					$end = $this->runEnd($today, $end);
+				}
+				if ($end === null || $minutes < $end) {
+					return $this->openResult($end, $this->specialOn($yesterday)['occasion'] ?? null, $today);
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Step 1: a closure today.
+	 *
+	 * @return array{
+	 *   open: bool, text: string, detail: string,
+	 *   state: 'open'|'closed'|'holiday'|'closure',
+	 *   until: ?string, next: ?string, occasion: ?string, holiday: ?string
+	 * }|null
+	 */
+	private function closureResult(DateTimeImmutable $now, DateTimeImmutable $today): array|null
+	{
+		$closure = $this->closureOn($now);
+		if (!$closure) {
+			return null;
+		}
+
+		// A single day (New Year's Eve) reads like a holiday:
+		// "Silvester: geschlossen — öffnet am 2.1. um 8:30 Uhr".
+		if ($closure['from'] === $closure['to']) {
+			$next = $this->nextOpenDay($today);
+			return $this->result(
+				false,
+				match (true) {
+					$closure['occasion'] === null => I18n::t('status.closedToday'),
+					I18n::namesClosed($closure['occasion']) => $closure['occasion'],
+					default => I18n::t('status.occasionClosed', ['occasion' => $closure['occasion']]),
+				},
+				$closure['note'] ?? ($next !== null ? $this->opens($today, $next) : ''),
+				'closure',
+				next: $this->nextIso($next),
+				occasion: $closure['occasion'],
+			);
+		}
+		// Not simply "end + 1 day": if the closure ends on Saturday and
+		// Sunday is a rest day, the business opens on Monday. Another
+		// closure may follow directly. Without a known opening day (no
+		// plan) no date rather than a wrong one.
+		$end = DateTimeImmutable::createFromFormat('!Y-m-d', $closure['to'], $this->timezone);
+		$next = $end ? $this->nextOpenDay($end) : null;
+		return $this->result(
+			false,
+			$this->label($closure),
+			$closure['note'] ?? ($next !== null ? I18n::t('detail.backOn', ['date' => I18n::date($next)]) : ''),
+			'closure',
+			next: $this->nextIso($next),
+			occasion: $closure['occasion'],
+		);
+	}
+
+	/**
+	 * Step 2: a public holiday, like a single-day closure. Only when the plan
+	 * would be open today; on a rest day it stays "Heute geschlossen".
+	 *
+	 * @return array{
+	 *   open: bool, text: string, detail: string,
+	 *   state: 'open'|'closed'|'holiday'|'closure',
+	 *   until: ?string, next: ?string, occasion: ?string, holiday: ?string
+	 * }|null
+	 */
+	private function holidayResult(DateTimeImmutable $now, DateTimeImmutable $today): array|null
+	{
+		$holiday = $this->specialOn($now) === null ? $this->holidayOn($now) : null;
+		if ($holiday === null || $this->blocks($this->weekday($now)) === []) {
+			return null;
+		}
+		$next = $this->nextOpenDay($today);
+		return $this->result(
+			false,
+			I18n::t('status.holidayToday'),
+			$next !== null ? $this->opens($today, $next) : $holiday,
+			'holiday',
+			next: $this->nextIso($next),
+			holiday: $holiday,
+		);
+	}
+
+	/**
+	 * Step 3: inside a block, until the end of the run, which may continue
+	 * after midnight (Friday 18:00–00:00 and Saturday 00:00–02:00).
+	 *
+	 * @param list<array{0:int,1:int}> $todayBlocks
+	 * @param array{occasion?: string|null}|null $special
+	 * @return array{
+	 *   open: bool, text: string, detail: string,
+	 *   state: 'open'|'closed'|'holiday'|'closure',
+	 *   until: ?string, next: ?string, occasion: ?string, holiday: ?string
+	 * }|null
+	 */
+	private function insideBlockResult(DateTimeImmutable $today, int $minutes, array $todayBlocks, array|null $special): array|null
+	{
 		foreach ($todayBlocks as [$from, $to]) {
 			if ($minutes >= $from && $minutes < $to) {
 				return $this->openResult($this->runEnd($today, $to), $special['occasion'] ?? null, $today);
 			}
 		}
+		return null;
+	}
 
-		// 4. Later today.
+	/**
+	 * Step 4: a block that starts later today.
+	 *
+	 * @param list<array{0:int,1:int}> $todayBlocks
+	 * @return array{
+	 *   open: bool, text: string, detail: string,
+	 *   state: 'open'|'closed'|'holiday'|'closure',
+	 *   until: ?string, next: ?string, occasion: ?string, holiday: ?string
+	 * }|null
+	 */
+	private function laterTodayResult(DateTimeImmutable $today, int $minutes, array $todayBlocks): array|null
+	{
 		foreach ($todayBlocks as [$from]) {
 			if ($minutes < $from) {
 				return $this->result(
@@ -711,8 +789,21 @@ class Schedule
 				);
 			}
 		}
+		return null;
+	}
 
-		// 5. The next day with hours, closures and holidays skipped.
+	/**
+	 * Step 5: the next day with hours, closures and holidays skipped.
+	 *
+	 * @param list<array{0:int,1:int}> $todayBlocks
+	 * @return array{
+	 *   open: bool, text: string, detail: string,
+	 *   state: 'open'|'closed'|'holiday'|'closure',
+	 *   until: ?string, next: ?string, occasion: ?string, holiday: ?string
+	 * }
+	 */
+	private function nextOpeningResult(DateTimeImmutable $today, array $todayBlocks): array
+	{
 		$next = $this->nextOpenDay($today);
 		$detail = $next !== null ? $this->opens($today, $next) : '';
 		$tomorrowHoliday = null;
