@@ -155,18 +155,6 @@ class Options
 		Log::error($message);
 	}
 
-	/**
-	 * The option name as the site spelled it, for messages: the 1.x noren.*
-	 * name only when the site sets no sayamaapps.noren.* value for it.
-	 */
-	private static function setKey(App $kirby, string $key): string
-	{
-		if ($kirby->option(self::OPTION_PREFIX . $key) === null && $kirby->option(self::PREFIX . $key) !== null) {
-			return self::PREFIX . $key;
-		}
-		return self::OPTION_PREFIX . $key;
-	}
-
 	private static function knowsZone(string $zone): bool
 	{
 		if ($zone === '') {
@@ -249,6 +237,18 @@ class Options
 			return Schedule::DEFAULT_OVERNIGHT_UNTIL;
 		}
 		return $minutes;
+	}
+
+	/**
+	 * The option name as the site spelled it, for messages: the 1.x noren.*
+	 * name only when the site sets no sayamaapps.noren.* value for it.
+	 */
+	private static function setKey(App $kirby, string $key): string
+	{
+		if ($kirby->option(self::OPTION_PREFIX . $key) === null && $kirby->option(self::PREFIX . $key) !== null) {
+			return self::PREFIX . $key;
+		}
+		return self::OPTION_PREFIX . $key;
 	}
 
 	/**
