@@ -9,6 +9,7 @@
 /.github                export-ignore
 /CHANGELOG.md           export-ignore
 /CLAUDE.md              export-ignore
+/composer.lock          export-ignore
 /docs                   export-ignore
 /phpmd.xml.dist         export-ignore
 /phpunit.xml.dist       export-ignore
