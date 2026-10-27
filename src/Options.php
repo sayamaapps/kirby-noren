@@ -42,8 +42,8 @@ class Options
 		'short'    => 'kurzname',
 	];
 
-	/** Option prefix of 1.x, read as a fallback until 2.0. */
-	public const LEGACY_PREFIX = 'noren.';
+	/** Option prefix of 1.x (`noren.<key>`), read as a fallback until 2.0. */
+	public const PREFIX = 'noren.';
 
 	/**
 	 * Legacy zone names (tzdata "backward" links) mapped to the canonical zone
@@ -62,7 +62,7 @@ class Options
 	];
 
 	/** Option prefix since 1.4 (OPT-1). */
-	public const PREFIX = 'sayamaapps.noren.';
+	public const OPTION_PREFIX = 'sayamaapps.noren.';
 
 	/** Master switch: only a real `true` switches Noren on. */
 	public static function active(App $kirby): bool
@@ -115,22 +115,22 @@ class Options
 		if (is_bool($value)) {
 			return $value;
 		}
-		self::invalid($kirby, 'Noren: ' . self::PREFIX . $key . ' must be true or false — using ' . var_export($default, true) . '.');
+		self::invalid($kirby, 'Noren: ' . self::OPTION_PREFIX . $key . ' must be true or false — using ' . var_export($default, true) . '.');
 		return $default;
 	}
 
 	public static function get(App $kirby, string $key, mixed $default = null): mixed
 	{
-		$value = $kirby->option(self::PREFIX . $key);
+		$value = $kirby->option(self::OPTION_PREFIX . $key);
 		if ($value !== null) {
 			return $value;
 		}
 
 		// The 1.x spelling still works, with a deprecation (README, Deprecations).
-		$legacy = $kirby->option(self::LEGACY_PREFIX . $key);
+		$legacy = $kirby->option(self::PREFIX . $key);
 		if ($legacy !== null) {
 			Helpers::deprecated(
-				'Noren: noren.' . $key . ' is deprecated, use ' . self::PREFIX . $key,
+				'Noren: noren.' . $key . ' is deprecated, use ' . self::OPTION_PREFIX . $key,
 				'option-prefix'
 			);
 		}
