@@ -36,7 +36,8 @@ $closed = esc(\Sayamaapps\Noren\I18n::t('table.closed'));
 ?>
 <div class="noren-table">
 <?php foreach ($table['days'] as $day) : ?>
-  <div class="noren-row" data-today="<?= $day['today'] ? 'true' : 'false' ?>"><div class="noren-day"><?= esc($day['name']) ?></div><div class="noren-hours"><?php
+  <div class="noren-row" data-today="<?= $day['today'] ? 'true' : 'false' ?>"><div class="noren-day"><?= esc($day['name']) ?>
+</div><div class="noren-hours"><?php
 	foreach ($day['hours'] as $hours) : ?><?= esc($hours) ?><br><?php
 	endforeach ?><?php
 	if ($day['closed']) : ?><span class="noren-closed"><?= $closed ?></span><?php
@@ -45,7 +46,8 @@ $closed = esc(\Sayamaapps\Noren\I18n::t('table.closed'));
 	endif ?></div></div>
 <?php endforeach ?>
 <?php $holidays = $table['holidays']; if ($holidays !== null) : ?>
-  <div class="noren-row noren-row--holidays" data-today="<?= $holidays['today'] ? 'true' : 'false' ?>"><div class="noren-day"><?= esc($holidays['label']) ?></div><?php
+  <div class="noren-row noren-row--holidays" data-today="<?= $holidays['today'] ? 'true' : 'false' ?>"><div class="noren-day"><?= esc($holidays['label']) ?>
+</div><?php
 ?><div class="noren-hours"><span class="noren-closed"><?= esc($holidays['text']) ?></span></div></div>
 <?php endif ?>
 </div>
@@ -55,8 +57,18 @@ $closed = esc(\Sayamaapps\Noren\I18n::t('table.closed'));
 	if ($note['type'] === 'closure') : ?>
 <p class="noren-closure"><strong><?= $text ?></strong><?php if ($extra !== null) : ?><br><?= $extra ?><?php endif ?></p>
     <?php elseif ($note['type'] === 'holiday') : ?>
-<p class="noren-extra" data-holiday><?= $text ?><?php if ($extra !== null) : ?><?= esc(\Sayamaapps\Noren\I18n::t('detail.separator')) ?><?= $extra ?><?php endif ?></p>
+<p class="noren-extra" data-holiday><?= $text ?>
+<?php if ($extra !== null) : ?>
+<?= esc(\Sayamaapps\Noren\I18n::t('detail.separator')) ?>
+<?= $extra ?>
+<?php endif ?>
+</p>
     <?php else : ?>
-<p class="noren-extra" data-special><?= $text ?><?php if ($extra !== null) : ?><?= esc(\Sayamaapps\Noren\I18n::t('detail.separator')) ?><?= $extra ?><?php endif ?></p>
+<p class="noren-extra" data-special><?= $text ?>
+<?php if ($extra !== null) : ?>
+<?= esc(\Sayamaapps\Noren\I18n::t('detail.separator')) ?>
+<?= $extra ?>
+<?php endif ?>
+</p>
     <?php endif ?>
 <?php endforeach ?>
