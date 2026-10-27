@@ -8,6 +8,28 @@ All notable changes to this project are documented here. Versions follow
   and schema.org show without configuration) is a **major** version: a site
   would show other hours after a routine update.
 
+## [Unreleased]
+
+No breaking changes in 1.x. The items under "Planned for 2.0" come with the next major.
+
+### Changed
+
+- Options are read as `sayamaapps.noren.<name>`. The 1.x names `noren.<name>` keep working and are read without a warning. If both are set, the new one wins.
+- Classes live in the `Sayamaapps\Noren` namespace, loaded through a class map. The `Noren\` names stay as class aliases in `legacy.php`.
+- Classes are no longer `final`.
+- Warnings about broken options name the key as the site wrote it, also for `holidays`.
+- `Options::OPTION_PREFIX` is new. `Options::PREFIX` keeps its 1.x value.
+- `Locations::status()`, `table()`, `compact()` and `schema()` take an optional `$kirby` argument. `Holidays::config()` takes an optional `$optionName`. Without them, the behaviour is the same as before.
+- Tests run on PHPUnit. CI runs on PHP 8.2 to 8.5 with the lowest and the locked dependencies.
+- New public methods only: `Options::setKey()`, `Locations::pageAreas()`, `Locations::pageHasHours()`, `Locations::siteAreas()`, `Locations::siteSchedule()`.
+- `Grouping::rangeLabel([])` raises no PHP warning any more. The return value is unchanged.
+
+### Planned for 2.0
+
+- Runtime deprecation notices for the 1.x option names and `noren_option()`.
+- Kirby's `InvalidArgumentException` for invalid options in debug mode.
+- Removal of the 1.x option names, `noren_option()`, the `Noren\` aliases and `Log::forget()`.
+
 ## [1.3.1] — 2026-10-26
 
 ### Fixed

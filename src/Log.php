@@ -1,32 +1,44 @@
 <?php
 
-namespace Noren;
+namespace Sayamaapps\Noren;
 
 /**
- * The one place where Noren writes to the PHP error log (Kirby-free).
+ * The one place where Noren writes to the PHP error log.
  *
- * Every message is written once per process: a status and a table render
- * read the configuration many times, and a broken option must not fill the
- * log with copies (SPEC.md §4). Tests call forget() to see a message again.
+ * Every message is written once per process: a status and a table render read
+ * the configuration many times, and a broken option must not fill the log with
+ * copies (SPEC.md §4).
+ *
+ * @package   Kirby Noren
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-noren
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
-final class Log
+class Log
 {
-    /** @var array<string, true> */
-    private static array $seen = [];
+	/** @var array<string, true> */
+	private static array $seen = [];
 
-    /** Writes $message to the error log unless it was written before in this process. */
-    public static function error(string $message): void
-    {
-        if (isset(self::$seen[$message])) {
-            return;
-        }
-        self::$seen[$message] = true;
-        error_log($message);
-    }
+	/** Writes $message to the error log unless it was written before in this process. */
+	public static function error(string $message): void
+	{
+		if (isset(self::$seen[$message])) {
+			return;
+		}
 
-    /** Forgets the messages already written (tests only). */
-    public static function forget(): void
-    {
-        self::$seen = [];
-    }
+		self::$seen[$message] = true;
+		error_log($message);
+	}
+
+	/**
+	 * Forgets the messages already written. A test hook, kept for 1.x callers.
+	 *
+	 * @deprecated 1.4 no replacement; removal planned for 2.0
+	 * @internal
+	 */
+	public static function forget(): void
+	{
+		self::$seen = [];
+	}
 }

@@ -2,6 +2,8 @@
 
 Opening hours for [Kirby CMS](https://getkirby.com) 5, with an "open now" status and German public holidays.
 
+**Versions:** Kirby 5 · PHP 8.2 to 8.5 · MIT · [Changes](CHANGELOG.md) · [Reference](docs/reference.md)
+
 *Noren* (暖簾) is the curtain hung in a shop's doorway while it is open. On a website, the plugin answers the same question: are you open right now, and if not, when again? It prints unstyled markup and provides the data for your own markup and schema.org.
 
 ## Features
@@ -15,16 +17,28 @@ Opening hours for [Kirby CMS](https://getkirby.com) 5, with an "open now" status
 
 ## Requirements
 
-- PHP 8.2–8.4
-- Kirby 5
+- Kirby 5 (`getkirby/cms` 5.0 or newer)
+- PHP 8.2, 8.3, 8.4 or 8.5
 
 ## Installation
+
+Pick one of three ways. The plugin always ends up in `site/plugins/noren/`.
+
+**Composer** (the plugin goes to `vendor/` and is linked into `site/plugins/`):
 
 ```sh
 composer require sayamaapps/kirby-noren
 ```
 
-Composer installs to `site/plugins/noren/`. Add that path to `.gitignore` and deploy it like `vendor/`.
+Add `site/plugins/noren/` to `.gitignore` and deploy it like `vendor/`.
+
+**ZIP:** download the release archive from the [releases page](https://github.com/sayamaapps/kirby-noren/releases), unpack it and copy the folder to `site/plugins/noren/`.
+
+**Git submodule:**
+
+```sh
+git submodule add https://github.com/sayamaapps/kirby-noren.git site/plugins/noren
+```
 
 ## Usage
 
@@ -34,13 +48,13 @@ Switch Noren on in `site/config/config.php`:
 
 ```php
 return [
-    'noren.active'   => true,
-    'noren.language' => 'de',   // German texts (optional)
-    'noren.holidays' => 'BY',   // Bavarian public holidays (optional)
+    'sayamaapps.noren.active'   => true,
+    'sayamaapps.noren.language' => 'de',   // German texts (optional)
+    'sayamaapps.noren.holidays' => 'BY',   // Bavarian public holidays (optional)
 ];
 ```
 
-Texts are English unless `noren.language`, the site language or Kirby's `locale` says otherwise. A German single-language site without a `locale` must set `noren.language`.
+Texts are English unless `sayamaapps.noren.language`, the site language or Kirby's `locale` says otherwise. A German single-language site without a `locale` must set `sayamaapps.noren.language`. Noren keeps its texts in its own tables (`translations/`), registered with Kirby as `noren.*` keys, so `Sayamaapps\Noren\I18n::t()` returns them without a Kirby app too. The class name `I18n` is also used by Kirby (`Kirby\Toolkit\I18n`). The two are unrelated; refer to Noren's class by its full name.
 
 Give the location pages this blueprint, for example `site/blueprints/pages/betrieb.yml`:
 
@@ -49,7 +63,7 @@ title: noren.panel.page.title
 extends: noren/pages/location
 ```
 
-Keep the `title` line, because `extends:` does not carry it over. Pages with the template `betrieb` are locations (see `template`).
+Keep the `title` line, because `extends:` does not carry it over. Pages with the template `betrieb` are locations (see `sayamaapps.noren.template`).
 
 ### Snippets
 
@@ -75,7 +89,7 @@ Site and page methods return the data behind the snippets, for example `site()->
 
 ## Content field contract
 
-The German field names are the defaults; rename them with `fields`. One location with several areas (a shop and a café, say) lists them in `bereiche` and gives each hours row its `bereich`. Several sites are several location pages; `locations` selects them explicitly.
+The German field names are the defaults; rename them with `sayamaapps.noren.fields`. One location with several areas (a shop and a café, say) lists them in `bereiche` and gives each hours row its `bereich`. Several sites are several location pages; `sayamaapps.noren.locations` selects them explicitly.
 
 | Field (option key) | Content |
 |---|---|
@@ -92,7 +106,9 @@ The German field names are the defaults; rename them with `fields`. One location
 
 ## Configuration
 
-Every option is `noren.<name>`, flat or nested. `null` means "not set". Booleans must be real `true` or `false`. A broken value is logged once and the default is used; with Kirby's `debug` option on, it throws instead.
+Every option is `sayamaapps.noren.<name>`, written flat: `'sayamaapps.noren.active' => true`. The nested form `'noren' => ['active' => true]` works for the 1.x name only (see below). `null` means "not set". Booleans must be real `true` or `false`. A broken value is logged once and the default is used; with Kirby's `debug` option on, it throws instead.
+
+The 1.x name `noren.<name>` still works as a fallback until 2.0, flat or nested, and is read without a warning. If both names are set, the new one wins. See [Deprecations](#deprecations).
 
 | Option | Default | Description |
 |---|---|---|
@@ -115,6 +131,44 @@ Every option is `noren.<name>`, flat or nested. `null` means "not set". Booleans
 | `status` | `true` | `false` hides the `noren/status` snippet. |
 | `mergeAreas` | `false` | Areas with identical hours become one unit, such as "Hofladen und Hofcafé". `site()->norenUnits(null, false)` still returns one unit per area. |
 
+Example with several options:
+
+```php
+return [
+    'sayamaapps.noren.active'          => true,
+    'sayamaapps.noren.template'        => ['betrieb', 'praxis'],
+    'sayamaapps.noren.timezone'        => 'Europe/Berlin',
+    'sayamaapps.noren.language'        => 'de',
+    'sayamaapps.noren.holidays'        => ['state' => 'BY', 'augsburg' => true],
+    'sayamaapps.noren.holidayEve'      => true,
+    'sayamaapps.noren.overnightUntil'  => '04:00',
+    'sayamaapps.noren.closureLabel'    => 'Praxisurlaub',
+    'sayamaapps.noren.mergeAreas'      => true,
+];
+```
+
+## Deprecations
+
+Deprecated in 1.4, removal planned for 2.0. Nothing changes in 1.x: the old names keep working, without a warning.
+
+| 1.x | Now | Notes |
+|---|---|---|
+| `noren.<option>` in `config.php` | `sayamaapps.noren.<option>` | Still read as fallback. Rename the keys in your site config. |
+| `noren.<name>` translation keys | `sayamaapps.noren.<name>` | Both are registered in 1.4. |
+| `noren_option('name', $default)` | `Sayamaapps\Noren\Options::get(kirby(), 'name', $default)` | Global function, kept as a guarded wrapper. |
+| `Noren\Schedule`, `Noren\I18n`, … (all classes) | `Sayamaapps\Noren\Schedule`, `Sayamaapps\Noren\I18n`, … | Class aliases. `instanceof` and type hints keep working. |
+| `Noren\Log::forget()` | none | Test hook, kept for existing callers. |
+
+In warnings and logs, a broken option is named as the site wrote it: `noren.timezone` for the 1.x name, `sayamaapps.noren.timezone` otherwise. Log searches for `noren.` keep matching.
+
+The site and page methods (`norenStatus()`, `norenTable()` and so on) and the snippet names keep their names. Their return values do not change.
+
+### Planned for 2.0
+
+- Runtime deprecation notices for the 1.x option names and `noren_option()`. In debug mode, Kirby shows them as an error page.
+- Invalid options throw `Kirby\Exception\InvalidArgumentException` in debug mode instead of `\InvalidArgumentException`. A `catch (\InvalidArgumentException)` does not catch it.
+- Removal of the 1.x option names, `noren_option()`, the `Noren\` class aliases and `Log::forget()`.
+
 ## Public holidays
 
 Off by default. With `holidays` set, the holidays of a state are calculated for any year, Easter included. Pass flags in an array, for example `['state' => 'BY', 'augsburg' => true, 'extra' => ['06-24' => 'Stadtfest']]`. The regional days of each state are listed in [docs/reference.md](docs/reference.md#public-holidays-by-state).
@@ -135,7 +189,7 @@ Noren processes no visitor data. It sets no cookies, uses no browser storage and
 
 ## Maintenance
 
-Tests: `composer test` (after `composer install --ignore-platform-req=ext-gd`). Issues and pull requests are welcome, without a support promise. Report security problems privately through GitHub's vulnerability reporting. Changes: [CHANGELOG.md](CHANGELOG.md).
+Tests: `composer install`, then `composer test`. Contributing and the checks: [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md). Issues and pull requests are welcome, without a support promise. Report security problems privately, see [.github/SECURITY.md](.github/SECURITY.md). Changes: [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
