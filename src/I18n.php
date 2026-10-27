@@ -58,6 +58,7 @@ class I18n
 		return self::t('dayShort.' . ($weekday + 1));
 	}
 
+	/** The active language code, `en` unless one was set. */
 	public static function language(): string
 	{
 		return self::$language;
@@ -74,6 +75,7 @@ class I18n
 		return mb_stripos($occasion, self::t('table.closed')) !== false;
 	}
 
+	/** Sets the active language; an unsupported code falls back to `en`. */
 	public static function setLanguage(string $language): void
 	{
 		self::$language = in_array($language, self::LANGUAGES, true) ? $language : 'en';

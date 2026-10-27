@@ -592,6 +592,7 @@ class Schedule
 		);
 	}
 
+	/** The note on a weekday's hours, or null when it has none. `$weekday` 0 = Monday … 6 = Sunday. */
 	public function note(int $weekday): string|null
 	{
 		return $this->days[$weekday]['note'] ?? null;
@@ -836,6 +837,7 @@ class Schedule
 			?? $this->nextOpeningResult($today, $todayBlocks);
 	}
 
+	/** The time zone the hours are read in. */
 	public function timezone(): DateTimeZone
 	{
 		return $this->timezone;
