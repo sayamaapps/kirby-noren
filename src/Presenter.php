@@ -71,7 +71,11 @@ class Presenter
 	 * Options: mode ('grouped' | 'consecutive', default 'grouped'; anything
 	 * else counts as 'grouped'), leadDays (14), closures (max notes, 1).
 	 *
-	 * @return array{mode: 'consecutive'|'grouped', groups: list<array{days: list<int>, label: string, blocks: list<array{0:int,1:int}>, hours: string, note: string|null}>, notes: list<array{type: string, from: string, to: string, text: string, note: string|null}>}
+	 * @return array{
+	 *   mode: 'consecutive'|'grouped',
+	 *   groups: list<array{days: list<int>, label: string, blocks: list<array{0:int,1:int}>, hours: string, note: string|null}>,
+	 *   notes: list<array{type: string, from: string, to: string, text: string, note: string|null}>
+	 * }
 	 */
 	public static function compact(Schedule $schedule, DateTimeImmutable|null $now = null, array $options = []): array
 	{
