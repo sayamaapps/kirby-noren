@@ -30,4 +30,15 @@ class Log
 		self::$seen[$message] = true;
 		error_log($message);
 	}
+
+	/**
+	 * Forgets the messages already written. Kept for 1.x callers and tests;
+	 * removed in 2.0 (README, Deprecations).
+	 *
+	 * @deprecated 1.4.0, no replacement; removal planned for 2.0
+	 */
+	public static function forget(): void
+	{
+		self::$seen = [];
+	}
 }
