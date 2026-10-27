@@ -106,9 +106,9 @@ The German field names are the defaults; rename them with `sayamaapps.noren.fiel
 
 ## Configuration
 
-Every option is `sayamaapps.noren.<name>`, flat or nested. `null` means "not set". Booleans must be real `true` or `false`. A broken value is logged once and the default is used; with Kirby's `debug` option on, it throws instead.
+Every option is `sayamaapps.noren.<name>`, written flat: `'sayamaapps.noren.active' => true`. The nested form `'noren' => ['active' => true]` works for the 1.x name only (see below). `null` means "not set". Booleans must be real `true` or `false`. A broken value is logged once and the default is used; with Kirby's `debug` option on, it throws instead.
 
-The 1.x name `noren.<name>` still works as a fallback until 2.0, and reading it shows a deprecation in debug mode. If both names are set, the new one wins. See [Deprecations](#deprecations).
+The 1.x name `noren.<name>` still works as a fallback until 2.0, flat or nested, and reading it shows a deprecation in debug mode. If both names are set, the new one wins. See [Deprecations](#deprecations).
 
 | Option | Default | Description |
 |---|---|---|

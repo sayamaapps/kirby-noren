@@ -17,8 +17,10 @@ use Kirby\Cms\Helpers;
  * with Kirby's `debug` option on: then it throws, so a developer sees it on
  * the page instead of in the log (README, Configuration).
  *
- * Both spellings work, flat (`'noren.active' => true`) and nested
- * (`'noren' => ['active' => true]`), because Kirby's option() finds both.
+ * The flat form (`'sayamaapps.noren.active' => true`) is the one to use. The
+ * nested form (`'noren' => ['active' => true]`) works for the 1.x prefix only:
+ * Kirby resolves `sayamaapps.noren.*` through the plugin's own options block
+ * first, which shadows a nested `sayamaapps` array.
  *
  * Defaults are given here and at the call sites. The `options` block of the
  * plugin lists the keys with null: a default there would hide the 1.x spelling.
