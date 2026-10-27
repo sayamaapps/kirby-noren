@@ -163,6 +163,7 @@ final class GroupingTest extends TestCase
 		expect('Di – Mi', Grouping::rangeLabel([1, 2]), 'rangeLabel: Di – Mi');
 		expect('Do', Grouping::rangeLabel([3]), 'rangeLabel: single day Do');
 		expect('Mo – Fr', Grouping::rangeLabel([0, 1, 2, 3, 4]), 'rangeLabel: first and last only');
+		expect(I18n::dayShort(0), Grouping::rangeLabel([]), 'rangeLabel: no days gives the 1.x value, without a warning');
 
 		expect('Mo–Mi, Fr', Grouping::listLabel([0, 1, 2, 4]), 'listLabel: Mo–Mi, Fr');
 		expect('Mi, Fr', Grouping::listLabel([2, 4]), 'listLabel: Mi, Fr');

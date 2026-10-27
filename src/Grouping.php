@@ -153,7 +153,7 @@ class Grouping
 	public static function rangeLabel(array $days): string
 	{
 		sort($days);
-		$first = (int)$days[0];
+		$first = (int)($days[0] ?? 0);
 		$last = (int)end($days);
 		if ($first === $last) {
 			return I18n::dayShort($first);
