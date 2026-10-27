@@ -44,14 +44,16 @@ $compact = \Sayamaapps\Noren\Presenter::compact($schedule, $now, [
     <li><span class="noren-compact-days"><?= esc($group['label']) ?>
 </span> <span class="noren-compact-hours"><?= esc($group['hours']) ?>
 </span><?php
-		if ($group['note'] !== null && $group['note'] !== '') : ?> <span class="noren-compact-note"><?= esc($group['note']) ?>
+		if ($group['note'] !== null && $group['note'] !== '') :
+			?> <span class="noren-compact-note"><?= esc($group['note']) ?>
 </span><?php
 		endif ?></li>
 <?php endforeach ?>
   </ul>
 <?php foreach ($compact['notes'] as $note) : ?>
   <p class="noren-compact-closure"><?= esc($note['text']) ?>
-<?php if ($note['note'] !== null && $note['note'] !== '') : ?> — <?= esc($note['note']) ?>
+<?php if ($note['note'] !== null && $note['note'] !== '') : ?>
+ — <?= esc($note['note']) ?>
 <?php endif ?>
 </p>
 <?php endforeach ?>

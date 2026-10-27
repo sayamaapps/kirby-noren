@@ -48,9 +48,12 @@ $labels = count($units) > 1;
 	$status = $unit['schedule']->status($now);
 	?>
   <p class="noren-status-line" data-open="<?= $status['open'] ? 'true' : 'false' ?>" data-state="<?= esc((string)$status['state']) ?>"><?php
-	if ($labels) : ?><span class="noren-status-label"><?= esc((string)$unit['label']) ?></span> <?php
-	endif ?><b class="noren-status-text"><?= esc((string)$status['text']) ?></b><?php
-	if ($status['detail'] !== '') : ?> <span class="noren-status-detail"><?= esc((string)$status['detail']) ?>
+	if ($labels) :
+		?><span class="noren-status-label"><?= esc((string)$unit['label']) ?></span> <?php
+	endif ?>
+<b class="noren-status-text"><?= esc((string)$status['text']) ?></b><?php
+	if ($status['detail'] !== '') :
+		?> <span class="noren-status-detail"><?= esc((string)$status['detail']) ?>
 </span><?php
 	endif ?></p>
 <?php endforeach ?>
