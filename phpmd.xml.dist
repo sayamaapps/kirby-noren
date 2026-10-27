@@ -20,17 +20,15 @@
 	<!-- codesize: NPathComplexity is not used, the cyclomatic complexity below covers the same branching.
 	     ExcessiveClassComplexity is not used: the domain classes are large by design; splitting them is a follow-up. -->
 	<rule ref="rulesets/codesize.xml/CyclomaticComplexity">
-		<!-- Open: Holidays::ids() (29), Schedule::status() (30), fromFields() (24) branch on purpose. Default 10 after the follow-up. -->
+		<!-- Reported from 30 on. Holidays::ids() (29), fromFields() (24), Holidays::config() (18),
+		     Locations::units() (14) and pages() (11) are above the default 10 because every branch
+		     is one rule of the SPEC (the holiday table of a state, one row shape per content field).
+		     Splitting them changes no output but moves the rule text away from its code. -->
 		<properties>
-			<property name="reportLevel" value="31" />
+			<property name="reportLevel" value="30" />
 		</properties>
 	</rule>
-	<rule ref="rulesets/codesize.xml/ExcessiveMethodLength">
-		<!-- Open: Schedule::status() has 131 lines. Splitting it is a follow-up. -->
-		<properties>
-			<property name="minimum" value="140" />
-		</properties>
-	</rule>
+	<rule ref="rulesets/codesize.xml/ExcessiveMethodLength" />
 	<rule ref="rulesets/codesize.xml/ExcessiveParameterList" />
 
 	<rule ref="rulesets/design.xml">
