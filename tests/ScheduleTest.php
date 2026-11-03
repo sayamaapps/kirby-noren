@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -17,6 +18,9 @@ use PHPUnit\Framework\TestCase;
  * wäre derselbe Samstag offen"). Regression guards: no memoisation
  * across areas, appended rows, DST, running closure, 14-day lead boundary.
  *
+ * Daylight saving: `next` is the first instant at which status() says open,
+ * also when the opening time falls into the hour the clocks skip.
+ *
  * Run:  php tests/ScheduleTest.php
  */
 require_once __DIR__ . '/helpers.php';
@@ -26,6 +30,129 @@ use Sayamaapps\Noren\{Holidays, I18n, Schedule};
 #[CoversClass(Sayamaapps\Noren\Schedule::class)]
 final class ScheduleTest extends TestCase
 {
+	/**
+	 * The first minute within ten hours after $from at which status() says
+	 * open, as local 'Y-m-d\TH:i'. Walks the real time line, so it does not
+	 * share the wall-clock arithmetic of the code under test.
+	 */
+	private static function firstOpen(Schedule $schedule, DateTimeImmutable $from): string|null
+	{
+		$start = $from->getTimestamp();
+		for ($t = $start; $t <= $start + 10 * 3600; $t += 60) {
+			$moment = (new DateTimeImmutable('@' . $t))->setTimezone($schedule->timezone());
+			if ($schedule->status($moment)['open']) {
+				return $moment->format('Y-m-d\TH:i');
+			}
+		}
+		return null;
+	}
+
+	/** Sundays from $from to 04:00, in $zone. */
+	private static function sundaySchedule(string $from, string $zone = 'Europe/Berlin'): Schedule
+	{
+		return Schedule::fromFields(
+			field([['tag' => 'Sonntag', 'von1' => $from, 'bis1' => '04:00']]),
+			settings: ['timezone' => $zone],
+		);
+	}
+
+	/**
+	 * Opening times that exist keep their wall time: ordinary Sundays, and the
+	 * times before, at and after the gap on the clock change day.
+	 *
+	 * @return array<string, array{string, string, string}>
+	 */
+	public static function openingsOutsideTheGap(): array
+	{
+		return [
+			'Sunday 22 March, 02:30'  => ['2026-03-22', '02:30', '2026-03-22T02:30'],
+			'Sunday 5 April, 02:30'   => ['2026-04-05', '02:30', '2026-04-05T02:30'],
+			'gap day, 02:00'          => ['2026-03-29', '02:00', '2026-03-29T03:00'],
+			'gap day, 03:00'          => ['2026-03-29', '03:00', '2026-03-29T03:00'],
+			'gap day, 03:30'          => ['2026-03-29', '03:30', '2026-03-29T03:30'],
+			'gap day, 01:30'          => ['2026-03-29', '01:30', '2026-03-29T01:30'],
+		];
+	}
+
+	#[DataProvider('openingsOutsideTheGap')]
+	public function testNextAroundTheSkippedHour(string $date, string $from, string $expected): void
+	{
+		I18n::setLanguage('de');
+		$sunday = self::sundaySchedule($from);
+		$sameDay = at($date . ' 00:30');
+		$evening = at($date . ' 00:00')->modify('-1 day')->setTime(23, 0);
+
+		expect($expected, $sunday->status($sameDay)['next'], "$date $from: same day");
+		expect($expected, $sunday->status($evening)['next'], "$date $from: previous evening");
+		expect($expected, self::firstOpen($sunday, $sameDay), "$date $from: same day, first open instant");
+		expect($expected, self::firstOpen($sunday, $evening), "$date $from: previous evening, first open instant");
+	}
+
+	/** A gap of half an hour (Lord Howe Island, 4 October 2026: 02:00 to 02:30). */
+	public function testNextInAGapShorterThanAnHour(): void
+	{
+		I18n::setLanguage('de');
+		$sunday = self::sundaySchedule('02:15', 'Australia/Lord_Howe');
+		$sameDay = at('2026-10-04 01:00', 'Australia/Lord_Howe');
+		$evening = at('2026-10-03 23:00', 'Australia/Lord_Howe');
+
+		expect('2026-10-04T02:30', $sunday->status($sameDay)['next'], 'half-hour gap: same day');
+		expect('2026-10-04T02:30', $sunday->status($evening)['next'], 'half-hour gap: previous evening');
+		expect('2026-10-04T02:30', self::firstOpen($sunday, $sameDay), 'half-hour gap: first open instant');
+	}
+
+	/**
+	 * Autumn, 25 October 2026: 02:00 to 03:00 happens twice. 02:30 is reached
+	 * the first time at 02:30 summer time, which is when status() says open.
+	 */
+	public function testNextInRepeatedHourIsTheFirstOccurrence(): void
+	{
+		I18n::setLanguage('de');
+		foreach (['02:00', '02:30', '03:00'] as $from) {
+			$sunday = self::sundaySchedule($from);
+			$sameDay = at('2026-10-25 01:00');
+			$evening = at('2026-10-24 23:00');
+
+			expect("2026-10-25T$from", $sunday->status($sameDay)['next'], "repeated hour, $from: same day");
+			expect("2026-10-25T$from", $sunday->status($evening)['next'], "repeated hour, $from: previous evening");
+			expect("2026-10-25T$from", self::firstOpen($sunday, $sameDay), "repeated hour, $from: first open instant");
+		}
+		// 02:30 is the first one, in summer time (+02:00).
+		expect('+02:00', at('2026-10-25 00:00')->setTime(2, 30)->format('P'), 'the first 02:30 is in summer time');
+	}
+
+	/**
+	 * Sunday 02:30 does not exist on 29 March 2026 (Europe/Berlin): the clocks
+	 * go from 02:00 to 03:00. status() is open from 03:00, so `next` says 03:00.
+	 */
+	public function testNextInSkippedHourIsTheFirstOpenInstant(): void
+	{
+		I18n::setLanguage('de');
+		$sunday = self::sundaySchedule('02:30');
+
+		$s = $sunday->status(at('2026-03-29 01:00'));
+		expect('2026-03-29T03:00', $s['next'], 'skipped 02:30: next is the end of the gap');
+		expect(false, $s['open'], 'skipped 02:30: closed at 01:00');
+		expect('öffnet heute um 2:30 Uhr', $s['detail'], 'skipped 02:30: the text keeps the posted time');
+
+		$opening = at($s['next']);
+		expect(true, $sunday->status($opening)['open'], 'skipped 02:30: open at the announced instant');
+		expect(false, $sunday->status($opening->setTimestamp($opening->getTimestamp() - 1))['open'], 'skipped 02:30: closed one second before it');
+		expect($s['next'], self::firstOpen($sunday, at('2026-03-29 01:00')), 'skipped 02:30: next is the first instant status() says open');
+	}
+
+	/** The Saturday-evening pre-announcement takes the same way (nextIso). */
+	public function testNextInSkippedHourOnThePreviousEvening(): void
+	{
+		I18n::setLanguage('de');
+		$sunday = self::sundaySchedule('02:30');
+
+		$s = $sunday->status(at('2026-03-28 23:00'));
+		expect('2026-03-29T03:00', $s['next'], 'pre-announcement: next is the end of the gap');
+		expect('öffnet morgen um 2:30 Uhr', $s['detail'], 'pre-announcement: the text keeps the posted time');
+		expect($s['next'], self::firstOpen($sunday, at('2026-03-28 23:00')), 'pre-announcement: next is the first instant status() says open');
+	}
+
 	public function testSuite(): void
 	{
 		I18n::setLanguage('de');

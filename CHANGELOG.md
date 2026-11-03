@@ -8,6 +8,17 @@ All notable changes to this project are documented here. Versions follow
   and schema.org show without configuration) is a **major** version: a site
   would show other hours after a routine update.
 
+## [1.4.1] — 2026-11-03
+
+### Fixed
+
+- **`next` when the opening time falls into the skipped hour.** On the Sunday the
+  clocks go forward (2:00 to 3:00), a row that opens at 2:30 gave `next` 3:30
+  while the status was already open from 3:00. `next` is now 3:00, the first
+  moment the status says open, also in the evening-before announcement. The text
+  keeps the posted time ("öffnet heute um 2:30 Uhr"). Times that exist and the
+  repeated hour in autumn are unchanged.
+
 ## [1.4.0] — 2026-10-27
 
 No breaking changes in 1.x. The items under "Planned for 2.0" come with the next major.
