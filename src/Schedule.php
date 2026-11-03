@@ -476,7 +476,7 @@ class Schedule
 					I18n::t('status.closedNow'),
 					I18n::t('detail.opensToday', ['time' => self::formatTime($from)]),
 					'closed',
-					next: $today->setTime(intdiv($from, 60), $from % 60)->format('Y-m-d\TH:i'),
+					next: $this->openingIso($today, $from),
 				);
 			}
 		}
@@ -528,8 +528,7 @@ class Schedule
 		if ($day === null) {
 			return null;
 		}
-		$start = $this->blocksOn($day)[0][0];
-		return $day->setTime(intdiv($start, 60), $start % 60)->format('Y-m-d\TH:i');
+		return $this->openingIso($day, $this->blocksOn($day)[0][0]);
 	}
 
 	/**
@@ -601,6 +600,35 @@ class Schedule
 	private function now(): DateTimeImmutable
 	{
 		return new DateTimeImmutable('now', $this->timezone);
+	}
+
+	/**
+	 * The moment the schedule opens at $minutes (since 0:00) on $day, as the
+	 * `next` value 'Y-m-d\TH:i': the first instant at which status() says open.
+	 *
+	 * Normally that is the wall time itself. When the clocks skip it (2:30 on
+	 * the Sunday they go from 2:00 to 3:00), setTime() moves it on by the
+	 * length of the gap, to 3:30, while status() compares the local hour and
+	 * minute and says open from 3:00. The opening is then the first instant
+	 * after the gap. In the repeated hour in autumn setTime() takes the first
+	 * occurrence, the one status() meets first.
+	 */
+	private function openingIso(DateTimeImmutable $day, int $minutes): string
+	{
+		$hour = intdiv($minutes, 60);
+		$minute = $minutes % 60;
+		$at = $day->setTime($hour, $minute);
+
+		if ($at->format('G:i') !== sprintf('%d:%02d', $hour, $minute)) {
+			$timestamp = $at->getTimestamp();
+			// Two days back cover any gap. The first entry is the state at the start of the range; a clock change follows it.
+			$transitions = $at->getTimezone()->getTransitions($timestamp - 2 * 86400, $timestamp);
+			if (is_array($transitions) && count($transitions) > 1) {
+				$at = $at->setTimestamp(end($transitions)['ts']);
+			}
+		}
+
+		return $at->format('Y-m-d\TH:i');
 	}
 
 	/**
