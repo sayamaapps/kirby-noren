@@ -57,6 +57,24 @@ final class ScheduleTest extends TestCase
 	}
 
 	/**
+	 * Kirby 6 reads YAML with Symfony: a date a closure row stored unquoted
+	 * (`von: 2026-11-21`) arrives as the Unix time 1795219200.
+	 */
+	public function testClosureDatesAsUnixTime(): void
+	{
+		I18n::setLanguage('de');
+
+		$fromFields = Schedule::fromFields(field([]), field([['von' => '1795219200', 'bis' => '1795305600']]));
+		$direct = new Schedule([], [['from' => 1795219200, 'to' => 1795305600]]);
+		foreach (['fields' => $fromFields, 'constructor' => $direct] as $source => $schedule) {
+			expect(['2026-11-21', '2026-11-22'], [$schedule->closures()[0]['from'] ?? null, $schedule->closures()[0]['to'] ?? null], $source . ': dates');
+			expect(true, $schedule->closureOn(at('2026-11-22 10:00')) !== null, $source . ': the closure applies');
+		}
+		expect(I18n::date('2026-11-21', true), I18n::date('1795219200', true), 'I18n::date() reads the Unix time');
+		expect('20261121', I18n::date('20261121'), 'eight digits are no Unix time');
+	}
+
+	/**
 	 * Opening times that exist keep their wall time: ordinary Sundays, and the
 	 * times before, at and after the gap on the clock change day.
 	 *
