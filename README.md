@@ -1,8 +1,8 @@
 # Noren
 
-Opening hours for [Kirby CMS](https://getkirby.com) 5, with an "open now" status and German public holidays.
+Opening hours for [Kirby CMS](https://getkirby.com) 5 and 6, with an "open now" status and German public holidays.
 
-**Versions:** Kirby 5 · PHP 8.2 to 8.5 · MIT · [Changes](CHANGELOG.md) · [Reference](docs/reference.md)
+**Versions:** Kirby 5 and 6 · PHP 8.2 to 8.5 · MIT · [Changes](CHANGELOG.md) · [Reference](docs/reference.md)
 
 *Noren* (暖簾) is the curtain hung in a shop's doorway while it is open. On a website, the plugin answers the same question: are you open right now, and if not, when again? It prints unstyled markup and provides the data for your own markup and schema.org.
 
@@ -17,7 +17,7 @@ Opening hours for [Kirby CMS](https://getkirby.com) 5, with an "open now" status
 
 ## Requirements
 
-- Kirby 5 (`getkirby/cms` 5.0 or newer)
+- Kirby 5 or 6 (`getkirby/cms` `^5.0 || ^6.0`); Kirby 6 needs PHP 8.3 or newer
 - PHP 8.2, 8.3, 8.4 or 8.5
 
 ## Installation

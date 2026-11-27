@@ -37,7 +37,7 @@ class I18n
 	public static function date(\DateTimeInterface|string $date, bool $withYear = false): string
 	{
 		if (is_string($date)) {
-			$parsed = \DateTimeImmutable::createFromFormat('!Y-m-d', substr(trim($date), 0, 10));
+			$parsed = \DateTimeImmutable::createFromFormat('!Y-m-d', substr(self::isoDate(trim($date)), 0, 10));
 			if ($parsed === false) {
 				return $date;
 			}
@@ -56,6 +56,17 @@ class I18n
 	public static function dayShort(int $weekday): string
 	{
 		return self::t('dayShort.' . ($weekday + 1));
+	}
+
+	/**
+	 * A stored date as text. Kirby 6 reads an unquoted YAML date
+	 * (`von: 2026-11-21`) as the Unix time 1795219200: that becomes "Y-m-d",
+	 * read in UTC. Anything else stays as it is; fewer than 9 digits (a year,
+	 * "20261121") are no Unix time.
+	 */
+	public static function isoDate(string $value): string
+	{
+		return preg_match('/^\d{9,10}$/', $value) ? gmdate('Y-m-d', (int)$value) : $value;
 	}
 
 	/** The active language code, `en` unless one was set. */

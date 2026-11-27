@@ -8,6 +8,19 @@ All notable changes to this project are documented here. Versions follow
   and schema.org show without configuration) is a **major** version: a site
   would show other hours after a routine update.
 
+## [Unreleased]
+
+### Added
+
+- Kirby 6 is supported next to Kirby 5 (`getkirby/cms` `^5.0 || ^6.0`). Kirby 6 itself
+  needs PHP 8.3 or newer; the plugin still runs on PHP 8.2 with Kirby 5.
+
+### Fixed
+
+- Closure dates that Kirby 6 reads as a Unix time (stored unquoted by Kirby 5, for
+  example `von: 2026-11-21`) are read as that date again, instead of the closure
+  being skipped. `I18n::date()` reads such a value too.
+
 ## [1.4.1] — 2026-11-03
 
 ### Fixed

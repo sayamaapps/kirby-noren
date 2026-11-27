@@ -93,8 +93,8 @@ class Schedule
 		$this->closures = [];
 		foreach ($closures as $c) {
 			$this->closures[] = [
-				'from'     => (string)$c['from'],
-				'to'       => (string)$c['to'],
+				'from'     => I18n::isoDate((string)$c['from']),
+				'to'       => I18n::isoDate((string)$c['to']),
 				'note'     => $c['note'] ?? null,
 				'occasion' => $c['occasion'] ?? null,
 				'hours'    => $c['hours'] ?? null,
@@ -344,8 +344,8 @@ class Schedule
 
 		$closures = [];
 		foreach (self::rows($closuresField) as $row) {
-			$from = trim((string)$row->von());
-			$to = trim((string)$row->bis());
+			$from = I18n::isoDate(trim((string)$row->von()));
+			$to = I18n::isoDate(trim((string)$row->bis()));
 			if ($from === '' || $to === '') {
 				continue;
 			}
