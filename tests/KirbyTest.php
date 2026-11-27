@@ -764,4 +764,20 @@ final class KirbyTest extends TestCase
 			holds(count($holidayNotes($group)) <= 1, 'mergeAreas with holidays: at most one holiday note');
 		});
 	}
+
+	/**
+	 * A content file as Kirby 5 wrote it, the closure dates unquoted. Kirby 5
+	 * reads them as text, Kirby 6 as a Unix time: the closure applies with both.
+	 */
+	public function testUnquotedClosureDatesInAContentFile(): void
+	{
+		withSite(function (string $tmp): void {
+			mkdir($tmp . '/content/1_kontakt', 0700, true);
+			file_put_contents($tmp . '/content/1_kontakt/betrieb.txt', "Title: Kontakt\n\n----\n\nSchliessungen:\n\n- von: 2026-11-21\n  bis: 2026-11-22\n");
+
+			$schedule = noren_kirby($tmp, ['sayamaapps.noren.active' => true])->site()->norenSchedule();
+			$closure = $schedule?->closureOn(at('2026-11-22 10:00'));
+			expect(['2026-11-21', '2026-11-22'], [$closure['from'] ?? null, $closure['to'] ?? null], 'the closure applies on its second day');
+		});
+	}
 }
